@@ -1,0 +1,24 @@
+---
+- hosts: k8s
+#   pre_tasks:
+#     - debug:
+#         msg: "{{ desired_host }}"
+  roles:
+    # - _bootstrap
+    - hostname
+    - networking
+    - custom_configs
+    - k8s
+
+
+
+
+
+
+
+
+
+# - hosts: alternate
+#   tasks:
+#     - include_role:
+#         name: hostname
