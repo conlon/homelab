@@ -1,0 +1,30 @@
+- name: make sure .ssh dir exists
+  file:
+    path: /home/{{ ansible_user }}/.ssh
+    state: directory
+    mode: '0755'
+
+- name: add public key
+  template:
+    src: authorized_keys.j2
+    dest: /home/{{ ansible_user }}/.ssh/authorized_keys
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+
+- name: change default password
+  user:
+    name: pi
+    password: "{{ new_password }}"
+    state: present
+  become: yes
+  when: new_password is defined
+
+- name: setup desired IP
+  include_role:
+    name: networking
+
+- name: reboot to adopt new settings
+  reboot:
+    reboot_timeout: 600
+  become: yes

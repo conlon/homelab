@@ -1,0 +1,28 @@
+[new]
+#new1 ansible_ssh_host=192.168.1.79 desired_host=192.168.1.103
+
+[new:vars]
+ansible_connection=paramiko
+ansible_user=pi
+ansible_ssh_pass=raspberry
+
+
+[k8s]
+k8s00 ansible_ssh_host=192.168.1.100
+k8s01 ansible_ssh_host=192.168.1.101
+k8s02 ansible_ssh_host=192.168.1.102
+k8s03 ansible_ssh_host=192.168.1.103
+
+[k8s:vars]
+ansible_user=pi
+desired_host={{ansible_ssh_host}}
+ansible_connection=ssh
+
+
+[master]
+k8s00
+
+[workers]
+k8s01
+k8s02
+k8s03
