@@ -1,18 +1,26 @@
 ---
-# Mapping of what hardware MAC addresses should be configured with specific IPs.
+# ip_base: "192.168.1"
+# routers:
+#   - "{{ ip_base }}.254"
+
+# ip_base: "10.0.0"
+# routers:
+#   - "{{ ip_base }}.1"
+
+  # Mapping of what hardware MAC addresses should be configured with specific IPs.
 mac_address_mapping:
-  "b8:27:eb:69:0d:c3":
-    name: kube1.pidramble.com
-    ip: "10.0.100.61"
-  "b8:27:eb:21:1b:f3":
-    name: kube2.pidramble.com
-    ip: "10.0.100.62"
-  "b8:27:eb:e3:be:21":
-    name: kube3.pidramble.com
-    ip: "10.0.100.63"
-  "b8:27:eb:09:4f:46":
-    name: kube4.pidramble.com
-    ip: "10.0.100.64"
+  "dc:a6:32:09:40:f9":
+    name: k0
+    ip: "{{ip_base}}.100"
+  "dc:a6:32:09:52:c9":
+    name: k1
+    ip: "{{ip_base}}.101"
+  "dc:a6:32:09:53:de":
+    name: k2
+    ip: "{{ip_base}}.102"
+  "b8:27:eb:c0:7f:be":
+    name: k3
+    ip: "{{ip_base}}.103"
 
 # Nameservers to use in resolv.conf.
 dns_nameservers:

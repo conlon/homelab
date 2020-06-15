@@ -1,5 +1,5 @@
 ---
-- hosts: dramble
+- hosts: new,k8s
   become: yes
 
   vars_files:
@@ -8,12 +8,12 @@
   tasks:
     - name: Set the current MAC address for eth0.
       set_fact:
-        dramble_mac_address: "{{ hostvars[inventory_hostname].ansible_default_ipv4.macaddress }}"
+        mac_address: "{{ hostvars[inventory_hostname].ansible_default_ipv4.macaddress }}"
 
     - name: Set variables based on eth0 MAC address.
       set_fact:
-        dramble_hostname: "{{ mac_address_mapping[dramble_mac_address].name }}"
-        dramble_ip_address: "{{ mac_address_mapping[dramble_mac_address].ip }}"
+        k8s_hostname: "{{ mac_address_mapping[mac_address].name }}"
+        k8s_ip_address: "{{ mac_address_mapping[mac_address].ip }}"
 
     - name: Set up networking-related files.
       template:
@@ -31,7 +31,7 @@
 
   handlers:
     - name: update hostname
-      command: "hostname {{ dramble_hostname }}"
+      command: "hostname {{ k8s_hostname }}"
 
     - name: delete dhcp leases
       file:
