@@ -3,5 +3,6 @@ kind: Kustomization
 metadata:
   name: datadog-agent
 resources:
-  - datadog-secret.yaml
-  - datadog-helm-repo.yaml
+  - namespace.yaml
+  - secret.sops.yaml
+  - helm.yaml
