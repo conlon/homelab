@@ -31,7 +31,8 @@ spec:
     clusterAgent:
       replicas: 2
       createPodDisruptionBudget: true
-    tolerations:
-    - effect: NoSchedule
-      key: node-role.kubernetes.io/master
-      operator: Exists
+    agents:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
