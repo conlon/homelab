@@ -3,11 +3,6 @@
 export GITHUB_TOKEN=...
 export KEY_FP="$(gpg -k | grep -B 1 flux | head -1 | tr -d " ")"
 
-gpg --export-secret-keys --armor "${KEY_FP}" |
-kubectl create secret generic sops-gpg \
---namespace=flux-system \
---from-file=sops.asc=/dev/stdin
-
 flux bootstrap github \
   --token-auth \
   --owner=conlon \
@@ -15,7 +10,11 @@ flux bootstrap github \
   --branch=main \
   --path=clusters/pi \
   --personal
-  --private
+
+gpg --export-secret-keys --armor "${KEY_FP}" |
+kubectl create secret generic sops-gpg \
+--namespace=flux-system \
+--from-file=sops.asc=/dev/stdin
 ```
 
 # To bootstrap a fresh cluster from scratch:
@@ -27,7 +26,6 @@ flux bootstrap github \
   --branch=main \
   --path=clusters/pi \
   --personal
-  --private
 ```
 
 ## To setup sops encryption:
