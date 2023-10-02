@@ -23,7 +23,7 @@ spec:
         kind: HelmRepository
         name: datadog
         namespace: datadog
-      interval: 1m
+      interval: 24h
   values:
     datadog:
       apiKeyExistingSecret: datadog-secret
