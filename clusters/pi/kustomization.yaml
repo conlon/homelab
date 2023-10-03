@@ -4,3 +4,4 @@ metadata:
   name: base-kustomization
 resources:
   - datadog-agent
+  - cert-manager
