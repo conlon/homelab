@@ -34,7 +34,7 @@ spec:
           nfs:
             server: 192.168.86.10
             path: /nfs/configs/overseerr
-            readOnly: no
+            readOnly: false
 ---
 apiVersion: v1
 kind: Service
