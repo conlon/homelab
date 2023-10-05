@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overseerr-deployment
+  labels:
+    app: overseerr
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: overseerr
+  template:
+    metadata:
+      name: overseerr
+    spec:
+      containers:
+      - name: overseerr
+        image: lscr.io/linuxserver/overseerr:1.33.2
+        ports:
+        - containerPort: 5055
+          name: overseerr-port
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+        env:
+        - name: PID
+          value: 1000
+        - name: GID
+          value: 1000
+        - name: TZ
+          value: 'America/Chicago'
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/overseerr
+            readOnly: no
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: overseerr-service
+spec:
+  selector:
+    app.kubernetes.io/name: overseerr
+  ports:
+  - name: overseerr-port
+    protocol: TCP
+    port: 5555
+    targetPort: overseerr-port

@@ -6,3 +6,4 @@ resources:
   - flux-system
   - datadog-agent
   - cert-manager
+  - home
