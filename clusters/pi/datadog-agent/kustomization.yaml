@@ -6,3 +6,6 @@ resources:
   - namespace.yaml
   - secret.sops.yaml
   - helm.yaml
+patches:
+  - path: ./patches/resources.yaml
+  - path: ./patches/network-monitoring.yaml
