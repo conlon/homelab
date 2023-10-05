@@ -26,11 +26,20 @@ spec:
             mountPath: /config
         env:
         - name: PID
-          value: "1000"
+          valueFrom:
+            configMapKeyRef:
+              name: xarr-configs
+              key: PID
         - name: GID
-          value: "1000"
+          valueFrom:
+            configMapKeyRef:
+              name: xarr-configs
+              key: GID
         - name: TZ
-          value: 'America/Chicago'
+          valueFrom:
+            configMapKeyRef:
+              name: xarr-configs
+              key: TZ
       volumes:
         - name: nfs-volume
           nfs:

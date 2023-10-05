@@ -4,4 +4,5 @@ metadata:
   name: home
 resources:
   - namespace.yaml
+  - config-map.yaml
   - overseerr.yaml
