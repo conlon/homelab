@@ -3,5 +3,6 @@ kind: Kustomization
 metadata:
   name: base-kustomization
 resources:
+  - flux-system
   - datadog-agent
   - cert-manager
