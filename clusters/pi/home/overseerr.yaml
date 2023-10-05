@@ -12,6 +12,7 @@ spec:
   template:
     metadata:
       name: overseerr
+      namespace: home
     spec:
       containers:
       - name: overseerr
