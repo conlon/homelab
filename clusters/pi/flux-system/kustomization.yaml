@@ -5,3 +5,4 @@ resources:
 - gotk-sync.yaml
 patches:
   - path: ./patches/sops-decryption.yaml
+  - path: ./patches/sync-interval.yaml
