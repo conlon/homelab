@@ -28,12 +28,14 @@ spec:
     datadog:
       apiKeyExistingSecret: datadog-secret
       appKeyExistingSecret: datadog-secret
+
     clusterAgent:
       replicas: 2
       createPodDisruptionBudget: true
-    # tends to make cluster unstable
-    # agents:
-    #   tolerations:
-    #   - effect: NoSchedule
-    #     key: node-role.kubernetes.io/master
-    #     operator: Exists
+    # tends to make cluster unstable?
+    # toleration(s) needed to run the agent on master nodes
+    agents:
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
