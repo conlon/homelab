@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: overseerr-deployment
+  name: overseerr
   namespace: home
   labels:
     app: overseerr
@@ -52,10 +52,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: overseerr-service
+  name: overseerr
   namespace: home
   annotations:
-    # metallb.universe.tf/loadBalancerIPs: 192.168.86.200
+    # metallb.universe.tf/loadBalancerIPs: 192.168.86.201
 spec:
   selector:
     app.kubernetes.io/name: overseerr
