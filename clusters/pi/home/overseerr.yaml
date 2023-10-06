@@ -54,13 +54,14 @@ kind: Service
 metadata:
   name: overseerr-service
   namespace: home
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.86.200
 spec:
   selector:
     app.kubernetes.io/name: overseerr
   ports:
   - name: overseerr-port
     protocol: TCP
-    port: 5555
+    port: 80
     targetPort: overseerr-port
-  externalIPs:
-    - 198.168.86.200
+  type: LoadBalancer
