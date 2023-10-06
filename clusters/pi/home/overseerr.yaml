@@ -62,3 +62,5 @@ spec:
     protocol: TCP
     port: 5555
     targetPort: overseerr-port
+  externalIPs:
+    - 198.168.86.200
