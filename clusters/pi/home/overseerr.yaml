@@ -23,9 +23,7 @@ spec:
         ports:
         - containerPort: 5055
           name: overseerr-port
-        volumeMounts:
-          - name: nfs-volume
-            mountPath: /config
+
         env:
         - name: PID
           valueFrom:
@@ -42,6 +40,11 @@ spec:
             configMapKeyRef:
               name: xarr-configs
               key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+
       volumes:
         - name: nfs-volume
           nfs:
@@ -54,14 +57,30 @@ kind: Service
 metadata:
   name: overseerr
   namespace: home
-  annotations:
+  # annotations:
     # metallb.universe.tf/loadBalancerIPs: 192.168.86.201
 spec:
   selector:
-    app.kubernetes.io/name: overseerr
+    app: overseerr
   ports:
   - name: overseerr-port
-    protocol: TCP
     port: 80
     targetPort: overseerr-port
   type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: overseerr-ingress
+  namespace: home
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: overseerr
+            port:
+              name: overseerr-port
