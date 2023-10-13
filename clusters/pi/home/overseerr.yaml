@@ -49,7 +49,7 @@ spec:
         - name: nfs-volume
           nfs:
             server: 192.168.86.10
-            path: /nfs/configs/overseerr/overseerr/config
+            path: /nfs/configs/overseerr/config
             readOnly: false
 ---
 apiVersion: v1
