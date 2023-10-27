@@ -58,7 +58,7 @@ metadata:
   name: overseerr
   namespace: home
   annotations:
-    metallb.universe.tf/loadBalancerIPs: 192.168.86.205
+    metallb.universe.tf/loadBalancerIPs: 192.168.86.35
 spec:
   selector:
     app: overseerr
