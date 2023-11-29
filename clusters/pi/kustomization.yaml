@@ -5,5 +5,6 @@ metadata:
 resources:
   - flux-system
   - datadog-agent
+  - twingate
   - cert-manager
   - home
