@@ -6,3 +6,4 @@ resources:
 patches:
   - path: ./patches/sops-decryption.yaml
   - path: ./patches/sync-interval.yaml
+  - path: ./patches/resources.yaml
