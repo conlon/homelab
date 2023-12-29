@@ -18,9 +18,13 @@ spec:
   chart:
     spec:
       chart: traefik
-      version: '24.0.0'
+      version: '26.0.0'
       sourceRef:
         kind: HelmRepository
         name: traefik
         namespace: traefik
       interval: 24h
+  valuesFrom:
+    - kind: ConfigMap
+      name: helm-values
+      valuesKey: helm-values.yaml

@@ -3,7 +3,6 @@ kind: Kustomization
 metadata:
   name: traefik
 resources:
-  - namespace.yaml
-  - helm-values.yaml
-  - helm.yaml
-  - dashboard
+  - dashboard-auth-secret.yaml
+  - middleware.yaml
+  - ingress.yaml
