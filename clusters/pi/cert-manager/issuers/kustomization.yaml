@@ -3,8 +3,6 @@ kind: Kustomization
 metadata:
   name: cert-manager
 resources:
-  - namespace.yaml
-  - helm.yaml
-  - issuers
-patches:
-  - path: helm-values.yaml
+  - cloudflare-api-token-secret.yaml
+  - lets-encrypt-staging-issuer.yaml
+  # - lets-encrypt-prod.yaml
