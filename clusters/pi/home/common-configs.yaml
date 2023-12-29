@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: xarr-configs
+  name: common-configs
   namespace: home
 data:
   PID: "1000"

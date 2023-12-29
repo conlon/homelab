@@ -28,17 +28,17 @@ spec:
         - name: PID
           valueFrom:
             configMapKeyRef:
-              name: xarr-configs
+              name: common-configs
               key: PID
         - name: GID
           valueFrom:
             configMapKeyRef:
-              name: xarr-configs
+              name: common-configs
               key: GID
         - name: TZ
           valueFrom:
             configMapKeyRef:
-              name: xarr-configs
+              name: common-configs
               key: TZ
 
         volumeMounts:
@@ -68,19 +68,45 @@ spec:
     targetPort: overseerr-port
   type: LoadBalancer
 ---
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: overseerr-ingress
+#   namespace: home
+# spec:
+#   rules:
+#   - http:
+#       paths:
+#       - path: /
+#         pathType: Prefix
+#         backend:
+#           service:
+#             name: overseerr
+#             port:
+#               name: overseerr-port
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
 metadata:
-  name: overseerr-ingress
-  namespace: home
+  name: overseerr-ingress-route
+  namespace: traefik
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
 spec:
-  rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: overseerr
-            port:
-              name: overseerr-port
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.requests.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: overseerr
+          port: 80
+    - match: Host(`requests.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: overseerr
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: fellowfreak-dev-staging-tls
