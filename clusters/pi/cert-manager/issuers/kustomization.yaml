@@ -5,4 +5,4 @@ metadata:
 resources:
   - cloudflare-api-token-secret.yaml
   - lets-encrypt-staging-issuer.yaml
-  # - lets-encrypt-prod.yaml
+  # - lets-encrypt-production-issuer.yaml

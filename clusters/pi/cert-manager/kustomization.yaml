@@ -4,7 +4,9 @@ metadata:
   name: cert-manager
 resources:
   - namespace.yaml
+  - crds/crds-v1.13.1.yaml
   - helm.yaml
   - issuers
+  # - certificates
 patches:
   - path: helm-values.yaml
