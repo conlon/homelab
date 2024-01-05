@@ -4,7 +4,8 @@ metadata:
   name: cert-manager
 resources:
   - namespace.yaml
-  - crds/crds-v1.13.1.yaml
+  # VERSION=1.13.3 && curl -L https://github.com/cert-manager/cert-manager/releases/download/v${VERSION}/cert-manager.crds.yaml > cert-manager/crds/crds-v${VERSION}.yaml
+  - crds/crds-v1.13.3.yaml
   - helm.yaml
   - issuers
   # - certificates
