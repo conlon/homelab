@@ -1,0 +1,16 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: local-fellowfreak-dev-staging
+  namespace: home
+  # namespace: traefik
+spec:
+  secretName: local-fellowfreak-dev-staging-tls
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+  commonName: "*.local.fellowfreak.dev"
+  dnsNames:
+  - "local.fellowfreak.dev"
+  - "*.local.fellowfreak.dev"
