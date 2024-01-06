@@ -9,7 +9,7 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`traefik.fellowfreak.local`)
+    - match: Host(`traefik.local.fellowfreak.dev`)
       kind: Rule
       middlewares:
         - name: traefik-dashboard-basicauth
@@ -17,5 +17,5 @@ spec:
       services:
         - name: api@internal
           kind: TraefikService
-#  tls:
-#    secretName: local-example-com-staging-tls
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
