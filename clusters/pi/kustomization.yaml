@@ -6,6 +6,6 @@ resources:
   - flux-system
   - datadog-agent
   - twingate
-  - cert-manager
   - traefik
+  # - cert-manager
   - home
