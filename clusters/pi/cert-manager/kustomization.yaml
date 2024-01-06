@@ -9,6 +9,6 @@ resources:
   - helm.yaml
   - issuers
   - certificates/staging
-  # - certificates/production
+  - certificates/production
 patches:
   - path: helm-values.yaml
