@@ -8,6 +8,7 @@ resources:
   - crds/crds-v1.13.3.yaml
   - helm.yaml
   - issuers
-  # - certificates
+  - certificates/staging
+  # - certificates/production
 patches:
   - path: helm-values.yaml
