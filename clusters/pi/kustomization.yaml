@@ -7,5 +7,5 @@ resources:
   - datadog-agent
   - twingate
   - traefik
-  # - cert-manager
+  - cert-manager
   - home
