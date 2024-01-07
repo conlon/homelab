@@ -5,3 +5,4 @@ metadata:
 resources:
   - fellowfreak-dev.yaml
   - local-fellowfreak-dev.yaml
+  - local-fellowfreak-dev-traefik.yaml
