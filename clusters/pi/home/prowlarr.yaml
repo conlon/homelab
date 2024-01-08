@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: home
+  labels:
+    app: prowlarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      name: prowlarr
+      namespace: home
+      labels:
+        app: prowlarr
+    spec:
+      containers:
+      - name: prowlarr
+        # image: lscr.io/linuxserver/prowlarr:5.0.3
+        image: lscr.io/linuxserver/prowlarr:1.7.4.3769-ls29
+        ports:
+        - containerPort: 9696
+          name: prowlarr-port
+
+        env:
+        - name: PID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PID
+        - name: GID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: GID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+          - name: media-root
+            mountPath: /media
+
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/prowlarr/config
+            readOnly: false
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr
+  namespace: home
+spec:
+  selector:
+    app: prowlarr
+  ports:
+  - name: prowlarr-port
+    port: 80
+    targetPort: prowlarr-port
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prowlarr-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.prowlarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: prowlarr
+          port: 80
+    - match: Host(`prowlarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: prowlarr
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
