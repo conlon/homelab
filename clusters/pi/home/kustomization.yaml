@@ -5,4 +5,9 @@ metadata:
 resources:
   - namespace.yaml
   - common-configs.yaml
+  # wireguard + qbittorrent
+  - wireguard-configs.yaml
+  - pia-secret.sops.yaml
+  - qbittorrent.yaml
+  # other apps
   - overseerr.yaml

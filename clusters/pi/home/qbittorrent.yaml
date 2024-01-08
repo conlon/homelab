@@ -1,0 +1,249 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbit
+  namespace: home
+  labels:
+    app: qbit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbit
+  template:
+    metadata:
+      name: qbit
+      namespace: home
+      labels:
+        app: qbit
+    spec:
+      initContainers:
+      - name: wg-init
+        image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
+        command:
+          - /bin/sh
+          - -c
+          - |
+            apk add git
+            git clone https://github.com/pia-foss/manual-connections.git
+            cd manual-connections
+            bash ./run_setup.sh
+        
+        env:
+        - name: HOME_IP
+          valueFrom:
+            secretKeyRef:
+              name: pia-auth
+              key: HOME_IP
+        - name: PIA_USER
+          valueFrom:
+            secretKeyRef:
+              name: pia-auth
+              key: PIA_USER
+        - name: PIA_PASS
+          valueFrom:
+            secretKeyRef:
+              name: pia-auth
+              key: PIA_PASS
+        - name: VPN_PROTOCOL
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: VPN_PROTOCOL
+        - name: DISABLE_IPV6
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: DISABLE_IPV6
+        - name: DIP_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: DIP_TOKEN
+        - name: AUTOCONNECT
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: AUTOCONNECT
+        - name: PREFERRED_REGION
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: PREFERRED_REGION
+        - name: PIA_PF
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: PIA_PF
+        - name: PIA_CONNECT
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: PIA_CONNECT
+        - name: PIA_DNS
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: PIA_DNS
+        - name: PIA_CONF_PATH
+          valueFrom:
+            configMapKeyRef:
+              name: wireguard-configs
+              key: PIA_CONF_PATH
+
+        volumeMounts:
+          - name: lib-modules
+            mountPath: /lib/modules
+          - name: config
+            mountPath: /config
+
+      containers:
+      - name: wireguard
+        image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "250m"
+          limits:
+            memory: "64Mi"
+            cpu: "250m"
+
+        ports:
+        - containerPort: 8080
+          name: qbit-port
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN", "SYS_MODULE"]
+        env:
+        - name: PID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PID
+        - name: GID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: GID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+        - name: HOME_IP
+          valueFrom:
+            secretKeyRef:
+              name: pia-auth
+              key: HOME_IP
+
+        readinessProbe:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - |
+                IP=`curl -s https://icanhazip.com/`
+                echo "current IP:${IP}"
+                [ "${IP}" != "$HOME_IP" ]
+          initialDelaySeconds: 5
+          periodSeconds: 15
+         
+        volumeMounts:
+          - name: lib-modules
+            mountPath: /lib/modules
+          - name: config
+            mountPath: /config
+
+      - name: qbit
+        image: lscr.io/linuxserver/qbittorrent:4.6.2
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1024Mi"
+            cpu: "1000m"
+
+        env:
+        - name: PID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PID
+        - name: GID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: GID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+          - name: media-root
+            mountPath: /media
+
+      volumes:
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: config
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/wireguard/config
+            readOnly: false
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/qbittorrent/config
+            readOnly: false
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbit
+  namespace: home
+spec:
+  selector:
+    app: qbit
+  ports:
+  - name: qbit-port
+    port: 80
+    targetPort: qbit-port
+  type: LoadBalancer
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: radarr-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.qbit.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: qbit
+          port: 80
+    - match: Host(`qbit.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: qbit
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
