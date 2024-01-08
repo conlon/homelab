@@ -30,11 +30,11 @@ spec:
             configMapKeyRef:
               name: common-configs
               key: PUID
-        - name: PGID
+        - name: PGUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: PGID
+              key: PGUID
         - name: TZ
           valueFrom:
             configMapKeyRef:

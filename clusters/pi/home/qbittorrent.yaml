@@ -121,11 +121,11 @@ spec:
             configMapKeyRef:
               name: common-configs
               key: PUID
-        - name: GID
+        - name: GUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: GID
+              key: GUID
         - name: TZ
           valueFrom:
             configMapKeyRef:
@@ -171,11 +171,11 @@ spec:
             configMapKeyRef:
               name: common-configs
               key: PUID
-        - name: GID
+        - name: GUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: GID
+              key: GUID
         - name: TZ
           valueFrom:
             configMapKeyRef:

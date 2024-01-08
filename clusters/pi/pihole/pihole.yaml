@@ -45,11 +45,11 @@ spec:
             configMapKeyRef:
               name: common-configs
               key: PUID
-        - name: PIHOLE_GID
+        - name: PIHOLE_GUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: GID
+              key: GUID
         - name: WEBPASSWORD
           valueFrom:
             secretKeyRef:
