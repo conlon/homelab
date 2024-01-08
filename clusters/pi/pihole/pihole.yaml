@@ -44,7 +44,7 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: PID
+              key: PUID
         - name: PIHOLE_GID
           valueFrom:
             configMapKeyRef:

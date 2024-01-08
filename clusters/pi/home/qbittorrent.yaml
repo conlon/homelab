@@ -116,11 +116,11 @@ spec:
           capabilities:
             add: ["NET_ADMIN", "SYS_MODULE"]
         env:
-        - name: PID
+        - name: PUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: PID
+              key: PUID
         - name: GID
           valueFrom:
             configMapKeyRef:
@@ -166,11 +166,11 @@ spec:
             cpu: "1000m"
 
         env:
-        - name: PID
+        - name: PUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: PID
+              key: PUID
         - name: GID
           valueFrom:
             configMapKeyRef:

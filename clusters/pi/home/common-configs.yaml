@@ -4,6 +4,6 @@ metadata:
   name: common-configs
   namespace: home
 data:
-  PID: "1000"
+  PUID: "1000"
   GID: "1000"
   TZ: "America/Chicago"

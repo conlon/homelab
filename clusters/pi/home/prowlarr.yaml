@@ -26,11 +26,11 @@ spec:
           name: prowlarr-port
 
         env:
-        - name: PID
+        - name: PUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: PID
+              key: PUID
         - name: GID
           valueFrom:
             configMapKeyRef:

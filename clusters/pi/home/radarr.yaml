@@ -24,18 +24,17 @@ spec:
         ports:
         - containerPort: 7878
           name: radarr-port
-
         env:
-        - name: PID
+        - name: PUID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: PID
-        - name: GID
+              key: PUID
+        - name: PGID
           valueFrom:
             configMapKeyRef:
               name: common-configs
-              key: GID
+              key: PGID
         - name: TZ
           valueFrom:
             configMapKeyRef:
@@ -70,7 +69,7 @@ spec:
     app: radarr
   ports:
   - name: radarr-port
-    port: 80
+    port: 443
     targetPort: radarr-port
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -88,12 +87,12 @@ spec:
       kind: Rule
       services:
         - name: radarr
-          port: 80
+          port: 443
     - match: Host(`radarr.local.fellowfreak.dev`)
       kind: Rule
       services:
         - name: radarr
-          port: 80
+          port: 443
       # middlewares:
       #   - name: default-headers
   tls:
