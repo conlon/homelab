@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+  namespace: home
+  labels:
+    app: radarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: radarr
+  template:
+    metadata:
+      name: radarr
+      namespace: home
+      labels:
+        app: radarr
+    spec:
+      containers:
+      - name: radarr
+        # image: lscr.io/linuxserver/radarr:5.0.3.8127
+        image: lscr.io/linuxserver/radarr:4.7.5
+        ports:
+        - containerPort: 7878
+          name: radarr-port
+
+        env:
+        - name: PID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PID
+        - name: GID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: GID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+          - name: media-root
+            mountPath: /media
+
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/radarr/config
+            readOnly: false
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr
+  namespace: home
+spec:
+  selector:
+    app: radarr
+  ports:
+  - name: radarr-port
+    port: 80
+    targetPort: radarr-port
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: radarr-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.radarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: radarr
+          port: 80
+    - match: Host(`radarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: radarr
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls

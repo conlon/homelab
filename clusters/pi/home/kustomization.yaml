@@ -11,3 +11,5 @@ resources:
   - qbittorrent.yaml
   # other apps
   - overseerr.yaml
+  - radarr.yaml
+  - radarr4k.yaml
