@@ -13,3 +13,5 @@ resources:
   - overseerr.yaml
   - radarr.yaml
   - radarr4k.yaml
+  - sonarr.yaml
+  - sonarr4k.yaml
