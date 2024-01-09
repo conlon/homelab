@@ -4,5 +4,5 @@ metadata:
   name: cert-manager
 resources:
   - cloudflare-api-token-secret.sops.yaml
-  - lets-encrypt-staging-issuer.yaml
+  - lets-encrypt-staging-issuer.sops.yaml
   - lets-encrypt-production-issuer.yaml
