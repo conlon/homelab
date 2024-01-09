@@ -69,7 +69,7 @@ spec:
     app: radarr
   ports:
   - name: radarr-port
-    port: 443
+    port: 80
     targetPort: radarr-port
 ---
 apiVersion: traefik.containo.us/v1alpha1
@@ -87,12 +87,12 @@ spec:
       kind: Rule
       services:
         - name: radarr
-          port: 443
+          port: 80
     - match: Host(`radarr.local.fellowfreak.dev`)
       kind: Rule
       services:
         - name: radarr
-          port: 443
+          port: 80
       # middlewares:
       #   - name: default-headers
   tls:
