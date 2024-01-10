@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heimdall
+  namespace: home
+  labels:
+    app: heimdall
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: heimdall
+  template:
+    metadata:
+      name: heimdall
+      namespace: home
+      labels:
+        app: heimdall
+    spec:
+      containers:
+      - name: heimdall
+        image: lscr.io/linuxserver/heimdall:2.5.8
+        ports:
+        - containerPort: 80
+          name: heimdall
+        - containerPort: 443
+          name: heimdall-ssl
+        env:
+        - name: PUID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PUID
+        - name: PGID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PGID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/heimdall/config
+            readOnly: false
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: heimdall
+  namespace: home
+spec:
+  selector:
+    app: heimdall
+  ports:
+  - name: heimdall
+    port: 80
+    targetPort: heimdall
+  - name: heimdall-ssl
+    port: 443
+    targetPort: heimdall-ssl
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: heimdall-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: heimdall
+          port: 80
+    - match: Host(`local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: heimdall
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
