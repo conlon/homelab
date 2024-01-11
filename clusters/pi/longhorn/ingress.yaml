@@ -1,0 +1,26 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: longhorn-ingress-route
+  namespace: longhorn
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.longhorn.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: longhorn-frontend
+          port: 80
+    - match: Host(`longhorn.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: longhorn-frontend
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
