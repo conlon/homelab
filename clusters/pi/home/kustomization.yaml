@@ -6,9 +6,7 @@ resources:
   - namespace.yaml
   - common-configs.yaml
   # wireguard + qbittorrent
-  - wireguard-configs.yaml
-  - pia-secret.sops.yaml
-  - qbittorrent.yaml
+  - qbit
   # other apps
   - overseerr.yaml
   - radarr.yaml
