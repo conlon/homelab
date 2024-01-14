@@ -19,7 +19,6 @@ spec:
     spec:
       containers:
       - name: sonarr
-        # image: lscr.io/linuxserver/sonarr:5.0.3
         image: lscr.io/linuxserver/sonarr:3.0.10.1567-ls204
         ports:
         - containerPort: 8989
