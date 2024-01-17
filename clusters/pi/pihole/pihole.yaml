@@ -34,6 +34,7 @@ spec:
           protocol: UDP
         - containerPort: 80
           protocol: TCP
+          name: pihole-web
         env:
         - name: TZ
           valueFrom:
@@ -99,4 +100,4 @@ spec:
   - name: pihole-web
     protocol: TCP
     port: 80
-    targetPort: 80
+    targetPort: pihole-web
