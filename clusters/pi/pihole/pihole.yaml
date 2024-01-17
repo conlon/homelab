@@ -88,6 +88,7 @@ spec:
   type: LoadBalancer
   selector:
     app: pihole
+  externalTrafficPolicy: Local
   ports:
   - name: pihole-udp
     protocol: UDP
