@@ -25,6 +25,9 @@ spec:
         namespace: datadog
       interval: 24h
   values:
+    processagent:
+      enabled: true
+      processCollection: true
     datadog:
       apiKeyExistingSecret: datadog-secret
       appKeyExistingSecret: datadog-secret
