@@ -18,7 +18,7 @@ spec:
         app: sonarr4k
     spec:
       containers:
-      - name: sonarr
+      - name: sonarr4k
         image: lscr.io/linuxserver/sonarr:3.0.10.1567-ls204
         ports:
         - containerPort: 8989
