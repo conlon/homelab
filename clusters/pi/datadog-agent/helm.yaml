@@ -25,7 +25,7 @@ spec:
         namespace: datadog
       interval: 24h
   values:
-    processagent:
+    processAgent:
       enabled: true
       processCollection: true
     datadog:
