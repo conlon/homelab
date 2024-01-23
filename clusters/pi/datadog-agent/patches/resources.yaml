@@ -10,8 +10,8 @@ spec:
         agent:
           resources:
             requests:
-              cpu: 250m
+              cpu: 400m
               memory: 256Mi
             limits:
-              cpu: 250m
+              cpu: 400m
               memory: 256Mi
