@@ -25,12 +25,12 @@ spec:
         namespace: datadog
       interval: 24h
   values:
-    processAgent:
-      enabled: true
-      processCollection: true
     datadog:
       apiKeyExistingSecret: datadog-secret
       appKeyExistingSecret: datadog-secret
+      processAgent:
+        enabled: true
+        processCollection: true
 
     clusterAgent:
       replicas: 2
