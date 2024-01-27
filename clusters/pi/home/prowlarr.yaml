@@ -44,8 +44,6 @@ spec:
         volumeMounts:
           - name: nfs-volume
             mountPath: /config
-          - name: media-root
-            mountPath: /media
 
       volumes:
         - name: nfs-volume
