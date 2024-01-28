@@ -18,6 +18,11 @@ spec:
       labels:
         app: qbit
     spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+
       initContainers:
       - name: wg-init
         image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
@@ -112,9 +117,6 @@ spec:
         securityContext:
           capabilities:
             add: ["NET_ADMIN", "SYS_MODULE"]
-          sysctls:
-          - name: net.ipv4.conf.all.src_valid_mark
-            value: "1"
 
         ports:
         - containerPort: 8080
