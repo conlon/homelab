@@ -1,3 +1,4 @@
-/*
+pi/group_vars/*
+!pi/group_vars/*.sops.yml
 !.gitignore
 !sample/
