@@ -1,6 +1,6 @@
-- name: reload dhcpcd
+- name: restart dhcpcd
   systemd:
-    name: dhcpcd
-    state: reloaded
+    name: networking
+    state: restarted
     daemon_reload: yes
   become: yes
