@@ -23,6 +23,11 @@
 
 - name: Setup k3s servers
   hosts: master
+  pre_tasks:
+    - name: Load encrypted credentials
+      community.sops.load_vars:
+        file: inventory/pi/group_vars/all.sops.yml
+        expressions: evaluate-on-load
   roles:
     - role: k3s_server
       become: true

@@ -1,0 +1,98 @@
+k3s_version: v1.28.2+k3s1
+# this is the user that has ssh access to these machines
+ansible_user: pi
+systemd_dir: /etc/systemd/system
+# Set your timezone
+system_timezone: America/Chicago
+# interface which will be used for flannel
+flannel_iface: eth0
+# apiserver_endpoint is virtual ip-address which will be configured on each master
+apiserver_endpoint: 192.168.86.19
+# k3s_token is required  masters can talk together securely
+# this token should be alpha numeric only
+k3s_token: ENC[AES256_GCM,data:5D/fJbXycdx3fBtKSO4Izj0zxQ==,iv:mtKuMDKUds5H+MeSCi/iCbbfSYLmcPZnEUM6Iu7jU04=,tag:gldhwng0K+JUTWTM7eFKQg==,type:str]
+# The IP on which the node is reachable in the cluster.
+# Here, a sensible default is provided, you can still override
+# it for each of your hosts, though.
+k3s_node_ip: '{{ ansible_facts[flannel_iface]["ipv4"]["address"] }}'
+# Disable the taint manually by setting: k3s_master_taint = false
+k3s_master_taint: '{{ true if groups[''node''] | default([]) | length >= 1 else false }}'
+# k3s_master_taint: false
+# these arguments are recommended for servers as well as agents:
+extra_args: --flannel-iface={{ flannel_iface }} --node-ip={{ k3s_node_ip }}
+# change these to your liking, the only required are: --disable servicelb, --tls-san {{ apiserver_endpoint }}
+extra_server_args: '{{ extra_args }} {{ ''--node-taint node-role.kubernetes.io/master=true:NoSchedule'' if k3s_master_taint else '''' }} --tls-san {{ apiserver_endpoint }} --disable servicelb --disable traefik'
+# --kubelet-arg=allowed-unsafe-sysctls= lines are included to allow wireguard containers to set these sysctls values
+extra_agent_args: '{{ extra_args }} --kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark'
+# --kubelet-arg=allowed-unsafe-sysctls=net.ipv6.conf.all.disable_ipv6
+# --kubelet-arg=allowed-unsafe-sysctls=net.ipv6.conf.default.disable_ipv6
+# image tag for kube-vip
+kube_vip_tag_version: v0.6.2
+# metallb type frr or native
+metal_lb_type: native
+# metallb mode layer2 or bgp
+metal_lb_mode: layer2
+# bgp options
+# metal_lb_bgp_my_asn: "64513"
+# metal_lb_bgp_peer_asn: "64512"
+# metal_lb_bgp_peer_address: "192.168.30.1"
+# image tag for metal lb
+metal_lb_speaker_tag_version: v0.13.11
+metal_lb_controller_tag_version: v0.13.11
+# metallb ip range for load balancer
+# metal_lb_ip_range: "192.168.86.30-192.168.86.50"
+# 192.168.86.32/27
+metal_lb_ip_range: 192.168.86.32-192.168.86.63
+# Only enable if your nodes are proxmox LXC nodes, make sure to configure your proxmox nodes
+# in your hosts.ini file.
+# Please read https://gist.github.com/triangletodd/02f595cd4c0dc9aac5f7763ca2264185 before using this.
+# Most notably, your containers must be privileged, and must not have nesting set to true.
+# Please note this script disables most of the security of lxc containers, with the trade off being that lxc
+# containers are significantly more resource efficent compared to full VMs.
+# Mixing and matching VMs and lxc containers is not supported, ymmv if you want to do this.
+# I would only really recommend using this if you have partiularly low powered proxmox nodes where the overhead of
+# VMs would use a significant portion of your available resources.
+proxmox_lxc_configure: false
+# the user that you would use to ssh into the host, for example if you run ssh some-user@my-proxmox-host,
+# set this value to some-user
+proxmox_lxc_ssh_user: root
+# the unique proxmox ids for all of the containers in the cluster, both worker and master nodes
+proxmox_lxc_ct_ids:
+    - 200
+    - 201
+    - 202
+    - 203
+    - 204
+retry_count: 30
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age: []
+    lastmodified: "2024-02-07T21:38:32Z"
+    mac: ENC[AES256_GCM,data:ZcIGWbMT6Q0H/YbFuZ5ti8gRaTbyfFqQRdNNFLPcS4G/aWzk9ZR7w4YrmNM6dF7zN6g3pbfOsoo9ZEdDIsuqIGjsrjGciZpwv2+BjNZkmap74UlV69DYqIsqtp0jJmMJ9hV3T81x2FawJolcESgPeNLa6FMkrpuWxsliL2yNGsY=,iv:wHWLW+zmNTWYRu/drofmik26pXzUq2ucCXUiLd5HX2I=,tag:cm+CwVyCBYzKopwG/zzvNA==,type:str]
+    pgp:
+        - created_at: "2024-02-07T21:38:32Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMAzSN9uM2UoaDAQ/9FbSejMb4rccBN8MSB1756MtGiVLioWCeNLpBXVT/PW6T
+            eV5JsKfKTzu7O00CdP25VrujT2qAgIR/BgBG9I3ePiTT5IkioDxuJUiFXMWegEeQ
+            yURv6KjFyye/wYxkYrbrsY5RJPhrpVFUZU1rVVeTutRIwHlv8rfI9qGF0Qho3QH4
+            pQnoL5nIL3kWBwBLT69FE4y0nWfgIohDhjM26i2CzwSDE+pQuaUo5vWfbk1XDVz1
+            ddQb0DU3ZgzFME5GYgfxHVxAs+26byWriwbd98ibajiY5MoGZ4TpwWnuqtZQHYRY
+            AaDxMCTD+Ds397qWk590G+rRcz0QD8Tb8R+cTZaRghfDLaO9tVDfHBQioOxG+vnE
+            8GPuPQncqYZ/qGUPDS8nh2mt6xtf40hmnJNuKVGZX+ByhffCBQfbcdHBcMrxQTbo
+            oYW6bl+GdGNB6UrjPCtbIPFVoYs/eehdqAGGx+LlBTHv296kA8FJf/iA3OO3zWij
+            UM376a9FzS/UkPDcqcH/bpuMIfxhsP9fWzjXQzAP9kDaekDrSphL1JuqJ2WqdfGV
+            OFX9ow8ysuVGoNuF64Up/KgrHCGzAyTDhqSsxpb91RkbVVcMm3jt9Z40VlUGsbiG
+            3r585Izs5+cz/h0k3mwb8MxkSyQz/WnYAo0TVLaE9OdXI9jmOkIuix2hRy73UG/U
+            aAEJAhA0fwnbYGiWOhveWF/GDFpF42JH/C1KYsC3YJADc2EPJzy1UuEh/UdPmge+
+            LsnMZazi+GklChLtj1ic9vpy8OYO8OB1PY0ZpCYZoQopUqRHPZuMshiROG46gXx1
+            mMDrStb4oG38
+            =+p2u
+            -----END PGP MESSAGE-----
+          fp: 77B66B06D2E06C5E776F4F92C7314867B986373D
+    encrypted_regex: ^(k3s_token)$
+    version: 3.8.0
