@@ -1,24 +1,10 @@
 ---
 - hosts: k8s
-#   pre_tasks:
-#     - debug:
-#         msg: "{{ desired_host }}"
   roles:
-    # - _bootstrap
-    - hostname
+    - _bootstrap
     - networking
+    - hostname
     - custom_configs
-    - k8s
 
-
-
-
-
-
-
-
-
-# - hosts: alternate
-#   tasks:
-#     - include_role:
-#         name: hostname
+# - name: Run k0s playbook
+#   import_playbook: k0s-ansible/site.yml
