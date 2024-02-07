@@ -1,0 +1,11 @@
+---
+- hosts: new
+  vars_prompt:
+    - name: new_password
+      prompt: new password?
+      private: yes
+      encrypt: sha512_crypt
+      confirm: yes
+      salt_size: 8
+  roles:
+    - _bootstrap

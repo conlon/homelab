@@ -1,0 +1,30 @@
+- name: install packages
+  ansible.builtin.apt:
+    pkg: "{{ packages }}"
+    state: latest
+    update_cache: yes
+    cache_valid_time: 86400 # 24 hours in seconds (60*60*24)
+  become: yes
+
+- name: Bash aliases | Add aliases
+  lineinfile:
+    dest: "{{ bash_aliases_path }}"
+    create: yes
+    mode: 0644
+    line: 'alias {{ item.alias }}="{{ item.command }}"'
+    regexp: "^alias {{ item.alias }}="
+  with_items: "{{ bash_aliases }}"
+  when: bash_aliases != false
+
+- name: Include aliases in bashrc
+  lineinfile:
+    dest: /home/pi/.bashrc
+    line: "source {{ bash_aliases_path }}"
+
+# https://connect.resilio.com/hc/en-us/articles/360011329820-Agent-run-out-of-system-notify-watchers
+- name: Increase max_user_watches (for resilio sync). Default is 8192
+  lineinfile:
+    dest: /etc/sysctl.conf
+    line: fs.inotify.max_user_watches=32768
+  when: "'worker' in group_names"
+  become: yes
