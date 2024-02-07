@@ -1,0 +1,36 @@
+---
+- hosts: k8s
+  become: true
+
+  tasks:
+    - name: install packages
+      apt:
+        name:
+          - vim
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: setup aliases
+      template:
+        src: bash_profile.j2
+        dest: "{{ item }}/.bash_profile"
+      loop:
+        - /home/pi
+        - /root
+
+    - name: create mount point for ssd
+      file:
+        path: /mnt/ssd
+        state: directory
+        mode: '0755'
+      when: kubernetes_role == "master"
+
+    - name: mount ssd on master node
+      mount:
+        path: /mnt/ssd
+        src: UUID=9f57c9aa-1115-4dd8-a768-946278e65ca3
+        fstype: ext4
+        opts: defaults,nofail
+        state: present
+      when: kubernetes_role == "master"

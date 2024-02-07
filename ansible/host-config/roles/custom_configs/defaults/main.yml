@@ -1,0 +1,14 @@
+packages:
+  - vim
+  - jq
+  - nfs-common # for general nfs access
+  - open-iscsi # for longhorn
+  - wireguard-tools # for running wireguard VPN
+
+bash_aliases:
+  - alias: k
+    command: sudo k3s kubectl
+  - alias: ll
+    command: ls -la
+
+bash_aliases_path: /home/pi/.bash_aliases

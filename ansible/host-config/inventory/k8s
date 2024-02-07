@@ -1,0 +1,52 @@
+#[new]
+#10.0.0.105
+
+localhost ansible_connection=local
+
+[all]
+
+[all:children]
+k8s
+
+[k8s]
+; add a new host on first run like this:
+; k9 ansible_host=192.168.86.XX desired_host=192.168.86.29
+k0 ansible_host=192.168.86.20 desired_host=192.168.86.20
+k1 ansible_host=192.168.86.21 desired_host=192.168.86.21
+k2 ansible_host=192.168.86.22 desired_host=192.168.86.22
+k3 ansible_host=192.168.86.23 desired_host=192.168.86.23
+k4 ansible_host=192.168.86.24 desired_host=192.168.86.24
+k5 ansible_host=192.168.86.25 desired_host=192.168.86.25
+
+[k8s:vars]
+ip_base="192.168.86"
+routers=["{{ip_base}}.1"]
+ansible_user=pi
+ansible_connection=ssh
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_user=pi
+ansible_ssh_private_key_file=~/.ssh/id_ed25519
+deploy_target="pi"   # enables cgroup features
+
+kubernetes_apiserver_advertise_address="{{ip_base}}.100"
+k0s_version=v1.27.5+k0s.0
+
+
+[initial_controller]
+k0
+
+[initial_controller:vars]
+artifacts_dir=~/.kube/
+extra_args="--enable-worker --enable-dynamic-config --no-taints"
+
+[controller]
+k1
+k2
+
+[controller:vars]
+extra_args="--enable-worker --enable-dynamic-config --no-taints"
+
+[worker]
+k3
+k4
+k5

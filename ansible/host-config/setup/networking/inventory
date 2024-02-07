@@ -1,0 +1,39 @@
+#[new]
+#10.0.0.105
+
+[dramble]
+
+[dramble:children]
+k8s
+
+[k8s]
+k0 ansible_host=10.0.0.100 kubernetes_role=master
+k1 ansible_host=10.0.0.101 kubernetes_role=node
+k2 ansible_host=10.0.0.102 kubernetes_role=node
+k3 ansible_host=10.0.0.103 kubernetes_role=node
+
+[k8s:vars]
+ip_base="10.0.0"
+routers=["{{ip_base}}.1"]
+ansible_user=pi
+desired_host={{ansible_host}}
+ansible_connection=ssh
+ansible_python_interpreter=/usr/bin/python3.7
+
+
+ansible_ssh_user=pi
+deploy_target=pi
+kubernetes_apiserver_advertise_address=10.0.0.100
+
+
+[master]
+k0
+
+[workers]
+k1
+k2
+k3
+
+
+#[localhost:vars]
+#ansible_python_interpreter={{ ansible_playbook_python }}

@@ -1,0 +1,10 @@
+---
+- hosts: k8s
+  roles:
+    - _bootstrap
+    - networking
+    - hostname
+    - custom_configs
+
+# - name: Run k0s playbook
+#   import_playbook: k0s-ansible/site.yml

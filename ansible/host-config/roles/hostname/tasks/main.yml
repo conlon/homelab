@@ -1,0 +1,22 @@
+- name: set hostname
+  template:
+    src: hostname.j2
+    dest: /etc/hostname
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+
+- name: set transient hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+  become: yes
+
+- name: set hosts
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
