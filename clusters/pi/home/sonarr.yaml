@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+  namespace: home
+  labels:
+    app: sonarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sonarr
+  template:
+    metadata:
+      name: sonarr
+      namespace: home
+      labels:
+        app: sonarr
+    spec:
+      containers:
+      - name: sonarr
+        image: lscr.io/linuxserver/sonarr:3.0.10.1567-ls204
+        ports:
+        - containerPort: 8989
+          name: sonarr-port
+
+        env:
+        - name: PUID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PUID
+        - name: PGID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PGID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+          - name: media-root
+            mountPath: /media
+
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/sonarr/config
+            readOnly: false
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarr
+  namespace: home
+spec:
+  selector:
+    app: sonarr
+  ports:
+  - name: sonarr-port
+    port: 80
+    targetPort: sonarr-port
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sonarr-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.sonarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: sonarr
+          port: 80
+    - match: Host(`sonarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: sonarr
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls

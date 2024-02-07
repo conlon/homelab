@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "schedule:weekdays",
+    ":preserveSemverRanges",
+    ":combinePatchMinorReleases",
+    ":separateMajorReleases",
+    ":separateMultipleMajorReleases"
+  ],
+  "kubernetes": {
+    "fileMatch": ["\\.yaml$"]
+  },
+  "packageRules": [
+    {
+      "description": "Limit linuxserver packages to not use dated versions",
+      "matchPackagePatterns": [".*linuxserver.*"],
+      "allowedVersions": "<2000"
+    },
+    {
+      "description": "Limit qbittorent packages below 14.x which strangely exists in the same registry",
+      "matchPackagePatterns": [".*linuxserver.*"],
+      "allowedVersions": "<14"
+    }
+  ]
+}

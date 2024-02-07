@@ -1,0 +1,94 @@
+apiVersion: k0sctl.k0sproject.io/v1beta1
+kind: Cluster
+metadata:
+  name: k0s-cluster
+spec:
+  hosts:
+  - ssh:
+      address: 192.168.86.100
+      user: root
+      port: 22
+      keyPath: /Users/michael/.ssh/id_ed25519
+    role: controller
+    noTaints: true
+    installFlags:
+    - --enable-dynamic-config
+    - --enable-worker
+  - ssh:
+      address: 192.168.86.101
+      user: root
+      port: 22
+      keyPath: /Users/michael/.ssh/id_ed25519
+    role: controller
+    noTaints: true
+    installFlags:
+    - --enable-dynamic-config
+    - --enable-worker
+  - ssh:
+      address: 192.168.86.102
+      user: root
+      port: 22
+      keyPath: /Users/michael/.ssh/id_ed25519
+    role: controller
+    noTaints: true
+    installFlags:
+    - --enable-dynamic-config
+    - --enable-worker
+  - ssh:
+      address: 192.168.86.103
+      user: root
+      port: 22
+      keyPath: /Users/michael/.ssh/id_ed25519
+    role: worker
+  k0s:
+    version: 1.27.6+k0s.0
+    dynamicConfig: true
+
+
+# resource "k0s_cluster" "pi_cluster" {
+#   name    = "pi-cluster"
+#   version = "v1.27.5+k0s.0"
+
+#   hosts = [
+#     {
+#       role = "controller+worker"
+
+#       ssh = {
+#         address  = "192.168.86.100"
+#         port     = 22
+#         user     = "pi"
+#         key_path = "~/.ssh/id_ed25519"
+#       }
+#     },
+#     {
+#       role = "controller+worker"
+
+#       ssh = {
+#         address  = "192.168.86.101"
+#         port     = 22
+#         user     = "pi"
+#         key_path = "~/.ssh/id_ed25519"
+#       }
+#     },
+#     {
+#       role = "controller+worker"
+
+#       ssh = {
+#         address  = "192.168.86.102"
+#         port     = 22
+#         user     = "pi"
+#         key_path = "~/.ssh/id_ed25519"
+#       }
+#     },
+#     {
+#       role = "worker"
+
+#       ssh = {
+#         address  = "192.168.86.103"
+#         port     = 22
+#         user     = "pi"
+#         key_path = "~/.ssh/id_ed25519"
+#       }
+#     }
+#   ]
+# }

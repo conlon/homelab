@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr
+  namespace: home
+  labels:
+    app: bazarr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bazarr
+  template:
+    metadata:
+      name: bazarr
+      namespace: home
+      labels:
+        app: bazarr
+    spec:
+      containers:
+      - name: bazarr
+        image: lscr.io/linuxserver/bazarr:1.4.0
+        ports:
+        - containerPort: 6767
+          name: bazarr-port
+        env:
+        - name: PUID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PUID
+        - name: PGID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PGID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+          - name: media-root
+            mountPath: /media
+
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/bazarr/config
+            readOnly: false
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bazarr
+  namespace: home
+spec:
+  selector:
+    app: bazarr
+  ports:
+  - name: bazarr-port
+    port: 80
+    targetPort: bazarr-port
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: bazarr-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.bazarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: bazarr
+          port: 80
+    - match: Host(`bazarr.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: bazarr
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
