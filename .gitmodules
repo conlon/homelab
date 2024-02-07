@@ -1,0 +1,3 @@
+[submodule "k0s-ansible"]
+	path = k0s-ansible
+	url = https://github.com/movd/k0s-ansible.git
