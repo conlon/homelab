@@ -60,5 +60,5 @@ slaac private
 
 interface eth0
 static ip_address={{ desired_host }}/24
-static routers={{ router_ip }}
+static routers={{ routers | join(" ") }}
 static domain_name_servers={{ nameservers | join(" ") }}
