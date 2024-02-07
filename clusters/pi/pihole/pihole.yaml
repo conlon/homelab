@@ -1,0 +1,130 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pihole
+  labels:
+    name: pihole
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+      - name: pihole
+        image: pihole/pihole:2024.01.0
+        securityContext:
+          capabilities:
+            add: ["NET_ADMIN"]
+        ports:
+        - containerPort: 53
+          protocol: TCP
+        - containerPort: 53
+          protocol: UDP
+        - containerPort: 80
+          protocol: TCP
+          name: pihole-web
+        env:
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+        - name: PIHOLE_UID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PUID
+        - name: PIHOLE_GUID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PGID
+        - name: WEBPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: web-secret
+              key: password
+
+        volumeMounts:
+          - name: etc-pihole
+            mountPath: /etc/pihole/
+          - name: etc-dnsmasq
+            mountPath: /etc/dnsmasq.d/
+
+      volumes:
+      - name: etc-pihole
+        nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/pihole/etc/pihole
+            readOnly: false
+      - name: etc-dnsmasq
+        nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/pihole/etc/dnsmasq.d
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pihole
+  namespace: pihole
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: 192.168.86.54
+  labels:
+    app: pihole
+spec:
+  type: LoadBalancer
+  selector:
+    app: pihole
+  externalTrafficPolicy: Local
+  ports:
+  - name: pihole-udp
+    protocol: UDP
+    port: 53
+    targetPort: 53
+  - name: pihole-tcp
+    protocol: TCP
+    port: 53
+    targetPort: 53
+  - name: pihole-web
+    protocol: TCP
+    port: 80
+    targetPort: pihole-web
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: pihole-ingress-route
+  namespace: pihole
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.pihole.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: pihole
+          port: 80
+    - match: Host(`pihole.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: pihole
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls

@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: home
+resources:
+  - namespace.yaml
+  - common-configs.yaml
+  # wireguard + qbittorrent
+  - qbit
+  # other apps
+  - overseerr.yaml
+  - radarr.yaml
+  - radarr4k.yaml
+  - sonarr.yaml
+  - sonarr4k.yaml

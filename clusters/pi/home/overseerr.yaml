@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: overseerr
+  namespace: home
+  labels:
+    app: overseerr
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: overseerr
+  template:
+    metadata:
+      name: overseerr
+      namespace: home
+      labels:
+        app: overseerr
+    spec:
+      containers:
+      - name: overseerr
+        image: lscr.io/linuxserver/overseerr:1.33.2
+        ports:
+        - containerPort: 5055
+          name: overseerr-port
+
+        env:
+        - name: PUID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PUID
+        - name: PGID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PGID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/overseerr/config
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: overseerr
+  namespace: home
+spec:
+  selector:
+    app: overseerr
+  ports:
+  - name: overseerr-port
+    port: 80
+    targetPort: overseerr-port
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: overseerr-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.requests.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: overseerr
+          port: 80
+    - match: Host(`requests.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: overseerr
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: fellowfreak-dev-production-tls

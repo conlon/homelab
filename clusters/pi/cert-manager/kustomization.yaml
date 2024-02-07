@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: cert-manager
+resources:
+  - namespace.yaml
+  # VERSION=1.13.3 && curl -L https://github.com/cert-manager/cert-manager/releases/download/v${VERSION}/cert-manager.crds.yaml > cert-manager/crds/crds-v${VERSION}.yaml
+  - crds/crds-v1.13.3.yaml
+  - helm.yaml
+  - issuers
+  - certificates/staging
+  - certificates/production
+patches:
+  - path: helm-values.yaml

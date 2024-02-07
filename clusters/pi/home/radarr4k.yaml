@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr4k
+  namespace: home
+  labels:
+    app: radarr4k
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: radarr4k
+  template:
+    metadata:
+      name: radarr4k
+      namespace: home
+      labels:
+        app: radarr4k
+    spec:
+      containers:
+      - name: radarr4k
+        image: lscr.io/linuxserver/radarr:4.7.5
+        ports:
+        - containerPort: 7878
+          name: radarr4k-port
+
+        env:
+        - name: PUID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PUID
+        - name: PGID
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: PGID
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: common-configs
+              key: TZ
+
+        volumeMounts:
+          - name: nfs-volume
+            mountPath: /config
+          - name: media-root
+            mountPath: /media
+
+      volumes:
+        - name: nfs-volume
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/configs/radarr4k/config
+            readOnly: false
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr4k
+  namespace: home
+spec:
+  selector:
+    app: radarr4k
+  ports:
+  - name: radarr4k-port
+    port: 80
+    targetPort: radarr4k-port
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: radarr4k-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`www.radarr4k.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: radarr4k
+          port: 80
+    - match: Host(`radarr4k.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: radarr4k
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
