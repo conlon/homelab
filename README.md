@@ -7,7 +7,7 @@ Recently merged multiple repos into here, so there's still some cruft that needs
 - Use ansible to configure hosts and setup k3s
 - Run mostly on a cluster of raspberry pi 4b and 5 with ssd's
 - Use fluxcd to define and maintain k8s resources
-- Use renovate-bot to keep an eye on image updates and automatically open PRs when appropriate (wip)
+- Use dependabot to keep an eye on image updates and automatically open PRs when appropriate (wip)
 - mozilla sops encrypts sensitive values in ansible and k8s secrets, allowing this repo to be public
 
 ## Setup steps
