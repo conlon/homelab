@@ -10,7 +10,9 @@ updates:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
   - package-ecosystem: "docker"
-    directory: "/fluxcd/clusters/pi/*"
+    directory:
+      - "/fluxcd/clusters/pi/datadog-agent/"
+      - "/fluxcd/clusters/pi/home/qbit/"
     schedule:
       interval: "daily"
     rebase-strategy: "auto"
