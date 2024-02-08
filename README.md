@@ -15,8 +15,8 @@ This can be run anytime a host is added or other ansible configuration has chang
 
 Once flux is setup after cluster creation, it automatically updates k8s resources.
 ```bash
-ansible-playbook ansible/host-config/playbook.yml
-ansible-playbook ansible/k3s-config/site.yml
+(cd ansible/host-config/ && ansible-playbook playbook.yml)
+(cd ansible/k3s-config/ && ansible-playbook site.yml)
 
 # required first-time only
 bash clusters/pi/bootstrap.sh
