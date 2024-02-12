@@ -25,3 +25,11 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+  - package-ecosystem: "docker"
+    directory: "/fluxcd/clusters/pi/"
+    schedule:
+      interval: "daily"
+    rebase-strategy: "auto"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
