@@ -6,7 +6,9 @@
     ":preserveSemverRanges",
     ":combinePatchMinorReleases",
     ":separateMajorReleases",
-    ":separateMultipleMajorReleases"
+    ":separateMultipleMajorReleases",
+    ":rebaseStalePrs",
+    "docker:enableMajor"
   ],
   "kubernetes": {
     "fileMatch": ["\\.yaml$"]
