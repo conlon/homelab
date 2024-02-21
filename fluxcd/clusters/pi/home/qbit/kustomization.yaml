@@ -5,4 +5,5 @@ metadata:
 resources:
   - wireguard-configs.yaml
   - pia-secret.sops.yaml
+  - pvc.yaml
   - qbittorrent.yaml
