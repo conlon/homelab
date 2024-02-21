@@ -223,7 +223,7 @@ spec:
             readOnly: false
         - name: qbit-downloads
           persistentVolumeClaim:
-            claimName: qbit-pvc
+            claimName: qbit-downloads
 ---
 apiVersion: v1
 kind: Service
