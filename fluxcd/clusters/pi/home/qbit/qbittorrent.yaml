@@ -42,9 +42,9 @@ spec:
         
         envFrom:
         - configMapRef:
-          name: pia-auth
+            name: pia-auth
         - configMapRef:
-          name: wireguard-configs
+            name: wireguard-configs
 
         volumeMounts:
           - name: lib-modules
@@ -75,7 +75,7 @@ spec:
 
         envFrom:
         - configMapRef:
-          name: common-configs
+            name: common-configs
 
         env:
         - name: HOME_IP
@@ -116,7 +116,7 @@ spec:
 
         envFrom:
         - configMapRef:
-          name: common-configs
+            name: common-configs
 
         volumeMounts:
           - name: nfs-volume
