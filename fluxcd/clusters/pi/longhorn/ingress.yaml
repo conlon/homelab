@@ -3,7 +3,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: longhorn-ingress-route
-  namespace: longhorn
+  namespace: longhorn-system
   annotations:
     kubernetes.io/ingress.class: traefik-external
 spec:

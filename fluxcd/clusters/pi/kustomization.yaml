@@ -8,4 +8,5 @@ resources:
   - twingate
   - traefik
   - cert-manager
+  - longhorn
   - home
