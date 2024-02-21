@@ -199,6 +199,8 @@ spec:
             mountPath: /config
           - name: media-root
             mountPath: /media
+          - name: qbit-downloads
+            mountPath: /downloads
 
       volumes:
         - name: lib-modules
@@ -219,6 +221,9 @@ spec:
             server: 192.168.86.10
             path: /nfs/media
             readOnly: false
+        - name: qbit-downloads
+          persistentVolumeClaim:
+            claimName: qbit-pvc
 ---
 apiVersion: v1
 kind: Service
