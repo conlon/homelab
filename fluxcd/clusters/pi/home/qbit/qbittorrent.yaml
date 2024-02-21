@@ -41,7 +41,7 @@ spec:
             bash ./run_setup.sh
         
         envFrom:
-        - configMapRef:
+        - secretRef:
             name: pia-auth
         - configMapRef:
             name: wireguard-configs
