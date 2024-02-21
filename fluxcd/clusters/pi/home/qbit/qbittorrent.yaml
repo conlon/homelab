@@ -51,6 +51,8 @@ spec:
             mountPath: /lib/modules
           - name: config
             mountPath: /config
+          - name: wireguard-configs
+            mountPath: /local-config
 
       containers:
       - name: wireguard
@@ -99,6 +101,8 @@ spec:
             mountPath: /lib/modules
           - name: config
             mountPath: /config
+          - name: wireguard-configs
+            mountPath: /local-config
 
       - name: qbit
         image: lscr.io/linuxserver/qbittorrent:4.6.3
@@ -119,6 +123,8 @@ spec:
             mountPath: /config
           - name: media-root
             mountPath: /media
+          - name: qbit-configs
+            mountPath: /local-config
           - name: qbit-downloads
             mountPath: /downloads
 
@@ -141,6 +147,12 @@ spec:
             server: 192.168.86.10
             path: /nfs/media
             readOnly: false
+        - name: wireguard-configs
+          persistentVolumeClaim:
+            claimName: wireguard-configs
+        - name: qbit-configs
+          persistentVolumeClaim:
+            claimName: qbit-configs
         - name: qbit-downloads
           persistentVolumeClaim:
             claimName: qbit-downloads
