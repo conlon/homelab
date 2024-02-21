@@ -5,6 +5,7 @@ metadata:
 resources:
   - flux-system
   - datadog-agent
+  - prometheus
   - twingate
   - traefik
   - cert-manager
