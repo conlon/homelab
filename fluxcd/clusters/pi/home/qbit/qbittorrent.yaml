@@ -169,7 +169,6 @@ spec:
   - name: qbit-port
     port: 80
     targetPort: qbit-port
-  type: LoadBalancer
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
