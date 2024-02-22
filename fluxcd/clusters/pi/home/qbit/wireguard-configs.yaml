@@ -12,7 +12,7 @@ data:
   # our PIA dedicated IP token (can be purchased in the client control panel)
   DIP_TOKEN: "no"
   # when true, this will test for and select the server with the lowest latency, it will override PREFERRED_REGION
-  AUTOCONNECT: "true"
+  AUTOCONNECT: "false"
   PREFERRED_REGION: "us_houston"
   # port forwarding
   PIA_PF: "false"
