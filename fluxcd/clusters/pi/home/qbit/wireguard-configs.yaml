@@ -1,6 +1,9 @@
 # Options taken from https://github.com/pia-foss/manual-connections/tree/master#automated-setup
 # As recommended by https://www.spad.uk/posts/wireguard-as-a-vpn-client-in-docker-using-pia/ and adapted for my uses here. Some values changed.
 
+# for testing:
+# VPN_PROTOCOL=wireguard DISABLE_IPV6=yes DIP_TOKEN=no AUTOCONNECT=true PIA_PF=false PIA_DNS=true PIA_CONNECT=false PIA_CONF_PATH=/config/wg0.conf bash ./run_setup.sh
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
