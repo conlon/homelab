@@ -13,7 +13,7 @@ kubectl create secret generic sops-gpg \
 flux bootstrap github \
   --token-auth \
   --owner=conlon \
-  --repository=fluxcd \
+  --repository=homelab \
   --branch=main \
-  --path=clusters/pi \
+  --path=fluxcd/clusters/pi \
   --personal
