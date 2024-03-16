@@ -71,7 +71,13 @@ spec:
 
         ports:
         - containerPort: 8080
-          name: qbit-port
+          name: qbit-webui-port
+        - containerPort: 6881
+          protocol: TCP
+          name: torrent-tcp
+        - containerPort: 6881
+          protocol: UDP
+          name: torrent-udp
 
         envFrom:
         - configMapRef:
@@ -95,7 +101,7 @@ spec:
                 [ "${IP}" != "$HOME_IP" ]
           initialDelaySeconds: 5
           periodSeconds: 15
-         
+
         volumeMounts:
           - name: lib-modules
             mountPath: /lib/modules
@@ -168,7 +174,7 @@ spec:
   ports:
   - name: qbit-port
     port: 80
-    targetPort: qbit-port
+    targetPort: qbit-webui-port
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
