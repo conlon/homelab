@@ -29,22 +29,9 @@ spec:
         - containerPort: 8989
           name: sonarr4k-port
 
-        env:
-        - name: PUID
-          valueFrom:
-            configMapKeyRef:
-              name: common-configs
-              key: PUID
-        - name: PGID
-          valueFrom:
-            configMapKeyRef:
-              name: common-configs
-              key: PGID
-        - name: TZ
-          valueFrom:
-            configMapKeyRef:
-              name: common-configs
-              key: TZ
+        envFrom:
+        - configMapRef:
+            name: common-configs
 
         volumeMounts:
           - name: sonarr-configs
