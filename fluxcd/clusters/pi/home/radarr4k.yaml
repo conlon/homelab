@@ -51,6 +51,8 @@ spec:
             mountPath: /config
           - name: media-root
             mountPath: /media
+          - name: radarr-configs
+            mountPath: /local-configs
 
       volumes:
         - name: nfs-volume
@@ -63,6 +65,9 @@ spec:
             server: 192.168.86.10
             path: /nfs/media
             readOnly: false
+        - name: radarr-configs
+          persistentVolumeClaim:
+            claimName: radarr4k-configs
 ---
 apiVersion: v1
 kind: Service
@@ -102,3 +107,16 @@ spec:
       #   - name: default-headers
   tls:
     secretName: local-fellowfreak-dev-production-tls
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: radarr4k-configs
+  namespace: home
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
