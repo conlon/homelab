@@ -48,7 +48,7 @@ spec:
 
         volumeMounts:
           - name: overseerr-configs
-            mountPath: /local-config
+            mountPath: /config
 
       volumes:
         - name: overseerr-configs
