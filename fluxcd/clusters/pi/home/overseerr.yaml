@@ -47,17 +47,10 @@ spec:
               key: TZ
 
         volumeMounts:
-          - name: nfs-volume
-            mountPath: /config
           - name: overseerr-configs
             mountPath: /local-config
 
       volumes:
-        - name: nfs-volume
-          nfs:
-            server: 192.168.86.10
-            path: /nfs/configs/overseerr/config
-            readOnly: false
         - name: overseerr-configs
           persistentVolumeClaim:
             claimName: overseerr-configs
