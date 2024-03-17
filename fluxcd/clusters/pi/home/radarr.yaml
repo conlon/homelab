@@ -46,19 +46,12 @@ spec:
               key: TZ
 
         volumeMounts:
-          - name: nfs-volume
+          - name: radarr-configs
             mountPath: /config
           - name: media-root
             mountPath: /media
-          - name: radarr-configs
-            mountPath: /local-config
 
       volumes:
-        - name: nfs-volume
-          nfs:
-            server: 192.168.86.10
-            path: /nfs/configs/radarr/config
-            readOnly: false
         - name: media-root
           nfs:
             server: 192.168.86.10
