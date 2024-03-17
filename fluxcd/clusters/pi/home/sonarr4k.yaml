@@ -47,27 +47,20 @@ spec:
               key: TZ
 
         volumeMounts:
-          - name: nfs-volume
-            mountPath: /config
           - name: sonarr-configs
-            mountPath: /local-config
+            mountPath: /config
           - name: media-root
             mountPath: /media
 
       volumes:
-        - name: nfs-volume
-          nfs:
-            server: 192.168.86.10
-            path: /nfs/configs/sonarr4k/config
-            readOnly: false
+        - name: sonarr-configs
+          persistentVolumeClaim:
+            claimName: sonarr4k-configs
         - name: media-root
           nfs:
             server: 192.168.86.10
             path: /nfs/media
             readOnly: false
-        - name: sonarr-configs
-          persistentVolumeClaim:
-            claimName: sonarr4k-configs
 ---
 apiVersion: v1
 kind: Service
