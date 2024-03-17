@@ -48,6 +48,8 @@ spec:
         volumeMounts:
           - name: nfs-volume
             mountPath: /config
+          - name: bazarr-configs
+            mountPath: /local-config
           - name: media-root
             mountPath: /media
 
@@ -62,6 +64,9 @@ spec:
             server: 192.168.86.10
             path: /nfs/media
             readOnly: false
+        - name: bazarr-configs
+          persistentVolumeClaim:
+            claimName: bazarr-configs
 ---
 apiVersion: v1
 kind: Service
@@ -101,3 +106,16 @@ spec:
       #   - name: default-headers
   tls:
     secretName: local-fellowfreak-dev-production-tls
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: bazarr-configs
+  namespace: home
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 100Mi
