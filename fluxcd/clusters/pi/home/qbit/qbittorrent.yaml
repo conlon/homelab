@@ -125,8 +125,8 @@ spec:
             mountPath: /media
           - name: qbit-configs
             mountPath: /config
-          - name: qbit-downloads
-            mountPath: /downloads
+          # - name: qbit-downloads
+          #   mountPath: /downloads
 
       volumes:
         - name: lib-modules
@@ -143,9 +143,9 @@ spec:
         - name: qbit-configs
           persistentVolumeClaim:
             claimName: qbit-configs
-        - name: qbit-downloads
-          persistentVolumeClaim:
-            claimName: qbit-downloads
+        # - name: qbit-downloads
+        #   persistentVolumeClaim:
+        #     claimName: qbit-downloads
 ---
 apiVersion: v1
 kind: Service
