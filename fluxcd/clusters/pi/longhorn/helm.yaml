@@ -24,3 +24,6 @@ spec:
         name: longhorn
         namespace: longhorn
       interval: 24h
+  values:
+    defaultSettings:
+      storageReservedPercentageForDefaultDisk: 10
