@@ -8,6 +8,6 @@ spec:
   selector:
     app: overseerr
   ports:
-  - name: overseerr-port
-    port: 80
-    targetPort: overseerr-port
+    - name: overseerr-port
+      port: 80
+      targetPort: overseerr-port
