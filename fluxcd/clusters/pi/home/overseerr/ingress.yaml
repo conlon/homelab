@@ -20,7 +20,7 @@ spec:
       services:
         - name: overseerr
           port: 80
-      # middlewares:
-      #   - name: default-headers
+  # middlewares:
+  #   - name: default-headers
   tls:
     secretName: fellowfreak-dev-production-tls

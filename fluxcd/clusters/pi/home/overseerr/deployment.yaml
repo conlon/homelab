@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,19 +24,19 @@ spec:
         app: overseerr
     spec:
       containers:
-      - name: overseerr
-        image: lscr.io/linuxserver/overseerr:1.33.2
-        ports:
-        - containerPort: 5055
-          name: overseerr-port
+        - name: overseerr
+          image: lscr.io/linuxserver/overseerr:1.33.2
+          ports:
+            - containerPort: 5055
+              name: overseerr-port
 
-        envFrom:
-        - configMapRef:
-            name: common-configs
+          envFrom:
+            - configMapRef:
+                name: common-configs
 
-        volumeMounts:
-          - name: overseerr-configs
-            mountPath: /config
+          volumeMounts:
+            - name: overseerr-configs
+              mountPath: /config
 
       volumes:
         - name: overseerr-configs
