@@ -2,12 +2,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: radarr
+  name: sonarr
   namespace: home
 spec:
   selector:
-    app: radarr
+    app: sonarr
   ports:
-    - name: radarr-port
+    - name: sonarr-port
       port: 80
-      targetPort: radarr-port
+      targetPort: sonarr-port
