@@ -9,8 +9,8 @@ resources:
   - qbit
   # other apps
   - overseerr
-  - radarr.yaml
+  - radarr
   - radarr4k.yaml
-  - sonarr.yaml
+  - sonarr
   - sonarr4k.yaml
   - prowlarr.yaml
