@@ -8,7 +8,7 @@ resources:
   # wireguard + qbittorrent
   - qbit
   # other apps
-  - overseerr.yaml
+  - overseerr
   - radarr.yaml
   - radarr4k.yaml
   - sonarr.yaml
