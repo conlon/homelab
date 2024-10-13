@@ -26,6 +26,7 @@ spec:
       interval: 24h
   values:
     connector:
-      network: 'conlon' # single quotes only!
+      network: 'conlon'  # single quotes only!
       existingSecret: twingate-secret
       hostNetwork: true
+      dnsServer: 192.168.86.54
