@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: pihole
-          image: pihole/pihole:2024.01.0
+          image: pihole/pihole:2024.07.0
           securityContext:
             capabilities:
               add: ["NET_ADMIN"]
