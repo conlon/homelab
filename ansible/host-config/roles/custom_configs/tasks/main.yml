@@ -16,6 +16,16 @@
   with_items: "{{ bash_aliases }}"
   when: bash_aliases != false
 
+- name: Bash aliases | wakeonlan
+  lineinfile:
+    dest: "{{ bash_aliases_path }}"
+    create: yes
+    mode: 0644
+    line: 'alias wake{{ item.name }}="wakeonlan {{ item.mac }}"'
+    regexp: "^alias wake{{ item.name }}="
+  with_items: "{{ wol_hosts }}"
+  when: wol_hosts != false
+
 - name: Include aliases in bashrc
   lineinfile:
     dest: /home/pi/.bashrc
