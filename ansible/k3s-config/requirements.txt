@@ -45,7 +45,7 @@ enrich==1.2.7
     # via molecule
 filelock==3.13.1
     # via virtualenv
-google-auth==2.27.0
+google-auth==2.37.0
     # via kubernetes
 identify==2.5.34
     # via pre-commit
