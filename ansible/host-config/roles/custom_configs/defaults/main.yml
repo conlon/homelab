@@ -1,23 +1,15 @@
 ---
-packages:
+default_packages:
   - vim
   - jq
-  - nfs-common # for general nfs access
-  - open-iscsi # for longhorn
-  - wireguard-tools # for running wireguard VPN
-  - dnsutils # for debugging dns issues, nslookup, dig, etc
-  - wakeonlan # for waking up hosts
+  - htop
+  - nfs-common        # for general nfs access
+  - dnsutils          # for debugging dns issues, nslookup, dig, etc
+  - wakeonlan         # for waking up hosts
 
-bash_aliases:
-  - alias: k
-    command: sudo k3s kubectl
+default_aliases:
   - alias: ll
     command: ls -la
 
-bash_aliases_path: /home/pi/.bash_aliases
-
-wol_hosts:
-  - name: bit
-    mac: 50:eb:f6:cf:2c:c1
-  # - name: proxmox
-  #   mac: 00:11:22:33:44:55
+external_wol_hosts:
+  bit: 50:eb:f6:cf:2c:c1

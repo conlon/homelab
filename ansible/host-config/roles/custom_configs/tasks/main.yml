@@ -1,40 +1,80 @@
 - name: install packages
   ansible.builtin.apt:
-    pkg: "{{ packages }}"
+    pkg: "{{
+      (default_packages +
+      (packages | default([]))) |
+      unique
+    }}"
     state: latest
     update_cache: yes
     cache_valid_time: 86400 # 24 hours in seconds (60*60*24)
   become: yes
 
-- name: Bash aliases | Add aliases
+- name: Bash aliases | general aliases
   lineinfile:
-    dest: "{{ bash_aliases_path }}"
+    dest: "{{ ansible_env.HOME }}/.bash_aliases"
     create: yes
     mode: 0644
     line: 'alias {{ item.alias }}="{{ item.command }}"'
     regexp: "^alias {{ item.alias }}="
-  with_items: "{{ bash_aliases }}"
-  when: bash_aliases != false
-
-- name: Bash aliases | wakeonlan
-  lineinfile:
-    dest: "{{ bash_aliases_path }}"
-    create: yes
-    mode: 0644
-    line: 'alias wake{{ item.name }}="wakeonlan {{ item.mac }}"'
-    regexp: "^alias wake{{ item.name }}="
-  with_items: "{{ wol_hosts }}"
-  when: wol_hosts != false
+  with_items: "{{
+    (default_aliases +
+    (aliases | default([]))) |
+    unique
+  }}"
 
 - name: Include aliases in bashrc
   lineinfile:
-    dest: /home/pi/.bashrc
-    line: "source {{ bash_aliases_path }}"
+    dest: "{{ ansible_env.HOME }}/.bashrc"
+    line: "source {{ ansible_env.HOME }}/.bash_aliases"
 
 # https://connect.resilio.com/hc/en-us/articles/360011329820-Agent-run-out-of-system-notify-watchers
 - name: Increase max_user_watches (for resilio sync). Default is 8192
   lineinfile:
     dest: /etc/sysctl.conf
     line: fs.inotify.max_user_watches=32768
-  when: "'worker' in group_names"
+  when:
+    - "'worker' in group_names"
+  become: yes
+
+- name: Gather active MAC addresses from k8s and proxmox groups
+  set_fact:
+    active_mac_addresses: "{{ external_wol_hosts | default({}) |
+      combine({item: hostvars[item]['ansible_default_ipv4']['macaddress']})
+    }}"
+  with_items: "{{ groups['k8s'] + groups['proxmox'] }}"
+  run_once: yes
+
+- name: list active_mac_addresses
+  debug:
+    var: active_mac_addresses
+  run_once: yes
+
+- name: Bash aliases | wakeonlan aliases
+  lineinfile:
+    dest: "{{ ansible_env.HOME }}/.bash_aliases"
+    state: absent
+    mode: 0644
+    regexp: "^alias wake{{item}}="
+  with_items:
+    - prox
+    - prox1
+    - prox2
+
+- name: Bash aliases | wakeonlan aliases
+  lineinfile:
+    dest: "{{ ansible_env.HOME }}/.bash_aliases"
+    create: yes
+    mode: 0644
+    line: 'alias wake{{ item.key }}="wakeonlan {{ item.value }}"'
+    regexp: "^alias wake{{ item.key }}="
+  with_items: "{{ active_mac_addresses | dict2items }}"
+  when: item.value != '00:00:00:00:00:00'
+
+- name: Enable wakeonlan for all wol_interfaces using a custom systemctl service
+  template:
+    src: templates/wakeonlan.service.j2
+    dest: /etc/systemd/system/wakeonlan.service
+    mode: 0644
+  notify: reload systemd
   become: yes

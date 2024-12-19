@@ -1,5 +1,4 @@
 ---
-
 - hosts: k8s, proxmox
   pre_tasks:
     - name: Gather facts for all hosts
@@ -8,7 +7,7 @@
       with_items: "{{ groups['k8s'] + groups['proxmox'] }}"
       when: hostvars[item]['ansible_default_ipv4'] is not defined
 
-- hosts: k8s, proxmox
+- hosts: k8s
   roles:
     - _bootstrap
     - networking

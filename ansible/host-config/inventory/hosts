@@ -1,14 +1,21 @@
-#[new]
-#10.0.0.105
 
 localhost ansible_connection=local
 
 [all]
 
+[all:vars]
+ip_base="192.168.86"
+routers=["{{ip_base}}.1"]
+ansible_connection=ssh
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_private_key_file=~/.ssh/id_ed25519
+
 [all:children]
 k8s
+proxmox
 
-[k8s]
+; ---------------- pi ----------------
+[pi]
 ; add a new host on first run like this:
 ; k9 ansible_host=192.168.86.XX desired_host=192.168.86.29
 k0 ansible_host=192.168.86.20 desired_host=192.168.86.20
@@ -18,20 +25,21 @@ k3 ansible_host=192.168.86.23 desired_host=192.168.86.23
 k4 ansible_host=192.168.86.24 desired_host=192.168.86.24
 k5 ansible_host=192.168.86.25 desired_host=192.168.86.25
 
-[k8s:vars]
-ip_base="192.168.86"
-routers=["{{ip_base}}.1"]
+[pi:vars]
 ansible_user=pi
-ansible_connection=ssh
-ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_user=pi
-ansible_ssh_private_key_file=~/.ssh/id_ed25519
-deploy_target="pi"   # enables cgroup features
 
+; ---------------- k8s ----------------
+[k8s]
+
+[k8s:children]
+pi
+
+[k8s:vars]
 kubernetes_apiserver_advertise_address="{{ip_base}}.100"
 k0s_version=v1.27.5+k0s.0
 
-
+; ---------------- k8s nodes by function ----------------
 [initial_controller]
 k0
 
@@ -50,3 +58,11 @@ extra_args="--enable-worker --enable-dynamic-config --no-taints"
 k3
 k4
 k5
+
+; ---------------- proxmox ----------------
+[proxmox]
+prox0 ansible_host=192.168.86.4 desired_host=192.168.86.4
+
+[proxmox:vars]
+ansible_user=root
+ansible_ssh_user=root
