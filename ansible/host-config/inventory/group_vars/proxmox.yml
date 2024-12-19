@@ -1,0 +1,4 @@
+---
+wol_interfaces:
+  - enp7s0
+  - enp8s0

@@ -1,0 +1,8 @@
+---
+packages:
+  - open-iscsi        # for longhorn
+  - wireguard-tools   # for running wireguard VPN
+
+aliases:
+  - alias: k
+    command: sudo k3s kubectl

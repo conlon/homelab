@@ -1,0 +1,11 @@
+[Unit]
+Description=Enable Wake-up on LAN
+
+[Service]
+Type=oneshot
+{% for interface in hostvars[inventory_hostname]['ansible_default_ipv4']['interface'] %}
+ExecStart=/sbin/ethtool -s {{ interface }} wol g
+{% endfor %}
+
+[Install]
+WantedBy=basic.target

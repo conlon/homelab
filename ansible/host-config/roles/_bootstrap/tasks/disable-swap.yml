@@ -7,7 +7,7 @@
     update-rc.d -f dphys-swapfile remove
   when:
     - ansible_swaptotal_mb > 0
-    - deploy_target == 'pi'
+    - ansible_distribution == 'Raspbian'
   become: yes
 
 - name: Permanently disable swap.
@@ -15,4 +15,7 @@
     path: /etc/dphys-swapfile
     regexp: '^CONF_SWAPSIZE='
     line: CONF_SWAPSIZE=0
+  when:
+    - ansible_swaptotal_mb > 0
+    - ansible_distribution == 'Raspbian'
   become: yes
