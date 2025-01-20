@@ -2,25 +2,27 @@
 version: 2
 updates:
   - package-ecosystem: "pip"
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: "daily"  # weekdays only
       time: "10:00"
       timezone: "America/Chicago"
     rebase-strategy: "auto"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+    # ignore:
+    #   - dependency-name: "*"
+    #     update-types: ["version-update:semver-major"]
   - package-ecosystem: "docker"
     directories:
       - "/fluxcd/clusters/pi/"
+      - "/fluxcd/clusters/pi/*"
       - "/fluxcd/clusters/pi/**/*"
     schedule:
       interval: "daily"  # weekdays only
       time: "10:00"
       timezone: "America/Chicago"
     rebase-strategy: "auto"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+    # ignore:
+    #   - dependency-name: "*"
+    #     update-types: ["version-update:semver-major"]
     open-pull-requests-limit: 0  # no limit
