@@ -4,32 +4,21 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "daily"  # weekdays only
+      time: "10:00"
+      timezone: "America/Chicago"
     rebase-strategy: "auto"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
   - package-ecosystem: "docker"
-    directory: "/fluxcd/clusters/pi/datadog-agent/"
+    directory: "/fluxcd/clusters/pi/"
     schedule:
-      interval: "daily"
+      interval: "daily"  # weekdays only
+      time: "10:00"
+      timezone: "America/Chicago"
     rebase-strategy: "auto"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-  - package-ecosystem: "docker"
-    directory: "/fluxcd/clusters/pi/home/qbit/"
-    schedule:
-      interval: "daily"
-    rebase-strategy: "auto"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-  - package-ecosystem: "docker"
-    directory: "/fluxcd/clusters/pi/home/"
-    schedule:
-      interval: "daily"
-    rebase-strategy: "auto"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
+    open-pull-requests-limit: 0  # no limit
