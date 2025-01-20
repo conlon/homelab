@@ -142,7 +142,7 @@ rich==13.7.0
     # via
     #   enrich
     #   molecule
-rpds-py==0.17.1
+rpds-py==0.22.3
     # via
     #   jsonschema
     #   referencing
