@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr
+  namespace: home
+  labels:
+    app: bazarr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: bazarr
+  template:
+    metadata:
+      name: bazarr
+      namespace: home
+      labels:
+        app: bazarr
+    spec:
+      containers:
+        - name: bazarr
+          image: lscr.io/linuxserver/bazarr:1.4.1
+          ports:
+            - containerPort: 6767
+              name: bazarr-port
+
+          envFrom:
+            - configMapRef:
+                name: common-configs
+
+          volumeMounts:
+            - name: bazarr-configs
+              mountPath: /config
+            - name: media-root
+              mountPath: /media
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+
+      volumes:
+        - name: bazarr-configs
+          persistentVolumeClaim:
+            claimName: bazarr-configs-local
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
