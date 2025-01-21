@@ -4,11 +4,11 @@
 #
 #    pip-compile requirements.in
 #
-ansible-compat==4.1.11
+ansible-compat==24.10.0
     # via molecule
 ansible-core==2.16.14
     # via
-    #   -r requirements.in
+    #   -r k3s-config/requirements.in
     #   ansible-compat
     #   molecule
 attrs==23.2.0
@@ -57,9 +57,9 @@ jinja2==3.1.5
     #   molecule
     #   molecule-vagrant
 jmespath==1.0.1
-    # via -r requirements.in
+    # via -r k3s-config/requirements.in
 jsonpatch==1.33
-    # via -r requirements.in
+    # via -r k3s-config/requirements.in
 jsonpointer==2.4
     # via jsonpatch
 jsonschema==4.21.1
@@ -69,21 +69,21 @@ jsonschema==4.21.1
 jsonschema-specifications==2023.12.1
     # via jsonschema
 kubernetes==29.0.0
-    # via -r requirements.in
+    # via -r k3s-config/requirements.in
 markdown-it-py==3.0.0
     # via rich
 markupsafe==2.1.5
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
-molecule==24.2.0
+molecule==25.1.0
     # via
-    #   -r requirements.in
+    #   -r k3s-config/requirements.in
     #   molecule-vagrant
 molecule-vagrant==2.0.0
-    # via -r requirements.in
+    # via -r k3s-config/requirements.in
 netaddr==1.3.0
-    # via -r requirements.in
+    # via -r k3s-config/requirements.in
 nodeenv==1.8.0
     # via pre-commit
 oauthlib==3.2.2
@@ -100,9 +100,9 @@ platformdirs==4.2.0
 pluggy==1.4.0
     # via molecule
 pre-commit==3.6.1
-    # via -r requirements.in
+    # via -r k3s-config/requirements.in
 pre-commit-hooks==4.5.0
-    # via -r requirements.in
+    # via -r k3s-config/requirements.in
 pyasn1==0.5.1
     # via
     #   pyasn1-modules
@@ -119,7 +119,7 @@ python-vagrant==1.0.0
     # via molecule-vagrant
 pyyaml==6.0.1
     # via
-    #   -r requirements.in
+    #   -r k3s-config/requirements.in
     #   ansible-compat
     #   ansible-core
     #   kubernetes
