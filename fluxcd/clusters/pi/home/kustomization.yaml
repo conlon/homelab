@@ -8,7 +8,7 @@ resources:
   - common-configs.yaml
   # wireguard + qbittorrent
   - qbit
-  # other apps
+  # xarr stack
   - overseerr
   - radarr
   - radarr4k.yaml
@@ -16,6 +16,9 @@ resources:
   - sonarr4k.yaml
   - prowlarr.yaml
   - bazarr
+  # le stack
+  - overseerr-le
+  - radarr-le
   # monitoring
   - uptime-kuma
   # misc
