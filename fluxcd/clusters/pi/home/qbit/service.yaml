@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbit
+  namespace: home
+spec:
+  selector:
+    app: qbit
+  ports:
+    - name: qbit-port
+      port: 80
+      targetPort: qbit-webui-port
