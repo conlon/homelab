@@ -1,0 +1,76 @@
+---
+# original docker compose config
+# sync:
+#   container_name: sync
+#   image: resilio/sync
+#   restart: always
+#   environment:
+#     PUID: "${PID}"
+#     GUID: "${GID}"
+#   ports:
+#     - 9999:8888 # web ui
+#     - 55555:55555/tcp
+#     - 55555:55555/udp
+#   volumes:
+#     #- sync_storage:/mnt/sync/storage     # Sync storage folder
+#     #- ./sync.conf:/mnt/sync/sync.conf    # Configuration file
+#     #- $SYNC_DATA:/mnt/sync/data          # folder with data to be shared
+#     - "${SYNC_STORAGE}:/mnt/sync"         # Sync storage folder
+#     #- "${SYNC_CONF}:/mnt/sync/sync.conf"  # Configuration file
+#     - "${MEDIA_ROOT}/${MUSIC_DIR_1}:/mnt/mounted_folders/${MUSIC_DIR_1}"
+#     - "${MEDIA_ROOT}/${MUSIC_DIR_2}:/mnt/mounted_folders/${MUSIC_DIR_2}"
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync
+  namespace: home
+  labels:
+    app: sync
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync
+  template:
+    metadata:
+      labels:
+        app: sync
+    spec:
+      containers:
+        - name: sync
+          image: lscr.io/linuxserver/resilio-sync:3.0.0.1409-1-ls198
+          ports:
+            - containerPort: 8888
+              name: sync-web-ui
+            - containerPort: 55555
+              name: sync-tcp
+              protocol: TCP
+            - containerPort: 55555
+              name: sync-udp
+              protocol: UDP
+          envFrom:
+            - configMapRef:
+                name: common-configs
+          volumeMounts:
+            - name: sync-storage
+              mountPath: /sync
+              subPath: "storage/folders/Resilio Sync"
+            - name: sync-storage
+              mountPath: /config
+              subPath: storage/config
+            # - name: music-dir-1
+            #   mountPath: /mnt/mounted_folders/${MUSIC_DIR_1}
+            # - name: music-dir-2
+            #   mountPath: /mnt/mounted_folders/${MUSIC_DIR_2}
+      volumes:
+        - name: sync-storage
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/michael/sync
+            readOnly: false
+        # - name: music-storage
+        #   nfs:
+        #     server: 192.168.86.10
+        #     path: /nfs/media
+        #     readOnly: false

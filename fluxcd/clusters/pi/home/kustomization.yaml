@@ -18,3 +18,5 @@ resources:
   - bazarr
   # monitoring
   - uptime-kuma
+  # misc
+  - sync
