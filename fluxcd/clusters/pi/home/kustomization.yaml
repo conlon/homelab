@@ -16,3 +16,5 @@ resources:
   - sonarr4k.yaml
   - prowlarr.yaml
   - bazarr
+  # monitoring
+  - uptime-kuma

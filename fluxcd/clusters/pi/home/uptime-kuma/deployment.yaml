@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uptime
+  namespace: home
+  labels:
+    app: uptime
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: uptime
+  template:
+    metadata:
+      name: uptime
+      namespace: home
+      labels:
+        app: uptime
+    spec:
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 192.168.86.54
+      containers:
+        - name: uptime
+          image: louislam/uptime-kuma:1
+          ports:
+            - containerPort: 3001
+              name: uptime-port
+
+          envFrom:
+            - configMapRef:
+                name: common-configs
+
+          volumeMounts:
+            - name: uptime-configs
+              mountPath: /app/data
+
+      volumes:
+        - name: uptime-configs
+          persistentVolumeClaim:
+            claimName: uptime-configs
