@@ -3,7 +3,7 @@ version: 2
 updates:
   - package-ecosystem: "pip"
     directories:
-      - "**/*"
+      - "/ansible/**/*"
     schedule:
       interval: "daily"  # weekdays only
       time: "10:00"
