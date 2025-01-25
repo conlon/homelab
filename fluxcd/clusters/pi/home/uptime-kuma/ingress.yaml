@@ -3,7 +3,7 @@ apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: uptime-ingress-route
-  # namespace: home
+  namespace: home
   annotations:
     kubernetes.io/ingress.class: traefik-external
 spec:
