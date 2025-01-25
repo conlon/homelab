@@ -1,0 +1,44 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: home
+  labels:
+    app: prowlarr
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      name: prowlarr
+      namespace: home
+      labels:
+        app: prowlarr
+    spec:
+      containers:
+        - name: prowlarr
+          image: lscr.io/linuxserver/prowlarr:1.17.2
+          ports:
+            - containerPort: 9696
+              name: prowlarr-port
+
+          envFrom:
+            - configMapRef:
+                name: common-configs
+
+          volumeMounts:
+            - name: prowlarr-configs
+              mountPath: /config
+
+      volumes:
+        - name: prowlarr-configs
+          persistentVolumeClaim:
+            claimName: prowlarr-configs

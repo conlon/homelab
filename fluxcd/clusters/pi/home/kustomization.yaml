@@ -14,7 +14,7 @@ resources:
   - radarr4k.yaml
   - sonarr
   - sonarr4k.yaml
-  - prowlarr.yaml
+  - prowlarr
   - bazarr
   # le stack
   - overseerr-le
