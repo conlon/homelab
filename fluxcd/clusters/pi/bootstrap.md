@@ -114,3 +114,22 @@ EOF
 gpg --import ./.sops.pub.asc
 ```
 > The public key is sufficient for creating brand new files. The secret key is required for decrypting and editing existing files because SOPS computes a MAC on all values. When using solely the public key to add or remove a field, the whole file should be deleted and recreated.
+
+# Troubleshooting
+Are your `sops` commands returning this error?
+```
+sops metadata not found
+```
+It's likely `gpg -k` is also hanging or producing this message:
+```
+gpg: waiting for lock (held by 82017) ...
+gpg: waiting for lock (held by 82017) ...
+```
+If so, scan the gpg dir for lock files:
+```
+find ~/.gnupg/ -name "*.lock"
+```
+These may need to be deleted. Be careful though! Reload gpg-agent if necessary:
+```
+gpgconf -R gpg-agent
+```
