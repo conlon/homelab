@@ -1,0 +1,77 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - pvc.yaml
+# resources:
+#   - ../base
+
+# labels:
+#   - pairs:
+#       app: overseerr
+#     includeSelectors: true
+
+# replacements:
+#   - source:
+#       kind: Deployment
+#       fieldPath: metadata.name
+#     targets:
+#       - select:
+#           name: base
+
+#   # - source:
+#   #     value: base
+#   #   target:
+#   #     name: overseerr
+#   #   kind: Deployment
+#   # - source:
+#   #     value: base
+#   #   target:
+#   #     name: overseerr
+#   #   kind: Service
+#   # - source:
+#   #     value: base
+#   #   target:
+#   #     name: overseerr
+#   #   kind: IngressRoute
+
+# # patches:
+# # #   - target:
+# # #       name: base
+# # #     patch: |-
+# # #       - op: replace
+# # #         path: /metadata/name
+# # #         value: overseerr
+# # #   - target:
+# # #       kind: Deployment
+# # #       name: base
+# # #     patch: |-
+# # #       - op: replace
+# # #         path: /spec/template/name
+# # #         value: overseerr
+# # #       - op: replace
+# # #         path: /spec/template/metadata/name
+# # #         value: overseerr
+# # #       - op: replace
+# # #         path: /spec/template/spec/containers/0/name
+# # #         value: overseerr
+# #   - path: patch-volumes.yaml
+# #   - path: patch-ports.yaml
+# #     # target:
+# #     #   kind: Deployment
+# #     #   name: base
+# #     # options:
+# #     #   override: true
+# #   - path: ingress.yaml
+# #     target:
+# #       kind: IngressRoute
+# #       name: base
+# #       namespace: home
+
+# images:
+#   - name: lscr.io/linuxserver/base:latest
+#     newName: lscr.io/linuxserver/overseerr
+#     newTag: 1.33.2
