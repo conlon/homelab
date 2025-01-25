@@ -1,0 +1,145 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbit
+  namespace: home
+  labels:
+    app: qbit
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: qbit
+  template:
+    metadata:
+      name: qbit
+      namespace: home
+      labels:
+        app: qbit
+    spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.conf.all.src_valid_mark
+            value: "1"
+
+      initContainers:
+        - name: wg-init
+          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
+          # image: lscr.io/linuxserver/wireguard:v1.0.20210914-ls27
+          command:
+            - /bin/sh
+            - -c
+            - |
+              apk add git
+              git clone https://github.com/pia-foss/manual-connections.git
+              cd manual-connections
+              bash ./run_setup.sh
+
+          envFrom:
+            - secretRef:
+                name: pia-auth
+            - configMapRef:
+                name: wireguard-configs
+
+          volumeMounts:
+            - name: lib-modules
+              mountPath: /lib/modules
+            - name: wireguard-configs
+              mountPath: /config
+
+      containers:
+        - name: wireguard
+          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
+          # image: lscr.io/linuxserver/wireguard:v1.0.20210914-ls27
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "250m"
+            limits:
+              memory: "64Mi"
+              cpu: "250m"
+
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN", "SYS_MODULE"]
+
+          ports:
+            - containerPort: 8080
+              name: qbit-webui-port
+            - containerPort: 6881
+              protocol: TCP
+              name: torrent-tcp
+            - containerPort: 6881
+              protocol: UDP
+              name: torrent-udp
+
+          envFrom:
+            - configMapRef:
+                name: common-configs
+
+          env:
+            - name: HOME_IP
+              valueFrom:
+                secretKeyRef:
+                  name: pia-auth
+                  key: HOME_IP
+
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  IP=`curl -s https://icanhazip.com/`
+                  echo "current IP:${IP}"
+                  [ "${IP}" != "$HOME_IP" ]
+            initialDelaySeconds: 5
+            periodSeconds: 15
+
+          volumeMounts:
+            - name: lib-modules
+              mountPath: /lib/modules
+            - name: wireguard-configs
+              mountPath: /config
+
+        - name: qbit
+          image: lscr.io/linuxserver/qbittorrent:4.6.3
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+
+          envFrom:
+            - configMapRef:
+                name: common-configs
+
+          volumeMounts:
+            - name: media-root
+              mountPath: /media
+            - name: qbit-configs
+              mountPath: /config
+
+      volumes:
+        - name: lib-modules
+          hostPath:
+            path: /lib/modules
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+        - name: wireguard-configs
+          persistentVolumeClaim:
+            claimName: wireguard-configs
+        - name: qbit-configs
+          persistentVolumeClaim:
+            claimName: qbit-configs
