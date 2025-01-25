@@ -9,9 +9,9 @@
 
 - hosts: proxmox
   roles:
-    # - _bootstrap
-    # - networking
-    # - hostname
+    - _bootstrap
+    - networking
+    - hostname
     - custom_configs
   gather_facts: no
 
