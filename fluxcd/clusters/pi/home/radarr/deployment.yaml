@@ -26,6 +26,15 @@ spec:
       containers:
         - name: radarr
           image: lscr.io/linuxserver/radarr:4.7.5
+
+          resources:
+            requests:
+              memory: "200Mi"
+              cpu: "150m"
+            limits:
+              memory: "500Mi"
+              cpu: "500m"
+
           ports:
             - containerPort: 7878
               name: radarr-port
@@ -48,4 +57,4 @@ spec:
             readOnly: false
         - name: radarr-configs
           persistentVolumeClaim:
-            claimName: radarr-configs
+            claimName: radarr-configs-local
