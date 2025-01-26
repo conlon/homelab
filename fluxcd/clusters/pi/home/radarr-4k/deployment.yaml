@@ -1,0 +1,20 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+  namespace: home
+  labels:
+    app: radarr
+spec:
+  template:
+    spec:
+      containers:
+        - name: radarr
+          resources:
+            requests:
+              memory: "50Mi"
+              cpu: "150m"
+            limits:
+              memory: "150Mi"
+              cpu: "300m"

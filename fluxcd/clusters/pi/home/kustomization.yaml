@@ -11,7 +11,7 @@ resources:
   # xarr stack
   - overseerr
   - radarr
-  - radarr4k.yaml
+  - radarr-4k
   - sonarr
   - sonarr4k.yaml
   - prowlarr
