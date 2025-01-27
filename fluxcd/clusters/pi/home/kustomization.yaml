@@ -13,7 +13,7 @@ resources:
   - radarr
   - radarr-4k
   - sonarr
-  - sonarr4k.yaml
+  - sonarr-4k
   - prowlarr
   - bazarr
   # le stack

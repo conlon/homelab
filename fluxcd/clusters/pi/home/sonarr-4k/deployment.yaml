@@ -1,0 +1,136 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarr
+  namespace: home
+  labels:
+    app: sonarr
+spec:
+  template:
+    spec:
+      containers:
+        - name: sonarr
+          resources:
+            requests:
+              memory: "50Mi"
+              cpu: "150m"
+            limits:
+              memory: "150Mi"
+              cpu: "300m"
+
+      #     volumeMounts:
+      #       - name: sonarr-configs
+      #         mountPath: /config
+      #       - name: sonarr-configs-local-4k
+      #         mountPath: /config-local
+      # volumes:
+      #   - name: sonarr-configs
+      #     persistentVolumeClaim:
+      #       claimName: sonarr4k-configs
+      #   - name: sonarr-configs-local-4k
+      #     persistentVolumeClaim:
+      #       claimName: sonarr-configs-local-4k
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: sonarr4k
+#   namespace: home
+#   labels:
+#     app: sonarr4k
+# spec:
+#   replicas: 1
+#   strategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxSurge: 1
+#       maxUnavailable: 0
+#   selector:
+#     matchLabels:
+#       app: sonarr4k
+#   template:
+#     metadata:
+#       name: sonarr4k
+#       namespace: home
+#       labels:
+#         app: sonarr4k
+#     spec:
+#       containers:
+#       - name: sonarr4k
+#         image: lscr.io/linuxserver/sonarr:4.0.1
+#         ports:
+#         - containerPort: 8989
+#           name: sonarr4k-port
+
+#         envFrom:
+#         - configMapRef:
+#             name: common-configs
+
+#         volumeMounts:
+#           - name: sonarr-configs
+#             mountPath: /config
+#           - name: media-root
+#             mountPath: /media
+
+#       volumes:
+#         - name: sonarr-configs
+#           persistentVolumeClaim:
+#             claimName: sonarr4k-configs
+#         - name: media-root
+#           nfs:
+#             server: 192.168.86.10
+#             path: /nfs/media
+#             readOnly: false
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: sonarr4k
+#   namespace: home
+# spec:
+#   selector:
+#     app: sonarr4k
+#   ports:
+#   - name: sonarr4k-port
+#     port: 80
+#     targetPort: sonarr4k-port
+# ---
+# apiVersion: traefik.containo.us/v1alpha1
+# kind: IngressRoute
+# metadata:
+#   name: sonarr4k-ingress-route
+#   namespace: home
+#   annotations:
+#     kubernetes.io/ingress.class: traefik-external
+# spec:
+#   entryPoints:
+#     - websecure
+#   routes:
+#     - match: Host(`www.sonarr4k.local.fellowfreak.dev`)
+#       kind: Rule
+#       services:
+#         - name: sonarr4k
+#           port: 80
+#     - match: Host(`sonarr4k.local.fellowfreak.dev`)
+#       kind: Rule
+#       services:
+#         - name: sonarr4k
+#           port: 80
+#       # middlewares:
+#       #   - name: default-headers
+#   tls:
+#     secretName: local-fellowfreak-dev-production-tls
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: sonarr4k-configs
+#   namespace: home
+# spec:
+#   accessModes:
+#     - ReadWriteMany
+#   storageClassName: longhorn
+#   resources:
+#     requests:
+#       storage: 1Gi
