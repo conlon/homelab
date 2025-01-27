@@ -2,50 +2,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: overseerr-le
+  name: overseerr
   namespace: home
   labels:
-    app: overseerr-le
+    app: overseerr
 spec:
-  replicas: 1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-  selector:
-    matchLabels:
-      app: overseerr-le
   template:
     metadata:
-      name: overseerr-le
+      name: overseerr
       namespace: home
       labels:
-        app: overseerr-le
+        app: overseerr
     spec:
       containers:
         - name: overseerr
-          image: lscr.io/linuxserver/overseerr:1.33.2
           resources:
             requests:
-              memory: "32Mi"
-              cpu: "250m"
+              memory: "100Mi"
+              cpu: "150m"
             limits:
-              memory: "1024Mi"
-              cpu: "250m"
-          ports:
-            - containerPort: 5055
-              name: overseerr-port
-
-          envFrom:
-            - configMapRef:
-                name: common-configs
-
-          volumeMounts:
-            - name: overseerr-configs
-              mountPath: /config
-
-      volumes:
-        - name: overseerr-configs
-          persistentVolumeClaim:
-            claimName: overseerr-le-configs
+              memory: "250Mi"
+              cpu: "300m"
