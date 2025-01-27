@@ -26,6 +26,15 @@ spec:
       containers:
         - name: overseerr
           image: lscr.io/linuxserver/overseerr:1.33.2
+
+          resources:
+            requests:
+              memory: "200Mi"
+              cpu: "150m"
+            limits:
+              memory: "300Mi"
+              cpu: "500m"
+
           ports:
             - containerPort: 5055
               name: overseerr-port
