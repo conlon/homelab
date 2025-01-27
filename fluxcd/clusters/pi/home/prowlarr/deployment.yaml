@@ -26,6 +26,15 @@ spec:
       containers:
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:1.17.2
+
+          resources:
+            requests:
+              memory: "300Mi"
+              cpu: "100m"
+            limits:
+              memory: "300Mi"
+              cpu: "300m"
+
           ports:
             - containerPort: 9696
               name: prowlarr-port
@@ -37,6 +46,7 @@ spec:
           volumeMounts:
             - name: prowlarr-configs
               mountPath: /config
+
 
       volumes:
         - name: prowlarr-configs
