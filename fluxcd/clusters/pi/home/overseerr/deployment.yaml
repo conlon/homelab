@@ -44,10 +44,10 @@ spec:
                 name: common-configs
 
           volumeMounts:
-            - name: overseerr-configs
+            - name: overseerr-configs-local
               mountPath: /config
 
       volumes:
-        - name: overseerr-configs
+        - name: overseerr-configs-local
           persistentVolumeClaim:
-            claimName: overseerr-configs
+            claimName: overseerr-configs-local
