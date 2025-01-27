@@ -2,57 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: radarr-le
+  name: radarr
   namespace: home
   labels:
-    app: radarr-le
+    app: radarr
 spec:
-  replicas: 1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-  selector:
-    matchLabels:
-      app: radarr-le
   template:
     metadata:
       name: radarr-le
-      namespace: home
-      labels:
-        app: radarr-le
     spec:
       containers:
         - name: radarr
-          image: lscr.io/linuxserver/radarr:4.7.5
-          ports:
-            - containerPort: 7878
-              name: radarr-le-port
-
-          envFrom:
-            - configMapRef:
-                name: common-configs
-
-          env:
-            # use downward API to expose the app label as an env var
-            - name: APP_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.labels['app']
-
-          volumeMounts:
-            - name: radarr-configs
-              mountPath: /config
-            - name: media-root
-              mountPath: /media
-
-      volumes:
-        - name: media-root
-          nfs:
-            server: 192.168.86.10
-            path: /nfs/media
-            readOnly: false
-        - name: radarr-configs
-          persistentVolumeClaim:
-            claimName: radarr-le-configs
+          resources:
+            requests:
+              memory: "50Mi"
+              cpu: "150m"
+            limits:
+              memory: "150Mi"
+              cpu: "300m"
