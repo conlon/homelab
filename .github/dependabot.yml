@@ -3,9 +3,11 @@ version: 2
 updates:
   - package-ecosystem: "pip"
     directories:
-      - "/ansible/**/*"
+      - "/ansible/host-config/*"
+      - "/ansible/k3s-config/*"
     schedule:
-      interval: "daily"  # weekdays only
+      interval: "weekly"
+      day: "monday"
       time: "10:00"
       timezone: "America/Chicago"
     rebase-strategy: "auto"
