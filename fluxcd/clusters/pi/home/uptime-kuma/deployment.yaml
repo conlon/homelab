@@ -9,10 +9,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
   selector:
     matchLabels:
       app: uptime
@@ -45,4 +42,4 @@ spec:
       volumes:
         - name: uptime-configs
           persistentVolumeClaim:
-            claimName: uptime-configs
+            claimName: uptime-configs-local
