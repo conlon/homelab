@@ -41,10 +41,10 @@ spec:
                 name: common-configs
 
           volumeMounts:
-            - name: prowlarr-configs-local
+            - name: prowlarr-configs
               mountPath: /config
 
       volumes:
-        - name: prowlarr-configs-local
+        - name: prowlarr-configs
           persistentVolumeClaim:
             claimName: prowlarr-configs-local
