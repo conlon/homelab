@@ -15,7 +15,6 @@ spec:
       app: overseerr
   template:
     metadata:
-      name: overseerr
       namespace: home
       labels:
         app: overseerr
