@@ -37,6 +37,14 @@ spec:
             - name: media-root
               mountPath: /media
 
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+
       volumes:
         - name: media-root
           nfs:
