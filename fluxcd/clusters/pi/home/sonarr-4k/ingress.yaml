@@ -2,7 +2,7 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: sonarr-ingress-route
+  name: sonarr-ingress-route-4k
   namespace: home
   annotations:
     kubernetes.io/ingress.class: traefik-external
