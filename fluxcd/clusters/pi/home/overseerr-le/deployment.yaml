@@ -1,20 +1,49 @@
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: overseerr
+#   namespace: home
+#   labels:
+#     app: overseerr
+# spec:
+#   template:
+#     spec:
+#       containers:
+#         - name: overseerr
+#           resources:
+#             requests:
+#               memory: "100Mi"
+#               cpu: "150m"
+#             limits:
+#               memory: "250Mi"
+#               cpu: "300m"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: overseerr
+  name: overseerr-le
   namespace: home
   labels:
-    app: overseerr
+    app: overseerr-le
 spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: overseerr-le
   template:
     metadata:
+      name: overseerr-le
       namespace: home
       labels:
-        app: overseerr
+        app: overseerr-le
     spec:
       containers:
         - name: overseerr
+          image: lscr.io/linuxserver/overseerr:1.33.2
+
           resources:
             requests:
               memory: "100Mi"
@@ -22,3 +51,20 @@ spec:
             limits:
               memory: "250Mi"
               cpu: "300m"
+
+          ports:
+            - containerPort: 5055
+              name: overseerr-port
+
+          envFrom:
+            - configMapRef:
+                name: common-configs
+
+          volumeMounts:
+            - name: overseerr-configs-local
+              mountPath: /config
+
+      volumes:
+        - name: overseerr-configs-local
+          persistentVolumeClaim:
+            claimName: overseerr-configs-local-le
