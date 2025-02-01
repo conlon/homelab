@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr-le
+  namespace: home
+spec:
+  selector:
+    app: radarr-le
+  ports:
+    - name: radarr-port
+      port: 80
+      targetPort: radarr-port

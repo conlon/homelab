@@ -1,16 +1,49 @@
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: radarr
+#   namespace: home
+#   labels:
+#     app: radarr
+# spec:
+#   template:
+#     spec:
+#       containers:
+#         - name: radarr
+#           resources:
+#             requests:
+#               memory: "100Mi"
+#               cpu: "150m"
+#             limits:
+#               memory: "250Mi"
+#               cpu: "300m"
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: radarr
+  name: radarr-4k
   namespace: home
   labels:
-    app: radarr
+    app: radarr-4k
 spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # required for ReadWriteOnce pvc
+  selector:
+    matchLabels:
+      app: radarr-4k
   template:
+    metadata:
+      name: radarr-4k
+      namespace: home
+      labels:
+        app: radarr-4k
     spec:
       containers:
         - name: radarr
+          image: lscr.io/linuxserver/radarr:4.7.5
+
           resources:
             requests:
               memory: "100Mi"
@@ -18,3 +51,27 @@ spec:
             limits:
               memory: "250Mi"
               cpu: "300m"
+
+          ports:
+            - containerPort: 7878
+              name: radarr-port
+
+          envFrom:
+            - configMapRef:
+                name: common-configs
+
+          volumeMounts:
+            - name: radarr-configs
+              mountPath: /config
+            - name: media-root
+              mountPath: /media
+
+      volumes:
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+        - name: radarr-configs
+          persistentVolumeClaim:
+            claimName: radarr-configs-local-4k

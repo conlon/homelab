@@ -2,7 +2,7 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: radarr-ingress-route
+  name: radarr-ingress-route-4k
   namespace: home
   annotations:
     kubernetes.io/ingress.class: traefik-external
