@@ -13,6 +13,8 @@ metadata:
   namespace: pihole
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: pihole
@@ -23,7 +25,7 @@ spec:
     spec:
       containers:
         - name: pihole
-          image: pihole/pihole:2025.02.6
+          image: pihole/pihole:2025.02.7
           securityContext:
             capabilities:
               add: ["NET_ADMIN"]
@@ -58,22 +60,17 @@ spec:
                   key: password
 
           volumeMounts:
-            - name: etc-pihole
+            - name: pihole-configs
               mountPath: /etc/pihole/
-            - name: etc-dnsmasq
+              subPath: etc/pihole/
+            - name: pihole-configs
               mountPath: /etc/dnsmasq.d/
+              subPath: etc/dnsmasq.d/
 
       volumes:
-        - name: etc-pihole
-          nfs:
-            server: 192.168.86.10
-            path: /nfs/configs/pihole/etc/pihole
-            readOnly: false
-        - name: etc-dnsmasq
-          nfs:
-            server: 192.168.86.10
-            path: /nfs/configs/pihole/etc/dnsmasq.d
-            readOnly: false
+        - name: pihole-configs
+          persistentVolumeClaim:
+            claimName: pihole-configs
 ---
 apiVersion: v1
 kind: Service
@@ -160,3 +157,16 @@ spec:
       #   - name: default-headers
   tls:
     secretName: local-fellowfreak-dev-production-tls
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pihole-configs
+  namespace: pihole
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
