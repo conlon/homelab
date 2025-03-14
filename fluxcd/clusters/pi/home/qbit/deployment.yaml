@@ -99,19 +99,6 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 15
 
-          livenessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - |
-                  IP=`curl -s https://icanhazip.com/`
-                  echo "current IP:${IP}"
-                  [ "${IP}" != "$HOME_IP" ]
-            initialDelaySeconds: 5
-            periodSeconds: 15
-            failureThreshold: 3
-
           volumeMounts:
             - name: lib-modules
               mountPath: /lib/modules
