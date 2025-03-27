@@ -11,5 +11,5 @@ spec:
     kind: ClusterIssuer
   commonName: "*.local.fellowfreak.dev"
   dnsNames:
-  - "local.fellowfreak.dev"
-  - "*.local.fellowfreak.dev"
+    - "local.fellowfreak.dev"
+    - "*.local.fellowfreak.dev"
