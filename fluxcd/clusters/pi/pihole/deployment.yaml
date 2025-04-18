@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole
+  namespace: pihole
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: pihole
+  template:
+    metadata:
+      labels:
+        app: pihole
+    spec:
+      containers:
+        - name: pihole
+          image: pihole/pihole:2025.02.7
+          securityContext:
+            capabilities:
+              add: ["NET_ADMIN"]
+          ports:
+            - containerPort: 53
+              protocol: TCP
+            - containerPort: 53
+              protocol: UDP
+            - containerPort: 80
+              protocol: TCP
+              name: pihole-web
+          env:
+            - name: TZ
+              valueFrom:
+                configMapKeyRef:
+                  name: common-configs
+                  key: TZ
+            - name: PIHOLE_UID
+              valueFrom:
+                configMapKeyRef:
+                  name: common-configs
+                  key: PUID
+            - name: PIHOLE_GUID
+              valueFrom:
+                configMapKeyRef:
+                  name: common-configs
+                  key: PGID
+            - name: WEBPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: web-secret
+                  key: password
+
+          volumeMounts:
+            - name: pihole-configs
+              mountPath: /etc/pihole/
+              subPath: etc/pihole/
+            - name: pihole-configs
+              mountPath: /etc/dnsmasq.d/
+              subPath: etc/dnsmasq.d/
+
+      volumes:
+        - name: pihole-configs
+          persistentVolumeClaim:
+            claimName: pihole-configs
