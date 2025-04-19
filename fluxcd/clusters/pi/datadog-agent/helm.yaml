@@ -39,6 +39,10 @@ spec:
     # toleration(s) needed to run the agent on master nodes
     agents:
       tolerations:
-      - effect: NoSchedule
-        key: node-role.kubernetes.io/master
-        operator: Exists
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: vm
+          operator: "Equal"
+          value: "true"
