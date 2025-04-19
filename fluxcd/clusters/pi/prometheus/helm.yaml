@@ -24,3 +24,9 @@ spec:
         name: prometheus-community
         namespace: prometheus
       interval: 24h
+  values:
+    tolerations:
+      - effect: NoSchedule
+        key: vm
+        operator: "Equal"
+        value: "true"
