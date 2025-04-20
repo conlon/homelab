@@ -28,3 +28,25 @@
   loop_control:
     label: "{{ item.change }} => {{ item.to }}"
   when: ansible_hostname == hostvars[groups[group_name_master | default('master')][0]]['ansible_hostname']
+
+- name: Add toleration for tainted node groups
+  ansible.builtin.blockinfile:
+    path: "/var/lib/rancher/k3s/server/manifests/metallb-crds.yaml"
+    insertafter: "tolerations:"
+    block: |6
+                - effect: NoSchedule
+                  key: vm
+                  operator: Equal
+                  value: "true"
+  when: ansible_hostname == hostvars[groups[group_name_master | default('master')][0]]['ansible_hostname']
+
+- name: Debug - Save metallb-crds.yaml contents to register
+  shell:
+    cmd: cat /var/lib/rancher/k3s/server/manifests/metallb-crds.yaml | grep tolerations -A 20
+  register: command_output
+  when: ansible_hostname == hostvars[groups[group_name_master | default('master')][0]]['ansible_hostname']
+
+- name: Debug - Display metallb-crds.yaml contents
+  debug:
+    msg: "{{command_output.stdout}}"
+  when: ansible_hostname == hostvars[groups[group_name_master | default('master')][0]]['ansible_hostname']

@@ -1,4 +1,5 @@
+---
 creation_rules:
   - path_regex: .*.ya*ml
     pgp: '77B66B06D2E06C5E776F4F92C7314867B986373D'
-    encrypted_regex: ^(k3s_token)$
+    encrypted_regex: ^(k3s_token|ansible_become_pass)$
