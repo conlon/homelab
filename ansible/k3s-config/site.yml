@@ -26,7 +26,7 @@
   pre_tasks:
     - name: Load encrypted credentials
       community.sops.load_vars:
-        file: inventory/pi/group_vars/all.sops.yml
+        file: inventory/k8s/group_vars/all.sops.yml
         expressions: evaluate-on-load
   roles:
     - role: k3s_server
