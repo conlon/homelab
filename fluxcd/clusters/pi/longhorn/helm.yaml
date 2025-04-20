@@ -27,3 +27,15 @@ spec:
   values:
     defaultSettings:
       storageReservedPercentageForDefaultDisk: 10
+    longhornManager:
+      tolerations:
+        - effect: NoSchedule
+          key: vm
+          operator: "Equal"
+          value: "true"
+    longhornDriver:
+      tolerations:
+        - effect: NoSchedule
+          key: vm
+          operator: "Equal"
+          value: "true"
