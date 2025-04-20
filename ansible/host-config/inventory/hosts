@@ -29,11 +29,16 @@ k5 ansible_host=192.168.86.25 desired_host=192.168.86.25
 ansible_user=pi
 ansible_ssh_user=pi
 
+; ---------------- proxmox vms ----------------
+[vm]
+joi ansible_host=192.168.86.5 desired_host=192.168.86.5
+
 ; ---------------- k8s ----------------
 [k8s]
 
 [k8s:children]
 pi
+vm
 
 [k8s:vars]
 kubernetes_apiserver_advertise_address="{{ip_base}}.100"
@@ -58,6 +63,7 @@ extra_args="--enable-worker --enable-dynamic-config --no-taints"
 k3
 k4
 k5
+joi
 
 ; ---------------- proxmox ----------------
 [proxmox]
