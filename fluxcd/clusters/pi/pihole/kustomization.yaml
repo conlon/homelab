@@ -5,7 +5,7 @@ metadata:
   name: pihole
 resources:
   - namespace.yaml
-  - web-secret.yaml
+  - web-secret.sops.yaml
   - common-configs.yaml
   - deployment.yaml
   - service.yaml
