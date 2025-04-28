@@ -16,6 +16,10 @@ spec:
       labels:
         app: pihole
     spec:
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 192.168.86.53
       containers:
         - name: pihole
           image: pihole/pihole:2025.04.0
