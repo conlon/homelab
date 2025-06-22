@@ -98,6 +98,10 @@ spec:
                   [ "${IP}" != "$HOME_IP" ]
             initialDelaySeconds: 5
             periodSeconds: 15
+            timeoutSeconds: 5
+            ## defaults:
+            # failureThreshold: 3
+            # successThreshold: 1
 
           volumeMounts:
             - name: lib-modules
