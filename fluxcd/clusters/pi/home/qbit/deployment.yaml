@@ -27,7 +27,8 @@ spec:
 
       initContainers:
         - name: wg-init
-          image: lscr.io/linuxserver/wireguard:arm64v8-1.0.20210914-r4-ls80
+          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
+          # image: lscr.io/linuxserver/wireguard:v1.0.20210914-ls27
           command:
             - /bin/sh
             - -c
@@ -51,7 +52,8 @@ spec:
 
       containers:
         - name: wireguard
-          image: lscr.io/linuxserver/wireguard:arm64v8-1.0.20210914-r4-ls80
+          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
+          # image: lscr.io/linuxserver/wireguard:v1.0.20210914-ls27
           resources:
             requests:
               memory: "32Mi"
