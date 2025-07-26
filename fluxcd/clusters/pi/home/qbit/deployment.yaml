@@ -93,7 +93,7 @@ spec:
                   IP=`curl -s https://icanhazip.com/`
                   echo "current IP:${IP}"
                   [ "${IP}" != "$HOME_IP" ]
-            initialDelaySeconds: 5
+            initialDelaySeconds: 15
             periodSeconds: 15
             timeoutSeconds: 5
             ## defaults:
