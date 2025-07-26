@@ -27,8 +27,7 @@ spec:
 
       initContainers:
         - name: wg-init
-          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
-          # image: lscr.io/linuxserver/wireguard:v1.0.20210914-ls27
+          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls80
           command:
             - /bin/sh
             - -c
@@ -37,7 +36,6 @@ spec:
               git clone https://github.com/pia-foss/manual-connections.git
               cd manual-connections
               bash ./run_setup.sh
-
           envFrom:
             - secretRef:
                 name: pia-auth
@@ -52,8 +50,7 @@ spec:
 
       containers:
         - name: wireguard
-          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls7
-          # image: lscr.io/linuxserver/wireguard:v1.0.20210914-ls27
+          image: lscr.io/linuxserver/wireguard:arm64v8-v1.0.20210914-ls80
           resources:
             requests:
               memory: "32Mi"
