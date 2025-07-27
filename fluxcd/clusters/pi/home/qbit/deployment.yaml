@@ -20,6 +20,7 @@ spec:
       labels:
         app: qbit
     spec:
+      nodeName: k3
       securityContext:
         sysctls:
           - name: net.ipv4.conf.all.src_valid_mark
