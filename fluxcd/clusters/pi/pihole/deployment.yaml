@@ -20,6 +20,12 @@ spec:
       dnsConfig:
         nameservers:
           - 192.168.86.53
+      tolerations:
+        - effect: NoSchedule
+          key: vm
+          operator: "Equal"
+          value: "true"
+
       containers:
         - name: pihole
           image: pihole/pihole:2025.04.0
