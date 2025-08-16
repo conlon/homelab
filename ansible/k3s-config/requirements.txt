@@ -99,7 +99,7 @@ platformdirs==4.2.0
     # via virtualenv
 pluggy==1.4.0
     # via molecule
-pre-commit==4.1.0
+pre-commit==4.2.0
     # via -r requirements.in
 pre-commit-hooks==5.0.0
     # via -r requirements.in
