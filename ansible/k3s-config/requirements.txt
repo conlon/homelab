@@ -4,7 +4,7 @@
 #
 #    pip-compile k3s-config/requirements.in
 #
-ansible-compat==25.1.1
+ansible-compat==25.1.5
     # via molecule
 ansible-core==2.18.2
     # via
@@ -76,7 +76,7 @@ markupsafe==2.1.5
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
-molecule==25.2.0
+molecule==25.4.0
     # via
     #   -r requirements.in
     #   molecule-vagrant
