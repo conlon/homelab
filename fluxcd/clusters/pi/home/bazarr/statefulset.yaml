@@ -19,7 +19,7 @@ spec:
       labels:
         app: bazarr
     spec:
-      nodeName: n0
+      # nodeName: n0
       terminationGracePeriodSeconds: 10
       containers:
         - name: bazarr
