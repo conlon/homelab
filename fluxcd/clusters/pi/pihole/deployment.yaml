@@ -64,6 +64,13 @@ spec:
             # needed from 2025.02.0 onwards, this instructs pihole to read local dnsmasq config files at /etc/dnsmasq.d/
             - name: FTLCONF_misc_etc_dnsmasq_d
               value: 'true'
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 100Mi
+            limits:
+              cpu: 1000m
+              memory: 1000Mi
 
           volumeMounts:
             - name: pihole-configs
