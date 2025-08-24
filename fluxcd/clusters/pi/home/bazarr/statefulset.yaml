@@ -1,0 +1,87 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bazarr
+  namespace: home
+  labels:
+    app: bazarr
+spec:
+  serviceName: bazarr
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bazarr
+  template:
+    metadata:
+      name: bazarr
+      namespace: home
+      labels:
+        app: bazarr
+    spec:
+      nodeName: n0
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: bazarr
+          image: lscr.io/linuxserver/bazarr:1.5.1
+          ports:
+            - containerPort: 6767
+              name: bazarr-port
+          envFrom:
+            - configMapRef:
+                name: common-configs
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 6767
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 6767
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          # securityContext:
+          #   runAsUser: 1000
+          #   runAsGroup: 1000
+          #   allowPrivilegeEscalation: false
+          #   capabilities:
+          #     drop:
+          #       - ALL
+          #   seccompProfile:
+          #     type: RuntimeDefault
+          #   runAsNonRoot: true
+          volumeMounts:
+            - name: bazarr-configs
+              mountPath: /config
+            - name: media-root
+              mountPath: /media
+      volumes:
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+      #   - name: bazarr-configs
+      #     persistentVolumeClaim:
+      #       claimName: bazarr-configs-local
+  volumeClaimTemplates:
+    - metadata:
+        name: bazarr-configs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 200Mi

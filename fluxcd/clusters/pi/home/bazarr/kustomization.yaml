@@ -5,6 +5,7 @@ metadata:
   name: home
 resources:
   - deployment.yaml
+  - statefulset.yaml
   - service.yaml
   - ingress.yaml
   - pvc.yaml
