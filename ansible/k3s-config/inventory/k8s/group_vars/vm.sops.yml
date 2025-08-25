@@ -3,15 +3,15 @@ ansible_become_pass: ENC[AES256_GCM,data:rs5lMftt6naD5mpl5QAe55wYoOeoVK1cUA==,iv
 flannel_iface: ens18
 k3s_node_ip: '{{ ansible_facts[flannel_iface]["ipv4"]["address"] }}'
 extra_args: --flannel-iface={{ flannel_iface }} --node-ip={{ k3s_node_ip }}
-extra_agent_args: '{{ extra_args }} --kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark --node-taint vm=true:NoSchedule'
+extra_agent_args: '{{ extra_args }} --kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark'
 sops:
     kms: []
     gcp_kms: []
     azure_kv: []
     hc_vault: []
     age: []
-    lastmodified: "2025-04-20T22:15:32Z"
-    mac: ENC[AES256_GCM,data:anjcLOhzVVl5ZJyIb44oXGoFMA8Qvoha89rrp769TSUlkgfucHKSvHOrfqnxtczzKL2CKekb/ILiamwOgjMjgrqTZBc1V/uxS99V4aqtbF76n9T94tFl6Bjfcd/YHp/Oy4JD+1P6TDBXZkUsVCEKHVXqvsRwFHUeH8B3/Ka/4u0=,iv:EF5fRxz0cWwMJ+xAaGSHdr+gNfY4O6We3Tj0FP3SAgI=,tag:JeieW6Is1JWywYLZ4uOeiQ==,type:str]
+    lastmodified: "2025-08-23T23:42:41Z"
+    mac: ENC[AES256_GCM,data:D8lxXScGz8bZ2Jdb2oAGuyIdcGBPS5G1eBE/Q/PY80Z3lgy6H/HiKziMzW0AR2daESqKdHvFpInhog4We/8AfTncmhkX03ZqbCjnPK87twiGjK/s70poCztAPAyN+vtFz9uGtYQW1yKsrKB+uAYPKEecg053mMHrHAAS3cgBEkY=,iv:oFgWMZtg360C3IKTVZIpTLAg/5aF/8w95t5ka7VJENw=,tag:PK9qu858ztmBetjK182ztw==,type:str]
     pgp:
         - created_at: "2025-04-20T22:15:32Z"
           enc: |-
