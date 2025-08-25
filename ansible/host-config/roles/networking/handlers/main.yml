@@ -4,3 +4,7 @@
     state: restarted
     daemon_reload: yes
   become: yes
+
+- name: apply netplan
+  ansible.builtin.command: netplan apply
+  become: yes

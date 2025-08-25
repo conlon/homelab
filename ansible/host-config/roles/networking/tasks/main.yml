@@ -6,6 +6,7 @@
     group: root
     mode: '0644'
   become: yes
+  when: "'pi' in group_names"
 
 - name: set dhcpcd.conf
   template:
@@ -16,3 +17,15 @@
     mode: '0644'
   become: yes
   notify: restart dhcpcd
+  when: "'pi' in group_names"
+
+- name: configure netplan
+  template:
+    src: netplan.j2
+    dest: /etc/netplan/50-cloud-init.yaml
+    owner: root
+    group: root
+    mode: '0600'
+  become: yes
+  notify: apply netplan
+  when: "'vm' in group_names"
