@@ -32,6 +32,12 @@ ansible_ssh_user=pi
 ; ---------------- proxmox vms ----------------
 [vm]
 joi ansible_host=192.168.86.5 desired_host=192.168.86.5
+n0  ansible_host=192.168.86.26 desired_host=192.168.86.26
+n1  ansible_host=192.168.86.27 desired_host=192.168.86.27
+
+[vm:vars]
+ansible_user=michael
+ansible_ssh_user=michael
 
 ; ---------------- k8s ----------------
 [k8s]
@@ -64,10 +70,17 @@ k3
 k4
 k5
 joi
+n0
+n1
+
+[longhorn]
+n0
+n1
 
 ; ---------------- proxmox ----------------
 [proxmox]
 prox0 ansible_host=192.168.86.4 desired_host=192.168.86.4
+prox1 ansible_host=192.168.86.6 desired_host=192.168.86.6
 
 [proxmox:vars]
 ansible_user=root
