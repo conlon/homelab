@@ -1,0 +1,87 @@
+- name: Create longhorn mount directory
+  ansible.builtin.file:
+    path: /mnt/longhorn
+    state: directory
+    mode: '0755'
+  become: yes
+  when: "'longhorn' in group_names"
+
+- name: Check if /dev/sdb1 partition exists
+  ansible.builtin.stat:
+    path: /dev/sdb1
+  register: sdb1_partition
+  when: "'longhorn' in group_names"
+
+- name: Create partition on /dev/sdb
+  community.general.parted:
+    device: /dev/sdb
+    number: 1
+    state: present
+    part_end: "100%"
+  become: yes
+  when: "'longhorn' in group_names and not sdb1_partition.stat.exists"
+
+- name: Wait for partition to be available
+  ansible.builtin.wait_for:
+    path: /dev/sdb1
+    timeout: 10
+  when: "'longhorn' in group_names and not sdb1_partition.stat.exists"
+
+- name: Check if /dev/sdb1 is formatted
+  ansible.builtin.command: blkid /dev/sdb1
+  register: blkid_result
+  failed_when: false
+  changed_when: false
+  when: "'longhorn' in group_names"
+
+- name: Check if filesystem exists on /dev/sdb1
+  ansible.builtin.command: blkid -s TYPE /dev/sdb1
+  register: blkid_type_result
+  failed_when: false
+  changed_when: false
+  when: "'longhorn' in group_names"
+
+- name: Debug filesystem type check
+  ansible.builtin.debug:
+    msg: "Filesystem type check: {{ blkid_type_result }}"
+  when: "'longhorn' in group_names"
+
+- name: Check if mount point is currently mounted
+  ansible.builtin.mount:
+    path: /mnt/longhorn
+    state: unmounted
+  register: unmount_result
+  failed_when: false
+  when: "'longhorn' in group_names"
+
+- name: Force format /dev/sdb1 with ext4 filesystem
+  ansible.builtin.filesystem:
+    fstype: ext4
+    dev: /dev/sdb1
+    force: yes
+  become: yes
+  when: "'longhorn' in group_names and (blkid_type_result.stdout == '' or unmount_result is failed)"
+
+- name: Add longhorn mount to /etc/fstab
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    line: '/dev/sdb1 /mnt/longhorn ext4 defaults 0 0'
+    state: present
+  become: yes
+  when: "'longhorn' in group_names"
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+  when: "'longhorn' in group_names"
+
+- name: Mount longhorn storage drive
+  ansible.builtin.mount:
+    path: /mnt/longhorn
+    src: /dev/sdb1
+    fstype: ext4
+    state: mounted
+    opts: defaults
+  become: yes
+  when: "'longhorn' in group_names"
