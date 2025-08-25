@@ -4,9 +4,26 @@
     state: reloaded
     daemon_reload: yes
   become: yes
+  when: "'pi' in group_names"
+
+- name: reload sshd
+  ansible.builtin.systemd_service:
+    name: ssh
+    state: reloaded
+    daemon_reload: yes
+  become: yes
+  when: "'proxmox' in group_names"
 
 - name: restart sshd
   ansible.builtin.systemd_service:
     name: sshd
     state: restarted
   become: yes
+  when: "'pi' in group_names"
+
+- name: restart sshd
+  ansible.builtin.systemd_service:
+    name: ssh
+    state: restarted
+  become: yes
+  when: "'proxmox' in group_names"
