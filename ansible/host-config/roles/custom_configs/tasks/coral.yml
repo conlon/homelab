@@ -1,0 +1,57 @@
+---
+- name: Add Coral Edge TPU repository key
+  ansible.builtin.apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  become: yes
+
+- name: Add Coral Edge TPU repository
+  ansible.builtin.apt_repository:
+    repo: deb https://packages.cloud.google.com/apt coral-edgetpu-stable main
+    state: present
+    filename: coral-edgetpu
+    update_cache: yes
+  become: yes
+
+# - name: apt-get update
+#   ansible.builtin.command: apt-get update
+#   become: yes
+
+- name: Include Python 3.9 specific tasks
+  ansible.builtin.include_tasks: python39.yml
+
+- name: Install Edge TPU runtime
+  ansible.builtin.apt:
+    name:
+      - libedgetpu1-std
+      # - python3-pycoral  # must be installed after the usb is mounted?
+    state: present
+  become: yes
+
+- name: Create Python 3.9 virtual environment using pyenv
+  shell: |
+    export PYENV_ROOT="{{ ansible_env.HOME }}/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+    pyenv virtualenv 3.9.18 coral-env
+  become: yes
+  args:
+    executable: /bin/bash
+
+- name: Install pycoral in pyenv virtual environment
+  shell: |
+    export PYENV_ROOT="{{ ansible_env.HOME }}/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+    pyenv activate coral-env
+    pip install pycoral
+  become: yes
+  args:
+    executable: /bin/bash
+
+- name: Create symlink for coral Python
+  file:
+    src: "{{ ansible_env.HOME }}/.pyenv/versions/coral-env/bin/python"
+    dest: /usr/local/bin/coral-python
+    state: link
+  become: yes
