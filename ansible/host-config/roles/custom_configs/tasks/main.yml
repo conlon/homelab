@@ -41,6 +41,17 @@
 - name: Include WOL tasks
   ansible.builtin.include_tasks: wol.yml
 
+- name: Add michael to sudoers with NOPASSWD
+  lineinfile:
+    path: /etc/sudoers.d/user
+    line: 'michael    ALL=(ALL) NOPASSWD:ALL'
+    create: yes
+    mode: 0440
+    validate: /usr/sbin/visudo -cf %s
+  when:
+    - "'vm' in group_names"
+  become: yes
+
 - name: Include Coral Edge TPU specific tasks
   ansible.builtin.include_tasks: coral.yml
   when: "'nuc' in group_names"
