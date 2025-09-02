@@ -1,0 +1,42 @@
+---
+- name: Gather active MAC addresses from k8s and proxmox groups
+  set_fact:
+    active_mac_addresses: "{{ external_wol_hosts | default({}) |
+      combine({item: hostvars[item]['ansible_default_ipv4']['macaddress']})
+    }}"
+  with_items: "{{ groups['k8s'] + groups['proxmox'] }}"
+  run_once: yes
+
+- name: list active_mac_addresses
+  debug:
+    var: active_mac_addresses
+  run_once: yes
+
+- name: Bash aliases | wakeonlan aliases
+  lineinfile:
+    dest: "{{ ansible_env.HOME }}/.bash_aliases"
+    state: absent
+    mode: 0644
+    regexp: "^alias wake{{item}}="
+  with_items:
+    - prox
+    - prox1
+    - prox2
+
+- name: Bash aliases | wakeonlan aliases
+  lineinfile:
+    dest: "{{ ansible_env.HOME }}/.bash_aliases"
+    create: yes
+    mode: 0644
+    line: 'alias wake{{ item.key }}="wakeonlan {{ item.value }}"'
+    regexp: "^alias wake{{ item.key }}="
+  with_items: "{{ active_mac_addresses | dict2items }}"
+  when: item.value != '00:00:00:00:00:00'
+
+- name: Enable wakeonlan for all wol_interfaces using a custom systemctl service
+  template:
+    src: templates/wakeonlan.service.j2
+    dest: /etc/systemd/system/wakeonlan.service
+    mode: 0644
+  notify: reload systemd
+  become: yes
