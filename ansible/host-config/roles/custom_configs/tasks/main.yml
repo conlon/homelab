@@ -79,3 +79,7 @@
     mode: 0644
   notify: reload systemd
   become: yes
+
+- name: Include Coral Edge TPU specific tasks
+  ansible.builtin.include_tasks: coral.yml
+  when: "'nuc' in group_names"
