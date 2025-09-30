@@ -1,0 +1,21 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: prox0-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`prox0.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: prox0
+          port: 8006
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls

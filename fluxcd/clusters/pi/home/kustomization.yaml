@@ -23,3 +23,5 @@ resources:
   - uptime-kuma
   # misc
   - sync
+  # external services
+  - external-dns
