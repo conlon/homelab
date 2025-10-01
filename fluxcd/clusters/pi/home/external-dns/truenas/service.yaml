@@ -8,6 +8,6 @@ spec:
   type: ExternalName
   externalName: 192.168.86.11
   ports:
-  - port: 80
-    targetPort: 80
-    protocol: TCP
+    - port: 80
+      targetPort: 80
+      protocol: TCP
