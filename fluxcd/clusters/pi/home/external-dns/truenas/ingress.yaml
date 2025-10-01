@@ -15,7 +15,5 @@ spec:
       services:
         - name: truenas
           port: 80
-      # middlewares:
-      #   - name: default-headers
   tls:
     secretName: local-fellowfreak-dev-production-tls

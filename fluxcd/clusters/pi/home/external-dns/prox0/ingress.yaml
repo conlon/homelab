@@ -15,7 +15,7 @@ spec:
       services:
         - name: prox0
           port: 8006
-      # middlewares:
-      #   - name: default-headers
+          scheme: https
+          serversTransport: insecure-skip-verify
   tls:
     secretName: local-fellowfreak-dev-production-tls

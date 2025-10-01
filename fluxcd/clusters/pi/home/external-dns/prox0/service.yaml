@@ -8,6 +8,6 @@ spec:
   type: ExternalName
   externalName: 192.168.86.4
   ports:
-  - port: 8006
-    targetPort: 8006
-    protocol: TCP
+    - port: 8006
+      targetPort: 8006
+      protocol: TCP
