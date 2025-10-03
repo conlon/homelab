@@ -24,4 +24,4 @@ resources:
   # misc
   - sync
   # external services
-  - external-dns
+  - 1-external-dns
