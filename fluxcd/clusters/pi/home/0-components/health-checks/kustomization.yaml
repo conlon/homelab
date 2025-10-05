@@ -3,10 +3,46 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-# This component adds health checks to any deployment
+# This component adds health checks to any deployment or statefulset
 patches:
   - target:
       kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/startupProbe
+        value:
+          httpGet:
+            path: /
+            port: 0  # Will be replaced by JSON patch with actual port
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 18  # Allow up to 3 minutes for startup
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe
+        value:
+          httpGet:
+            path: /
+            port: 0  # Will be replaced by JSON patch with actual port
+            scheme: HTTP
+          initialDelaySeconds: 60  # Wait for startup probe to succeed
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3  # Restart after 3 consecutive failures (1.5 minutes)
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe
+        value:
+          httpGet:
+            path: /
+            port: 0  # Will be replaced by JSON patch with actual port
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3  # Mark as not ready after 3 failures (30 seconds)
+  - target:
+      kind: StatefulSet
     patch: |-
       - op: add
         path: /spec/template/spec/containers/0/startupProbe
