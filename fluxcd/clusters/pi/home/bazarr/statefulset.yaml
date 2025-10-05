@@ -19,7 +19,6 @@ spec:
       labels:
         app: bazarr
     spec:
-      # nodeName: n0
       terminationGracePeriodSeconds: 10
       containers:
         - name: bazarr
@@ -37,30 +36,6 @@ spec:
             limits:
               memory: "1024Mi"
               cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 6767
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 6767
-            initialDelaySeconds: 10
-            periodSeconds: 10
-            timeoutSeconds: 5
-          # securityContext:
-          #   runAsUser: 1000
-          #   runAsGroup: 1000
-          #   allowPrivilegeEscalation: false
-          #   capabilities:
-          #     drop:
-          #       - ALL
-          #   seccompProfile:
-          #     type: RuntimeDefault
-          #   runAsNonRoot: true
           volumeMounts:
             - name: bazarr-configs
               mountPath: /config

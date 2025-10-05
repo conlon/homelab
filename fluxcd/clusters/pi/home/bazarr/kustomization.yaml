@@ -12,6 +12,7 @@ resources:
 
 components:
   - ../0-components/health-checks
+  - ../0-components/security-context
 
 patches:
   - patch: |-
