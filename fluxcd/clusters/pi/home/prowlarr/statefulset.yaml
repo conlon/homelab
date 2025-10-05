@@ -39,12 +39,6 @@ spec:
           volumeMounts:
             - name: prowlarr-configs
               mountPath: /config
-            - name: prowlarr-configs-old
-              mountPath: /config-old
-      volumes:
-        - name: prowlarr-configs-old
-          persistentVolumeClaim:
-            claimName: prowlarr-configs-local
   volumeClaimTemplates:
     - metadata:
         name: prowlarr-configs
