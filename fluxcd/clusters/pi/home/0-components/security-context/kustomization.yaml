@@ -1,0 +1,39 @@
+---
+# Kustomize Component: Security Context for LinuxServer.io Services
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+# This component adds security context settings compatible with LinuxServer.io images
+# LinuxServer.io images need to run as root initially to set up the environment,
+# then they drop to non-root user internally. We apply minimal security hardening.
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - SETGID
+              - SETUID
+          seccompProfile:
+            type: RuntimeDefault
+  - target:
+      kind: StatefulSet
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - SETGID
+              - SETUID
+          seccompProfile:
+            type: RuntimeDefault
