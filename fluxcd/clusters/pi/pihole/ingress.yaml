@@ -10,13 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.pihole.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: pihole
-          port: 80
-        - name: pihole-dup
-          port: 80
     - match: Host(`pihole.local.fellowfreak.dev`)
       kind: Rule
       services:

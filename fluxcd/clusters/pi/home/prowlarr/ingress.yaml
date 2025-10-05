@@ -10,11 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.prowlarr.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: prowlarr
-          port: 80
     - match: Host(`prowlarr.local.fellowfreak.dev`)
       kind: Rule
       services:

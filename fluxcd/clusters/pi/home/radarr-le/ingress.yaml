@@ -10,11 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.radarr-le.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: radarr-le
-          port: 80
     - match: Host(`radarr-le.local.fellowfreak.dev`)
       kind: Rule
       services:
