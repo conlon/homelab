@@ -7,6 +7,24 @@ resources:
   - ingress.yaml
   - pvc.yaml
 
+components:
+  - ../0-components/health-checks
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/port
+        value: 5055
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/port
+        value: 5055
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/port
+        value: 5055
+    target:
+      kind: Deployment
+      name: overseerr
+
 labels:
   - pairs:
       app: overseerr
