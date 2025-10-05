@@ -54,6 +54,29 @@ spec:
           envFrom:
             - configMapRef:
                 name: common-configs
+          # TCP socket probes instead of HTTP probes because Resilio Sync web interface
+          # requires authentication (returns 401) and doesn't have a health endpoint
+          livenessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 18
           volumeMounts:
             - name: sync-storage
               mountPath: /sync
