@@ -1,15 +1,14 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: qbit
   namespace: home
   labels:
     app: qbit
 spec:
-  replicas: 0
-  strategy:
-    type: Recreate
+  serviceName: qbit
+  replicas: 1
   selector:
     matchLabels:
       app: qbit
@@ -21,6 +20,7 @@ spec:
         app: qbit
     spec:
       nodeName: k3
+      terminationGracePeriodSeconds: 10
       securityContext:
         sysctls:
           - name: net.ipv4.conf.all.src_valid_mark
@@ -97,9 +97,6 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 15
             timeoutSeconds: 5
-            ## defaults:
-            # failureThreshold: 3
-            # successThreshold: 1
 
           volumeMounts:
             - name: lib-modules
@@ -139,6 +136,13 @@ spec:
         - name: wireguard-configs
           persistentVolumeClaim:
             claimName: wireguard-configs-local
-        - name: qbit-configs
-          persistentVolumeClaim:
-            claimName: qbit-configs-local
+  volumeClaimTemplates:
+    - metadata:
+        name: qbit-configs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 200Mi

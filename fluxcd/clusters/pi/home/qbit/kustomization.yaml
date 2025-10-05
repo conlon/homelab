@@ -5,25 +5,59 @@ metadata:
 resources:
   - wireguard-configs.yaml
   - pia-secret.sops.yaml
-  - deployment.yaml
+  - deployment.yaml  # scaled to 0
+  - statefulset.yaml
   - service.yaml
   - ingress.yaml
   - pvc.yaml
 
 components:
   - ../0-components/health-checks
+  - ../0-components/security-context
 
 patches:
-  - patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/startupProbe/httpGet/port
-        value: 8080
-      - op: replace
-        path: /spec/template/spec/containers/0/livenessProbe/httpGet/port
-        value: 8080
-      - op: replace
-        path: /spec/template/spec/containers/0/readinessProbe/httpGet/port
-        value: 8080
-    target:
+  - target:
       kind: Deployment
       name: qbit
+    patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: qbit
+      spec:
+        replicas: 0
+        template:
+          spec:
+            containers:
+              - name: qbit
+                startupProbe:
+                  httpGet:
+                    port: 8080
+                livenessProbe:
+                  httpGet:
+                    port: 8080
+                readinessProbe:
+                  httpGet:
+                    port: 8080
+  - target:
+      kind: StatefulSet
+      name: qbit
+    patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: qbit
+      spec:
+        template:
+          spec:
+            containers:
+              - name: qbit
+                startupProbe:
+                  httpGet:
+                    port: 8080
+                livenessProbe:
+                  httpGet:
+                    port: 8080
+                readinessProbe:
+                  httpGet:
+                    port: 8080
