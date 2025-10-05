@@ -1,15 +1,14 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: radarr
   namespace: home
   labels:
     app: radarr
 spec:
-  replicas: 0
-  strategy:
-    type: Recreate  # required for ReadWriteOnce pvc
+  serviceName: radarr
+  replicas: 1
   selector:
     matchLabels:
       app: radarr
@@ -20,10 +19,16 @@ spec:
       labels:
         app: radarr
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
         - name: radarr
           image: lscr.io/linuxserver/radarr:4.7.5
-
+          ports:
+            - containerPort: 7878
+              name: radarr-port
+          envFrom:
+            - configMapRef:
+                name: common-configs
           resources:
             requests:
               memory: "200Mi"
@@ -31,27 +36,24 @@ spec:
             limits:
               memory: "500Mi"
               cpu: "500m"
-
-          ports:
-            - containerPort: 7878
-              name: radarr-port
-
-          envFrom:
-            - configMapRef:
-                name: common-configs
-
           volumeMounts:
             - name: radarr-configs
               mountPath: /config
             - name: media-root
               mountPath: /media
-
       volumes:
         - name: media-root
           nfs:
             server: 192.168.86.10
             path: /nfs/media
             readOnly: false
-        - name: radarr-configs
-          persistentVolumeClaim:
-            claimName: radarr-configs-local
+  volumeClaimTemplates:
+    - metadata:
+        name: radarr-configs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 3Gi
