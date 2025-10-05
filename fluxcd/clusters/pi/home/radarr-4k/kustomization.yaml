@@ -1,20 +1,3 @@
-# ---
-# apiVersion: kustomize.config.k8s.io/v1beta1
-# kind: Kustomization
-
-# resources:
-#   # - https://github.com/conlon/homelab/fluxcd/clusters/pi/home/radarr?ref=main
-#   - ../radarr
-
-# labels:
-#   - pairs:
-#       app: radarr-4k
-#     includeSelectors: true
-
-# nameSuffix: -4k
-
-# patches:
-#   - path: deployment.yaml
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -23,3 +6,21 @@ resources:
   - service.yaml
   - ingress.yaml
   - pvc.yaml
+
+components:
+  - ../0-components/health-checks
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/port
+        value: 7878
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/port
+        value: 7878
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/httpGet/port
+        value: 7878
+    target:
+      kind: Deployment
+      name: radarr-4k
