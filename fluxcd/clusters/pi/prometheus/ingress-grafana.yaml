@@ -10,11 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.grafana.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: kube-prometheus-stack-grafana
-          port: 80
     - match: Host(`grafana.local.fellowfreak.dev`)
       kind: Rule
       services:

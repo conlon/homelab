@@ -10,11 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.sonarr-4k.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: sonarr-4k
-          port: 80
     - match: Host(`sonarr-4k.local.fellowfreak.dev`)
       kind: Rule
       services:

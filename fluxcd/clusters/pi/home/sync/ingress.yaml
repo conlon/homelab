@@ -10,11 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.sync.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: sync
-          port: 80
     - match: Host(`sync.local.fellowfreak.dev`)
       kind: Rule
       services:

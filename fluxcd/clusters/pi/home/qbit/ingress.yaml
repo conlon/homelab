@@ -10,11 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.qbit.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: qbit
-          port: 80
     - match: Host(`qbit.local.fellowfreak.dev`)
       kind: Rule
       services:

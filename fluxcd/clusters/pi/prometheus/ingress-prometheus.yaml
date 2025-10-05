@@ -10,11 +10,6 @@ spec:
   entryPoints:
     - websecure
   routes:
-    - match: Host(`www.prometheus.local.fellowfreak.dev`)
-      kind: Rule
-      services:
-        - name: kube-prometheus-stack-prometheus
-          port: 9090
     - match: Host(`prometheus.local.fellowfreak.dev`)
       kind: Rule
       services:
