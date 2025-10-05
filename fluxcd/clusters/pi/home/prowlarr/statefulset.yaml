@@ -1,15 +1,14 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: prowlarr
   namespace: home
   labels:
     app: prowlarr
 spec:
-  replicas: 0
-  strategy:
-    type: Recreate
+  serviceName: prowlarr
+  replicas: 1
   selector:
     matchLabels:
       app: prowlarr
@@ -20,10 +19,16 @@ spec:
       labels:
         app: prowlarr
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:1.32.2
-
+          ports:
+            - containerPort: 9696
+              name: prowlarr-port
+          envFrom:
+            - configMapRef:
+                name: common-configs
           resources:
             requests:
               memory: "300Mi"
@@ -31,20 +36,22 @@ spec:
             limits:
               memory: "300Mi"
               cpu: "300m"
-
-          ports:
-            - containerPort: 9696
-              name: prowlarr-port
-
-          envFrom:
-            - configMapRef:
-                name: common-configs
-
           volumeMounts:
             - name: prowlarr-configs
               mountPath: /config
-
+            - name: prowlarr-configs-old
+              mountPath: /config-old
       volumes:
-        - name: prowlarr-configs
+        - name: prowlarr-configs-old
           persistentVolumeClaim:
             claimName: prowlarr-configs-local
+  volumeClaimTemplates:
+    - metadata:
+        name: prowlarr-configs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 200Mi
