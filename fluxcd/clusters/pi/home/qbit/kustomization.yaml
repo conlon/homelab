@@ -29,6 +29,16 @@ patches:
         template:
           spec:
             containers:
+              - name: wireguard
+                startupProbe:
+                  httpGet:
+                    port: 8080
+                livenessProbe:
+                  httpGet:
+                    port: 8080
+                readinessProbe:
+                  httpGet:
+                    port: 8080
               - name: qbit
                 startupProbe:
                   httpGet:
@@ -51,6 +61,16 @@ patches:
         template:
           spec:
             containers:
+              - name: wireguard
+                startupProbe:
+                  httpGet:
+                    port: 8080
+                livenessProbe:
+                  httpGet:
+                    port: 8080
+                readinessProbe:
+                  httpGet:
+                    port: 8080
               - name: qbit
                 startupProbe:
                   httpGet:
