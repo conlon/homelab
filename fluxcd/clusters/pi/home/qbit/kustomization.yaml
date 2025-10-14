@@ -6,43 +6,48 @@ metadata:
 resources:
   - wireguard-configs.yaml
   - pia-secret.sops.yaml
-  - deployment.yaml  # scaled to 0
   - statefulset.yaml
   - service.yaml
   - ingress.yaml
   - pvc.yaml
 
+# Note: security-context component disabled for qbit due to:
+# - Init container needs to run package management (apk add git)
+# - Requires privileged networking capabilities (NET_ADMIN, SYS_MODULE)
 components:
   - ../0-components/health-checks
-  # Note: security-context component disabled for qbit due to:
-  # - Init container needs to run package management (apk add git)
-  # - Requires privileged networking capabilities (NET_ADMIN, SYS_MODULE)
   # - ../0-components/security-context
 
 patches:
+  # Fix health check ports for wireguard container (containers[0])
+  # Use JSON patch to replace readinessProbe with exec probe for VPN check
   - target:
-      kind: Deployment
+      kind: StatefulSet
       name: qbit
     patch: |-
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: qbit
-      spec:
-        replicas: 0
-        template:
-          spec:
-            containers:
-              - name: qbit
-                startupProbe:
-                  httpGet:
-                    port: 8080
-                livenessProbe:
-                  httpGet:
-                    port: 8080
-                readinessProbe:
-                  httpGet:
-                    port: 8080
+      - op: replace
+        path: /spec/template/spec/containers/0/startupProbe/httpGet/port
+        value: 8080
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/httpGet/port
+        value: 8080
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe
+        value:
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - |
+                IP=$(curl -s --max-time 5 https://icanhazip.com/)
+                echo "current IP: ${IP}"
+                [ "${IP}" != "$HOME_IP" ]
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 3
+
+  # Add health checks to qbit container (containers[1]) in StatefulSet
   - target:
       kind: StatefulSet
       name: qbit
