@@ -14,7 +14,10 @@ resources:
 
 components:
   - ../0-components/health-checks
-  - ../0-components/security-context
+  # Note: security-context component disabled for qbit due to:
+  # - Init container needs to run package management (apk add git)
+  # - Requires privileged networking capabilities (NET_ADMIN, SYS_MODULE)
+  # - ../0-components/security-context
 
 patches:
   - target:
