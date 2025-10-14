@@ -18,6 +18,7 @@ patches:
             drop:
               - ALL
             add:
+              - CHOWN
               - SETGID
               - SETUID
           seccompProfile:
@@ -33,6 +34,7 @@ patches:
             drop:
               - ALL
             add:
+              - CHOWN
               - SETGID
               - SETUID
           seccompProfile:
