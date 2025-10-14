@@ -7,6 +7,15 @@ kind: Component
 # LinuxServer.io images need to run as root initially to set up the environment,
 # then they drop to non-root user internally. We apply minimal security hardening.
 patches:
+  # Pod-level security context for Deployments
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          fsGroup: 1000
+  # Container-level security context for Deployments
   - target:
       kind: Deployment
     patch: |-
@@ -23,6 +32,15 @@ patches:
               - SETUID
           seccompProfile:
             type: RuntimeDefault
+  # Pod-level security context for StatefulSets
+  - target:
+      kind: StatefulSet
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          fsGroup: 1000
+  # Container-level security context for StatefulSets
   - target:
       kind: StatefulSet
     patch: |-
