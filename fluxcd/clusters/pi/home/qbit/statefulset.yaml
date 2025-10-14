@@ -63,7 +63,7 @@ spec:
 
           securityContext:
             capabilities:
-              add: ["NET_ADMIN", "SYS_MODULE", "CHOWN", "SETGID", "SETUID"]
+              add: ["NET_ADMIN", "NET_RAW", "SYS_MODULE", "CHOWN", "SETGID", "SETUID"]
               drop: ["ALL"]
 
           ports:
