@@ -22,6 +22,7 @@ spec:
       nodeName: k3
       terminationGracePeriodSeconds: 10
       securityContext:
+        fsGroup: 1000
         sysctls:
           - name: net.ipv4.conf.all.src_valid_mark
             value: "1"
@@ -62,7 +63,8 @@ spec:
 
           securityContext:
             capabilities:
-              add: ["NET_ADMIN", "SYS_MODULE"]
+              add: ["NET_ADMIN", "SYS_MODULE", "CHOWN", "SETGID", "SETUID"]
+              drop: ["ALL"]
 
           ports:
             - containerPort: 8080
@@ -85,19 +87,6 @@ spec:
                   name: pia-auth
                   key: HOME_IP
 
-          readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - |
-                  IP=`curl -s https://icanhazip.com/`
-                  echo "current IP:${IP}"
-                  [ "${IP}" != "$HOME_IP" ]
-            initialDelaySeconds: 15
-            periodSeconds: 15
-            timeoutSeconds: 5
-
           volumeMounts:
             - name: lib-modules
               mountPath: /lib/modules
@@ -113,6 +102,11 @@ spec:
             limits:
               memory: "2048Mi"
               cpu: "1000m"
+
+          securityContext:
+            capabilities:
+              add: ["CHOWN", "SETGID", "SETUID"]
+              drop: ["ALL"]
 
           envFrom:
             - configMapRef:
