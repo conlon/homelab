@@ -47,26 +47,42 @@ patches:
           timeoutSeconds: 10
           failureThreshold: 3
 
-  # Add health checks to qbit container (containers[1]) in StatefulSet
+  # Add health checks to qbit container (containers[1])
+  # The health-checks component only handles containers[0], so we add containers[1] manually
   - target:
       kind: StatefulSet
       name: qbit
     patch: |-
-      apiVersion: apps/v1
-      kind: StatefulSet
-      metadata:
-        name: qbit
-      spec:
-        template:
-          spec:
-            containers:
-              - name: qbit
-                startupProbe:
-                  httpGet:
-                    port: 8080
-                livenessProbe:
-                  httpGet:
-                    port: 8080
-                readinessProbe:
-                  httpGet:
-                    port: 8080
+      - op: add
+        path: /spec/template/spec/containers/1/startupProbe
+        value:
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 18
+      - op: add
+        path: /spec/template/spec/containers/1/livenessProbe
+        value:
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+      - op: add
+        path: /spec/template/spec/containers/1/readinessProbe
+        value:
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3

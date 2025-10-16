@@ -3,8 +3,10 @@
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 
-# This component adds health checks to any deployment or statefulset
+# This component adds health checks to deployments and statefulsets
+# Supports both single and multi-container pods
 patches:
+  # Add health checks to first container (containers[0])
   - target:
       kind: Deployment
     patch: |-
@@ -41,6 +43,8 @@ patches:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3  # Mark as not ready after 3 failures (30 seconds)
+
+  # Add health checks to first container (containers[0]) in StatefulSets
   - target:
       kind: StatefulSet
     patch: |-
