@@ -8,3 +8,4 @@ resources:
   - helm.yaml
   - basic-auth-secret.sops.yaml
   - ingress.yaml
+  - nodes/

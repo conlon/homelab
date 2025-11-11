@@ -1,0 +1,29 @@
+# ---
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: minio-configs
+#   namespace: longhorn-system
+# spec:
+#   capacity:
+#     storage: 30Gi
+#   accessModes:
+#     - ReadWriteMany
+#   nfs:
+#     server: nfs-server.default.svc.cluster.local
+#     path: "/mnt/nas/configs/minio"
+#   mountOptions:
+#     - nfsvers=4.2
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: minio-configs
+#   namespace: longhorn-system
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   storageClassName: ""
+#   resources:
+#     requests:
+#       storage: 30Gi

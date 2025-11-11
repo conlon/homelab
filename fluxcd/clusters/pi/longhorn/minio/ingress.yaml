@@ -1,0 +1,21 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: minio-ingress-route
+  namespace: longhorn-system
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`minio.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: minio
+          port: 80
+      # middlewares:
+      #   - name: default-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls

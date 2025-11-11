@@ -1,0 +1,20 @@
+---
+# Longhorn Node configuration for n1
+# This configures n1 to use /mnt/longhorn as the default disk path
+# instead of /var/lib/longhorn/ (which is on the root disk)
+apiVersion: longhorn.io/v1beta2
+kind: Node
+metadata:
+  name: n1
+  namespace: longhorn-system
+spec:
+  allowScheduling: true
+  disks:
+    default-disk:
+      allowScheduling: true
+      diskType: filesystem
+      evictionRequested: false
+      path: /mnt/longhorn
+      storageReserved: 536870912  # 512MB reserved (10% of ~5GB minimum)
+      tags: []
+
