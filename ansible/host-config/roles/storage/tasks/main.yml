@@ -1,3 +1,4 @@
+---
 - name: Create longhorn mount directory
   ansible.builtin.file:
     path: /mnt/longhorn
@@ -6,11 +7,25 @@
   become: yes
   when: "'longhorn' in group_names"
 
-- name: Check if /dev/sdb1 partition exists
+- name: Check if /dev/sdb exists
   ansible.builtin.stat:
-    path: /dev/sdb1
-  register: sdb1_partition
+    path: /dev/sdb
+  register: sdb_exists
   when: "'longhorn' in group_names"
+
+- name: Check if /dev/sdb1 partition exists
+  ansible.builtin.command: test -b /dev/sdb1
+  register: sdb1_check
+  failed_when: false
+  changed_when: false
+  when: "'longhorn' in group_names and sdb_exists.stat.exists"
+
+- name: Check if /mnt/longhorn is mounted (indicates partition exists and is configured)
+  ansible.builtin.command: mountpoint -q /mnt/longhorn
+  register: mountpoint_check
+  failed_when: false
+  changed_when: false
+  when: "'longhorn' in group_names and sdb_exists.stat.exists"
 
 - name: Create partition on /dev/sdb
   community.general.parted:
@@ -19,13 +34,50 @@
     state: present
     part_end: "100%"
   become: yes
-  when: "'longhorn' in group_names and not sdb1_partition.stat.exists"
+  when: >-
+    'longhorn' in group_names and
+    sdb_exists.stat.exists and
+    sdb1_check.rc != 0 and
+    mountpoint_check.rc != 0
+  register: partition_result
+  # Task is skipped if partition already exists (sdb1_check.rc == 0) or is mounted
+
+- name: Verify partition exists
+  ansible.builtin.command: test -b /dev/sdb1
+  register: sdb1_final_check
+  failed_when: false
+  changed_when: false
+  when: >-
+    'longhorn' in group_names and
+    sdb_exists.stat.exists and
+    (sdb1_check.rc != 0 or mountpoint_check.rc != 0)
+
+- name: Ensure partition exists
+  ansible.builtin.assert:
+    that:
+      - sdb1_final_check.rc == 0 or mountpoint_check.rc == 0
+    fail_msg: >-
+      Partition /dev/sdb1 does not exist.
+      {% if partition_result is defined and partition_result is failed %}
+      Creation failed: {{ partition_result.msg | default(partition_result.err | default('Unknown error')) }}
+      {% else %}
+      Please check if /dev/sdb exists and is available.
+      {% endif %}
+    success_msg: "Partition /dev/sdb1 exists"
+  when: >-
+    'longhorn' in group_names and
+    sdb_exists.stat.exists and
+    (sdb1_check.rc != 0 or mountpoint_check.rc != 0)
 
 - name: Wait for partition to be available
   ansible.builtin.wait_for:
     path: /dev/sdb1
     timeout: 10
-  when: "'longhorn' in group_names and not sdb1_partition.stat.exists"
+  when: >-
+    'longhorn' in group_names and
+    sdb_exists.stat.exists and
+    sdb1_final_check.rc == 0 and
+    sdb1_check.rc != 0
 
 - name: Check if /dev/sdb1 is formatted
   ansible.builtin.command: blkid /dev/sdb1
@@ -60,7 +112,10 @@
     dev: /dev/sdb1
     force: yes
   become: yes
-  when: "'longhorn' in group_names and (blkid_type_result.stdout == '' or unmount_result is failed)"
+  when: >-
+    'longhorn' in group_names and
+    mountpoint_check.rc != 0 and
+    (blkid_type_result.stdout == '' or unmount_result is failed)
 
 - name: Add longhorn mount to /etc/fstab
   ansible.builtin.lineinfile:
