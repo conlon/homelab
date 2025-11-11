@@ -1,0 +1,11 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: longhorn-nodes
+resources:
+  - joi-node.yaml
+  - n0-node.yaml
+  - n1-node.yaml
+  - n2-node.yaml
+

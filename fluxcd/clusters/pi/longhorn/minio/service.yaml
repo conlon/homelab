@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: longhorn-system
+spec:
+  selector:
+    app: minio
+  ports:
+    - name: minio-port
+      port: 80
+      targetPort: webui-port

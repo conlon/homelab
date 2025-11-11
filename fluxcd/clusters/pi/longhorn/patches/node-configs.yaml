@@ -1,0 +1,9 @@
+spec:
+  allowScheduling: true
+  disks:
+    default-disk-fd0000000000:
+      allowScheduling: true
+      evictionRequested: false
+      path: /var/lib/longhorn/
+      storageReserved: 536870912
+      tags: null

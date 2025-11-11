@@ -1,0 +1,56 @@
+# podman run -p 9000:9000 -p 9001:9001 \
+#   quay.io/minio/minio server /data --console-address ":9001"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio
+  namespace: longhorn-system
+  labels:
+    app: minio
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: minio
+  template:
+    metadata:
+      name: minio
+      namespace: longhorn-system
+      labels:
+        app: minio
+    spec:
+      containers:
+        - name: minio
+          image: quay.io/minio/minio:RELEASE.2024-03-15T01-07-19Z
+          # command:
+          args:
+            - server
+            - /data
+            - --console-address
+            - :9001
+
+          ports:
+            - containerPort: 9000
+              name: server-port
+            - containerPort: 9001
+              name: webui-port
+
+          envFrom:
+            - secretRef:
+                name: auth
+
+          volumeMounts:
+            - name: nfs-minio
+              mountPath: /data
+
+      volumes:
+        - name: nfs-minio
+          nfs:
+            # server: 192.168.86.10
+            # path: /nfs/configs/minio
+            server: 192.168.86.11
+            path: /mnt/nas/configs/minio
+            readOnly: false
