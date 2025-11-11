@@ -2,11 +2,11 @@
 
 - hosts: k8s, proxmox
   pre_tasks:
-    - name: Gather facts for all hosts
-      setup:
-      delegate_to: "{{ item }}"
-      with_items: "{{ groups['k8s'] + groups['proxmox'] }}"
-      when: hostvars[item]['ansible_default_ipv4'] is not defined
+    # - name: Gather facts for all hosts
+    #   setup:
+    #   delegate_to: "{{ item }}"
+    #   with_items: "{{ groups['k8s'] + groups['proxmox'] }}"
+    #   when: hostvars[item]['ansible_default_ipv4'] is not defined
     - name: Load encrypted credentials
       community.sops.load_vars:
         file: inventory/group_vars/vm.sops.yml
@@ -14,7 +14,10 @@
   roles:
     - _bootstrap
     - networking
-    - storage
+    - role: storage
+      tags:
+        - storage
+        - longhorn
     - hostname
     - custom_configs
 
