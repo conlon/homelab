@@ -94,7 +94,7 @@ spec:
               mountPath: /config
 
         - name: qbit
-          image: lscr.io/linuxserver/qbittorrent:5.0.3
+          image: lscr.io/linuxserver/qbittorrent:5.1.4
           resources:
             requests:
               memory: "512Mi"
