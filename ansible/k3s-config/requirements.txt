@@ -15,7 +15,7 @@ attrs==23.2.0
     # via
     #   jsonschema
     #   referencing
-bracex==2.4
+bracex==2.6
     # via wcmatch
 cachetools==5.5.1
     # via google-auth
