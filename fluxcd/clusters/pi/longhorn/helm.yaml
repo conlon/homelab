@@ -26,6 +26,8 @@ spec:
       interval: 24h
   values:
     defaultSettings:
+      backupTarget: s3://longhorn-recovery@us-east-1/
+      backupTargetCredentialSecret: minio-secret
       storageReservedPercentageForDefaultDisk: 10
     longhornManager:
       tolerations:
