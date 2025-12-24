@@ -24,7 +24,7 @@
 
 - name: Check if pyenv is installed
   stat:
-    path: "{{ ansible_env.HOME }}/.pyenv"
+    path: "{{ ansible_facts['env']['HOME'] }}/.pyenv"
   register: pyenv_dir
 
 - name: Download pyenv installer
@@ -40,7 +40,7 @@
 
 - name: Add pyenv to bash profile
   blockinfile:
-    dest: "{{ ansible_env.HOME }}/.bashrc"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
     marker: "# {mark} PYENV CONFIGURATION"
     block: |
       export PYENV_ROOT="$HOME/.pyenv"

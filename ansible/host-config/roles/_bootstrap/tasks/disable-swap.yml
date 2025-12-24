@@ -6,8 +6,8 @@
     dphys-swapfile uninstall &&
     update-rc.d -f dphys-swapfile remove
   when:
-    - ansible_swaptotal_mb > 0
-    - ansible_distribution == 'Raspbian'
+    - ansible_facts['swaptotal_mb'] > 0
+    - ansible_facts['distribution'] == 'Raspbian'
   become: yes
 
 - name: Permanently disable swap.
@@ -16,6 +16,6 @@
     regexp: '^CONF_SWAPSIZE='
     line: CONF_SWAPSIZE=0
   when:
-    - ansible_swaptotal_mb > 0
-    - ansible_distribution == 'Raspbian'
+    - ansible_facts['swaptotal_mb'] > 0
+    - ansible_facts['distribution'] == 'Raspbian'
   become: yes

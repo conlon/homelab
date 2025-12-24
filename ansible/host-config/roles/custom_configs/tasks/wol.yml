@@ -14,7 +14,7 @@
 
 - name: Bash aliases | wakeonlan aliases
   lineinfile:
-    dest: "{{ ansible_env.HOME }}/.bash_aliases"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
     state: absent
     mode: 0644
     regexp: "^alias wake{{item}}="
@@ -25,7 +25,7 @@
 
 - name: Bash aliases | wakeonlan aliases
   lineinfile:
-    dest: "{{ ansible_env.HOME }}/.bash_aliases"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.bash_aliases"
     create: yes
     mode: 0644
     line: 'alias wake{{ item.key }}="wakeonlan {{ item.value }}"'
