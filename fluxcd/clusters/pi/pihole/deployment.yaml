@@ -19,7 +19,7 @@ spec:
       dnsPolicy: "None"
       dnsConfig:
         nameservers:
-          - 192.168.86.53
+          - 192.168.86.1
       tolerations:
         - effect: NoSchedule
           key: vm
