@@ -1,13 +1,13 @@
 - name: make sure .ssh dir exists
   file:
-    path: "{{ ansible_env.HOME }}/.ssh"
+    path: "{{ ansible_facts['env']['HOME'] }}/.ssh"
     state: directory
     mode: '0755'
 
 - name: add public key
   template:
     src: authorized_keys.j2
-    dest: "{{ ansible_env.HOME }}/.ssh/authorized_keys"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.ssh/authorized_keys"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0644'
@@ -59,9 +59,9 @@
 - name: set cgroup features
   include_tasks: cgroup-features.yml
   when:
-    - ansible_distribution == 'Raspbian'
+    - ansible_facts['distribution'] == 'Raspbian'
 
 - name: disable swap
   include_tasks: disable-swap.yml
   when:
-    - ansible_distribution == 'Raspbian'
+    - ansible_facts['distribution'] == 'Raspbian'
