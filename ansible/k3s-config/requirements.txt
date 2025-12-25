@@ -158,7 +158,7 @@ six==1.16.0
     #   python-dateutil
 subprocess-tee==0.4.2
     # via ansible-compat
-urllib3==2.2.2
+urllib3==2.6.0
     # via
     #   kubernetes
     #   requests
