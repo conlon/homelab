@@ -20,7 +20,7 @@ spec:
         app: qbit
     spec:
       nodeName: k3
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 60
       securityContext:
         fsGroup: 1000
         sysctls:

@@ -29,6 +29,8 @@ spec:
       backupTarget: s3://longhorn-recovery@us-east-1/
       backupTargetCredentialSecret: minio-secret
       storageReservedPercentageForDefaultDisk: 10
+      defaultDataLocality: best-effort
+      defaultReplicaCount: 2
       taintTolerations:
         - effect: NoSchedule
           key: vm
