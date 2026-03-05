@@ -19,7 +19,7 @@ spec:
       labels:
         app: overseerr-le
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 60
       containers:
         - name: overseerr
           image: lscr.io/linuxserver/overseerr:1.34.0

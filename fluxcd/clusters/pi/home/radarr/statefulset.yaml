@@ -19,7 +19,7 @@ spec:
       labels:
         app: radarr
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 60
       containers:
         - name: radarr
           image: lscr.io/linuxserver/radarr:4.7.5

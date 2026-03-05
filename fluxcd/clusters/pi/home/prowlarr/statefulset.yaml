@@ -19,7 +19,7 @@ spec:
       labels:
         app: prowlarr
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 60
       containers:
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:1.32.2

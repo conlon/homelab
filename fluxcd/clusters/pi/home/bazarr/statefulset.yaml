@@ -19,7 +19,7 @@ spec:
       labels:
         app: bazarr
     spec:
-      terminationGracePeriodSeconds: 10
+      terminationGracePeriodSeconds: 60
       containers:
         - name: bazarr
           image: lscr.io/linuxserver/bazarr:1.5.1
