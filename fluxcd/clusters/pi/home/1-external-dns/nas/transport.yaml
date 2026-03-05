@@ -1,0 +1,12 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: ServersTransport
+metadata:
+  name: nas-transport
+  namespace: home
+spec:
+  insecureSkipVerify: true
+  forwardingTimeouts:
+    dialTimeout: 10s
+    responseHeaderTimeout: 30s
+    idleConnTimeout: 90s
+

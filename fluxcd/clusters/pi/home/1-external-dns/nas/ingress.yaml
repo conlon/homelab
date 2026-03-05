@@ -1,0 +1,23 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: nas-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`nas.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: nas
+          port: 80
+          passHostHeader: false
+          serversTransport: nas-transport
+      middlewares:
+        - name: nas-custom-headers
+  tls:
+    secretName: local-fellowfreak-dev-production-tls
