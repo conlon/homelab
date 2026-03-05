@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: nas-custom-headers
+  namespace: home
+spec:
+  headers:
+    customRequestHeaders:
+      # Force Host to NAS IP to satisfy NAS web server
+      Host: "192.168.86.10"
+      # Tell NAS we are on HTTPS
+      X-Forwarded-Proto: "https"
+      # Tell NAS the original domain
+      X-Forwarded-Host: "nas.local.fellowfreak.dev"
