@@ -162,7 +162,7 @@ urllib3==2.2.2
     # via
     #   kubernetes
     #   requests
-virtualenv==20.26.6
+virtualenv==20.36.1
     # via pre-commit
 wcmatch==8.5.2
     # via molecule
