@@ -13,6 +13,7 @@
   "kubernetes": {
     "fileMatch": ["\\.yaml$"]
   },
+  "dependencyDashboard": true,
   "packageRules": [
     {
       "description": "Limit linuxserver packages to not use dated versions",
@@ -23,6 +24,19 @@
       "description": "Limit qbittorent packages below 14.x which strangely exists in the same registry",
       "matchPackagePatterns": [".*linuxserver.*"],
       "allowedVersions": "<14"
+    },
+    {
+      "description": "Ansible role/galaxy updates require manual dashboard approval",
+      "matchManagers": ["ansible", "ansible-galaxy"],
+      "dependencyDashboardApproval": true,
+      "labels": ["ansible"],
+      "groupName": "ansible dependencies"
+    },
+    {
+      "description": "Docker/container image updates auto-create PRs",
+      "matchManagers": ["dockerfile", "docker-compose", "kubernetes"],
+      "labels": ["docker"],
+      "groupName": "docker images"
     }
   ]
 }
