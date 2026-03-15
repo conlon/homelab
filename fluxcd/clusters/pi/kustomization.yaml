@@ -11,5 +11,6 @@ resources:
   - traefik
   - cert-manager
   - longhorn
+  - cnpg
   - home
   - pihole

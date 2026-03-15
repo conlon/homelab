@@ -21,6 +21,8 @@ resources:
   - radarr-le
   # monitoring
   - uptime-kuma
+  # photos
+  - immich
   # misc
   - sync
   # external services

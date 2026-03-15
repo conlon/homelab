@@ -1,0 +1,19 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: immich-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`immich.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: immich-server
+          port: 2283
+  tls:
+    secretName: local-fellowfreak-dev-production-tls

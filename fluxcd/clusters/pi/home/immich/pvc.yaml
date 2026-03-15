@@ -1,0 +1,32 @@
+---
+# PersistentVolume pointing to NAS NFS share for photo library
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: immich-library
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: 192.168.86.11
+    path: /mnt/nas/media/photos
+  persistentVolumeReclaimPolicy: Retain
+  claimRef:
+    name: immich-library
+    namespace: home
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: immich-library
+  namespace: home
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  volumeName: immich-library
+  storageClassName: ""

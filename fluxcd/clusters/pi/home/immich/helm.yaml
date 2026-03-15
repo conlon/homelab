@@ -1,0 +1,73 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: immich
+  namespace: home
+spec:
+  interval: 24h
+  url: https://immich-app.github.io/immich-charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: immich
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: immich
+      sourceRef:
+        kind: HelmRepository
+        name: immich
+        namespace: home
+      interval: 24h
+  values:
+    # Shared env vars for all Immich components
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              TZ: "America/Chicago"
+              REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
+              IMMICH_MACHINE_LEARNING_URL: '{{ printf "http://%s-machine-learning:3003" .Release.Name }}'
+              DB_HOSTNAME: immich-database-rw
+              DB_PORT: "5432"
+              DB_DATABASE_NAME: app
+              DB_USERNAME: app
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-database-app
+                    key: password
+
+    immich:
+      persistence:
+        library:
+          existingClaim: immich-library
+
+    server:
+      ingress:
+        main:
+          enabled: false  # using Traefik IngressRoute
+
+    machine-learning:
+      persistence:
+        cache:
+          enabled: true
+          size: 10Gi
+          type: persistentVolumeClaim
+          storageClass: longhorn
+          accessMode: ReadWriteOnce
+
+    valkey:
+      enabled: true
+      persistence:
+        data:
+          enabled: true
+          size: 1Gi
+          type: persistentVolumeClaim
+          storageClass: longhorn
+          accessMode: ReadWriteOnce
