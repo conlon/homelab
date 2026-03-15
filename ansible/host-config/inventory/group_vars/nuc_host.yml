@@ -1,0 +1,5 @@
+---
+iommu:
+  passthrough_enabled: true
+  grub_options:
+    - intel_iommu=on iommu=pt video=simplefb:off video=vesafb:off video=efifb:off disable_vga=1

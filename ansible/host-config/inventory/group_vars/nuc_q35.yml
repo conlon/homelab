@@ -1,0 +1,11 @@
+---
+interface: enp6s18
+iommu:
+  grub_options:
+    - intel_iommu=on iommu=pt video=simplefb:off video=vesafb:off video=efifb:off disable_vga=1
+  disabled_drivers:
+    - i915
+    - snd_hda_intel
+    - snd_hda_codec_hdmi
+  disabled_drivers_options:
+    - options vfio-pci ids=8086:7d51,8086:7728 disable_vga=1

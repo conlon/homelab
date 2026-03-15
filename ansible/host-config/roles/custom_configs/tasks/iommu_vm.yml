@@ -1,0 +1,90 @@
+---
+# update to the latest patch version of ubuntu (equivalent to apt update && apt upgrade -y)
+- name: Update to the latest patch version of ubuntu
+  ansible.builtin.apt:
+    upgrade: dist
+    update_cache: yes
+  become: yes
+  notify: reboot system
+
+# update to the latest hwe kernel for ubuntu 24.04
+- name: Update to the latest hwe kernel for ubuntu 24.04
+  apt:
+    name: linux-generic-hwe-24.04
+    state: present
+  become: yes
+  notify: reboot system
+  when: iommu.enabled
+
+# update grub to support iommu and graphics passthrough
+- name: Update grub to support iommu and graphics passthrough
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"'  # i915.enable_guc=0 xe.enable_guc=0"'
+    create: yes
+    mode: 0644
+    validate: /usr/sbin/update-grub %s
+  become: yes
+  notify:
+    - update grub
+    - reboot system
+  when: iommu.enabled
+
+# blacklist related audio drivers
+# if you need to pass through HDMI/DisplayPort audio, or
+# if the VM is tripping up on the audio device from the host, and this tries to ignore it
+- name: Blacklist related audio drivers
+  template:
+    src: templates/blacklist-audio.conf.j2
+    dest: /etc/modprobe.d/blacklist-audio.conf
+    mode: 0644
+  become: yes
+  notify:
+    - update initramfs
+    - reboot system
+  when: iommu.enabled
+
+# Make sure i915/xe drivers are installed in guest
+# sudo apt update
+# sudo apt install linux-modules-extra-$(uname -r) linux-firmware mesa-utils vainfo intel-media-va-driver-non-free
+# linux-firmware → ships i915 + xe firmware blobs.
+# mesa-utils → gives glxinfo/glxgears.
+# vainfo / intel-media-va-driver-non-free → enables video acceleration testing.
+- name: Get current kernel version
+  shell: uname -r
+  register: current_kernel_version
+  changed_when: false
+  when: iommu.enabled
+
+- name: Install i915/xe drivers in guest
+  apt:
+    name:
+      - "linux-modules-extra-{{ current_kernel_version.stdout }}"
+      - linux-firmware
+      - mesa-utils
+      - mesa-utils-extra
+      - vainfo
+      - intel-media-va-driver-non-free
+      - intel-gpu-tools
+    state: present
+  become: yes
+  notify: reboot system
+  when: iommu.enabled
+
+
+# Install mainline kernel manager for testing different kernel versions
+- name: Add mainline kernel manager PPA
+  ansible.builtin.apt_repository:
+    repo: ppa:cappelikan/ppa
+    state: present
+  become: yes
+  when: iommu.enabled
+
+- name: Install mainline kernel manager
+  apt:
+    name: mainline
+    state: present
+    update_cache: yes
+  become: yes
+  when: iommu.enabled

@@ -1,92 +1,92 @@
 
-localhost ansible_connection=local
+; localhost ansible_connection=local
 
-[all]
+; [all]
 
-[all:vars]
-ip_base="192.168.86"
-routers=["{{ip_base}}.1"]
-ansible_connection=ssh
-ansible_python_interpreter=/usr/bin/python3
-ansible_ssh_private_key_file=~/.ssh/id_ed25519
+; [all:vars]
+; ip_base="192.168.86"
+; routers=["{{ip_base}}.1"]
+; ansible_connection=ssh
+; ansible_python_interpreter=/usr/bin/python3
+; ansible_ssh_private_key_file=~/.ssh/id_ed25519
 
-[all:children]
-k8s
-proxmox
+; [all:children]
+; k8s
+; proxmox
 
-; ---------------- pi ----------------
-[pi]
-; add a new host on first run like this:
-; k9 ansible_host=192.168.86.XX desired_host=192.168.86.29
-k0 ansible_host=192.168.86.20 desired_host=192.168.86.20
-k1 ansible_host=192.168.86.21 desired_host=192.168.86.21
-k2 ansible_host=192.168.86.22 desired_host=192.168.86.22
-k3 ansible_host=192.168.86.23 desired_host=192.168.86.23
-k4 ansible_host=192.168.86.24 desired_host=192.168.86.24
-k5 ansible_host=192.168.86.25 desired_host=192.168.86.25
+; ; ---------------- pi ----------------
+; [pi]
+; ; add a new host on first run like this:
+; ; k9 ansible_host=192.168.86.XX desired_host=192.168.86.29
+; k0 ansible_host=192.168.86.20 desired_host=192.168.86.20
+; k1 ansible_host=192.168.86.21 desired_host=192.168.86.21
+; k2 ansible_host=192.168.86.22 desired_host=192.168.86.22
+; k3 ansible_host=192.168.86.23 desired_host=192.168.86.23
+; k4 ansible_host=192.168.86.24 desired_host=192.168.86.24
+; k5 ansible_host=192.168.86.25 desired_host=192.168.86.25
 
-[pi:vars]
-ansible_user=pi
-ansible_ssh_user=pi
+; [pi:vars]
+; ansible_user=pi
+; ansible_ssh_user=pi
 
-; ---------------- proxmox vms ----------------
-[vm]
-joi ansible_host=192.168.86.5 desired_host=192.168.86.5
+; ; ---------------- proxmox vms ----------------
+; [vm]
+; joi ansible_host=192.168.86.5 desired_host=192.168.86.5
 
-[vm:children]
-nuc
+; [vm:children]
+; nuc
 
-[vm:vars]
-ansible_user=michael
-ansible_ssh_user=michael
+; [vm:vars]
+; ansible_user=michael
+; ansible_ssh_user=michael
 
-[nuc]
-n0  ansible_host=192.168.86.26 desired_host=192.168.86.26
-n1  ansible_host=192.168.86.27 desired_host=192.168.86.27
+; [nuc]
+; n0  ansible_host=192.168.86.26 desired_host=192.168.86.26
+; n1  ansible_host=192.168.86.27 desired_host=192.168.86.27
 
-; ---------------- k8s ----------------
-[k8s]
+; ; ---------------- k8s ----------------
+; [k8s]
 
-[k8s:children]
-pi
-vm
+; [k8s:children]
+; pi
+; vm
 
-[k8s:vars]
-kubernetes_apiserver_advertise_address="{{ip_base}}.100"
-k0s_version=v1.27.5+k0s.0
+; [k8s:vars]
+; kubernetes_apiserver_advertise_address="{{ip_base}}.100"
+; k0s_version=v1.27.5+k0s.0
 
-; ---------------- k8s nodes by function ----------------
-[initial_controller]
-k0
+; ; ---------------- k8s nodes by function ----------------
+; [initial_controller]
+; k0
 
-[initial_controller:vars]
-artifacts_dir=~/.kube/
-extra_args="--enable-worker --enable-dynamic-config --no-taints"
+; [initial_controller:vars]
+; artifacts_dir=~/.kube/
+; extra_args="--enable-worker --enable-dynamic-config --no-taints"
 
-[controller]
-k1
-k2
+; [controller]
+; k1
+; k2
 
-[controller:vars]
-extra_args="--enable-worker --enable-dynamic-config --no-taints"
+; [controller:vars]
+; extra_args="--enable-worker --enable-dynamic-config --no-taints"
 
-[worker]
-k3
-k4
-k5
-joi
-n0
-n1
+; [worker]
+; k3
+; k4
+; k5
+; joi
+; n0
+; n1
 
-[longhorn]
-n0
-n1
+; [longhorn]
+; n0
+; n1
 
-; ---------------- proxmox ----------------
-[proxmox]
-prox0 ansible_host=192.168.86.4 desired_host=192.168.86.4
-prox1 ansible_host=192.168.86.6 desired_host=192.168.86.6
+; ; ---------------- proxmox ----------------
+; [proxmox]
+; prox0 ansible_host=192.168.86.4 desired_host=192.168.86.4
+; prox1 ansible_host=192.168.86.6 desired_host=192.168.86.6
 
-[proxmox:vars]
-ansible_user=root
-ansible_ssh_user=root
+; [proxmox:vars]
+; ansible_user=root
+; ansible_ssh_user=root

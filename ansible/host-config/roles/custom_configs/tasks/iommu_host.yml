@@ -1,0 +1,19 @@
+---
+- name: Enable IOMMU passthrough on proxmox host
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT=".*"'
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="quiet {{ iommu.grub_options | join(" ") }}"'
+    create: yes
+    mode: 0644
+    validate: /usr/sbin/update-grub %s
+  become: yes
+  notify: reboot system
+
+- name: blacklist i915 driver on proxmox host
+  template:
+    src: templates/blacklist-i915.conf.j2
+    dest: /etc/modprobe.d/blacklist-i915.conf
+    mode: 0644
+  become: yes
+  notify: update initramfs

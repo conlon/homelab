@@ -1,0 +1,5 @@
+# blacklist related audio drivers
+# if you need to pass through HDMI/DisplayPort audio, or
+# if the VM is tripping up on the audio device from the host, and this tries to ignore it
+blacklist snd_hda_intel
+blacklist snd_hda_codec_hdmi
