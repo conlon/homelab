@@ -8,6 +8,9 @@ spec:
   selector:
     app: minio
   ports:
-    - name: minio-port
-      port: 80
+    - name: s3-api
+      port: 9000
+      targetPort: server-port
+    - name: webui
+      port: 9001
       targetPort: webui-port
