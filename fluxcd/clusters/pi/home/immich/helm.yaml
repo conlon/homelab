@@ -31,6 +31,11 @@ spec:
           main:
             image:
               tag: v2.5.6
+            probes:
+              liveness:
+                spec:
+                  timeoutSeconds: 10
+                  failureThreshold: 6
             env:
               TZ: "America/Chicago"
               REDIS_HOSTNAME: '{{ printf "%s-valkey" .Release.Name }}'
