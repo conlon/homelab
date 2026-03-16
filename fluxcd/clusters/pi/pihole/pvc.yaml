@@ -8,6 +8,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   storageClassName: longhorn
+  volumeName: pihole-restored-pv
   resources:
     requests:
       storage: 2Gi
