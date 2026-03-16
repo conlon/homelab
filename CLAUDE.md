@@ -5,7 +5,10 @@
 This repo is managed by FluxCD. Any file changes under `fluxcd/` must be
 **committed and pushed** to take effect. If changes are only written locally,
 FluxCD will overwrite them on its next reconcile interval (default: 5m for
-HelmReleases). Always commit after editing manifests here.
+HelmReleases). Always commit after editing manifests here. To force an immediate reconcile after pushing:
+```sh
+flux reconcile helmrelease <name> -n <namespace>
+```
 
 ### Testing significant changes
 
