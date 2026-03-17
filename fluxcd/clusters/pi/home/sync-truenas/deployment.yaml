@@ -1,0 +1,71 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-truenas
+  namespace: home
+  labels:
+    app: sync-truenas
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: sync-truenas
+  template:
+    metadata:
+      labels:
+        app: sync-truenas
+    spec:
+      containers:
+        - name: sync-truenas
+          image: lscr.io/linuxserver/resilio-sync:3.0.0.1409-1-ls198
+          ports:
+            - containerPort: 8888
+              name: sync-web-ui
+            - containerPort: 55555
+              name: sync-tcp
+              protocol: TCP
+            - containerPort: 55555
+              name: sync-udp
+              protocol: UDP
+          envFrom:
+            - configMapRef:
+                name: common-configs
+          # TCP socket probes instead of HTTP probes because Resilio Sync web interface
+          # requires authentication (returns 401) and doesn't have a health endpoint
+          livenessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            tcpSocket:
+              port: 8888
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 18
+          volumeMounts:
+            - name: sync-storage
+              mountPath: /sync
+              subPath: "storage/folders/Resilio Sync"
+            - name: sync-storage
+              mountPath: /config
+              subPath: storage/config
+      volumes:
+        - name: sync-storage
+          nfs:
+            server: 192.168.86.11
+            path: /mnt/nas/sync
+            readOnly: false

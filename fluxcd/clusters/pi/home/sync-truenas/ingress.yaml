@@ -1,0 +1,19 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sync-truenas-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`sync-truenas.local.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: sync-truenas
+          port: 80
+  tls:
+    secretName: local-fellowfreak-dev-production-tls

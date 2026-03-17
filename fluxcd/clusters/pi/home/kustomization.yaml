@@ -25,5 +25,6 @@ resources:
   - immich
   # misc
   - sync
+  - sync-truenas
   # external services
   - 1-external-dns
