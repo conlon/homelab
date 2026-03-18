@@ -6,6 +6,7 @@ metadata:
 resources:
   - namespace.yaml
   - common-configs.yaml
+  - truenas-configs.yaml
   # wireguard + qbittorrent
   - qbit
   # xarr stack

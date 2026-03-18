@@ -32,7 +32,7 @@ spec:
               protocol: UDP
           envFrom:
             - configMapRef:
-                name: common-configs
+                name: truenas-configs
           # TCP socket probes instead of HTTP probes because Resilio Sync web interface
           # requires authentication (returns 401) and doesn't have a health endpoint
           livenessProbe:
