@@ -22,8 +22,9 @@ spec:
         pod:
           securityContext:
             fsGroup: 1000
-          # Remove nodeName once verified working on other nodes
-          nodeName: k3
+          # Remove nodeSelector once verified working on other nodes
+          nodeSelector:
+            kubernetes.io/hostname: k3
         containers:
           gluetun:
             image:
