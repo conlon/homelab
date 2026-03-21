@@ -52,7 +52,7 @@ spec:
                 memory: 64Mi
                 cpu: 100m
               limits:
-                memory: 128Mi
+                memory: 384Mi
                 cpu: 500m
             probes:
               startup:
