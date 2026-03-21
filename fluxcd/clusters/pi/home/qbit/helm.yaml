@@ -146,7 +146,7 @@ spec:
 
     persistence:
       qbit-config:
-        existingClaim: qbit-configs-local
+        existingClaim: qbit-configs-qbit-0
         advancedMounts:
           main:
             qbit:
