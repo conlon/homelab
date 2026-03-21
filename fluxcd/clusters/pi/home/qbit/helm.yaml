@@ -59,8 +59,7 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /v1/vpn/status
+                  tcpSocket:
                     port: 8000
                   initialDelaySeconds: 10
                   periodSeconds: 10
@@ -70,8 +69,7 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /v1/vpn/status
+                  tcpSocket:
                     port: 8000
                   initialDelaySeconds: 60
                   periodSeconds: 30
@@ -81,8 +79,7 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  httpGet:
-                    path: /v1/vpn/status
+                  tcpSocket:
                     port: 8000
                   initialDelaySeconds: 15
                   periodSeconds: 15
