@@ -1,0 +1,165 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: qbit
+  namespace: home
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: app-template
+      version: "3.x"
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: home
+      interval: 24h
+  values:
+    controllers:
+      main:
+        type: statefulset
+        pod:
+          securityContext:
+            fsGroup: 1000
+          # Remove nodeName once verified working on other nodes
+          nodeName: k3
+        containers:
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: latest
+            securityContext:
+              capabilities:
+                add: ["NET_ADMIN"]
+            env:
+              VPN_SERVICE_PROVIDER: private internet access
+              VPN_TYPE: wireguard
+              SERVER_REGIONS: "US Houston"
+              # Gluetun uses OPENVPN_USER/PASS to authenticate with PIA's
+              # token API even for WireGuard — remapped from existing secret keys
+              OPENVPN_USER:
+                valueFrom:
+                  secretKeyRef:
+                    name: pia-auth
+                    key: PIA_USER
+              OPENVPN_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: pia-auth
+                    key: PIA_PASS
+            resources:
+              requests:
+                memory: 64Mi
+                cpu: 100m
+              limits:
+                memory: 128Mi
+                cpu: 500m
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8000
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 18
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8000
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8000
+                  initialDelaySeconds: 15
+                  periodSeconds: 15
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+
+          qbit:
+            image:
+              repository: lscr.io/linuxserver/qbittorrent
+              tag: "5.0.3"
+            env:
+              PUID: "1000"
+              PGID: "1000"
+              TZ: America/Chicago
+            resources:
+              requests:
+                memory: 512Mi
+                cpu: 500m
+              limits:
+                memory: 2048Mi
+                cpu: "1000m"
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8080
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 18
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8080
+                  initialDelaySeconds: 60
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: 8080
+                  initialDelaySeconds: 30
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+
+    service:
+      main:
+        controller: main
+        ports:
+          http:
+            port: 80
+            targetPort: 8080
+
+    persistence:
+      qbit-config:
+        existingClaim: qbit-configs-local
+        advancedMounts:
+          main:
+            qbit:
+              - path: /config
+      media:
+        type: nfs
+        server: 192.168.86.10
+        path: /nfs/media
+        advancedMounts:
+          main:
+            qbit:
+              - path: /media

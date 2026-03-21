@@ -7,6 +7,7 @@ resources:
   - namespace.yaml
   - common-configs.yaml
   - truenas-configs.yaml
+  - bjw-s-repo.yaml
   # wireguard + qbittorrent
   - qbit
   # xarr stack
