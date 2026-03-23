@@ -10,6 +10,10 @@
     ":rebaseStalePrs",
     "docker:enableMajor"
   ],
+  "pip-compile": {
+    "fileMatch": ["(^|/)requirements\\.in$"]
+  },
+  "ignorePaths": ["**/requirements.txt"],
   "kubernetes": {
     "fileMatch": ["\\.yaml$"]
   },
