@@ -17,13 +17,11 @@ attrs==23.2.0
     #   referencing
 bracex==2.6
     # via wcmatch
-cachetools==5.5.1
-    # via google-auth
 certifi==2024.12.14
     # via
     #   kubernetes
     #   requests
-cffi==1.17.1
+cffi==2.0.0
     # via cryptography
 cfgv==3.4.0
     # via pre-commit
@@ -36,7 +34,9 @@ click==8.1.8
 click-help-colors==0.9.4
     # via molecule
 cryptography==46.0.5
-    # via ansible-core
+    # via
+    #   ansible-core
+    #   google-auth
 distlib==0.3.9
     # via virtualenv
 distro==1.9.0
@@ -99,14 +99,12 @@ platformdirs==4.2.0
     # via virtualenv
 pluggy==1.4.0
     # via molecule
-pre-commit==4.1.0
+pre-commit==4.5.1
     # via -r requirements.in
 pre-commit-hooks==5.0.0
     # via -r requirements.in
-pyasn1==0.6.3
-    # via
-    #   pyasn1-modules
-    #   rsa
+pyasn1==0.5.1
+    # via pyasn1-modules
 pyasn1-modules==0.3.0
     # via google-auth
 pycparser==2.21
@@ -142,12 +140,10 @@ rich==13.7.0
     # via
     #   enrich
     #   molecule
-rpds-py==0.22.3
+rpds-py==0.30.0
     # via
     #   jsonschema
     #   referencing
-rsa==4.9
-    # via google-auth
 ruamel-yaml==0.18.10
     # via pre-commit-hooks
 selinux==0.3.0
@@ -168,6 +164,3 @@ wcmatch==8.5.2
     # via molecule
 websocket-client==1.7.0
     # via kubernetes
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
