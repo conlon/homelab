@@ -18,6 +18,10 @@
     "fileMatch": ["\\.yaml$"]
   },
   "dependencyDashboard": true,
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": ["at any time"]
+  },
   "packageRules": [
     {
       "description": "Limit linuxserver packages to not use dated versions",
