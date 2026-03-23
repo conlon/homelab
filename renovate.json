@@ -26,9 +26,12 @@
       "allowedVersions": "<14"
     },
     {
-      "description": "Ansible role/galaxy updates require manual dashboard approval",
+      "description": "Ansible role/galaxy updates require manual dashboard approval, but automerge for patch/minor updates",
       "matchManagers": ["ansible", "ansible-galaxy"],
       "dependencyDashboardApproval": true,
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
       "labels": ["ansible"],
       "groupName": "ansible dependencies"
     },
