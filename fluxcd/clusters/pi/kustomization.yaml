@@ -14,3 +14,4 @@ resources:
   - cnpg
   - home
   - pihole
+  - cloudflared
