@@ -46,8 +46,7 @@
     {
       "description": "Docker/container image updates auto-create PRs",
       "matchManagers": ["dockerfile", "docker-compose", "kubernetes"],
-      "labels": ["docker"],
-      "groupName": "docker images"
+      "labels": ["docker"]
     }
   ]
 }
