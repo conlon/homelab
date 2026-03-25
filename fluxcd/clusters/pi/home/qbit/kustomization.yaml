@@ -4,7 +4,6 @@ kind: Kustomization
 metadata:
   name: home
 resources:
-  - pia-secret.sops.yaml
+  - protonvpn-secret.sops.yaml
   - helm.yaml
   - ingress.yaml
-  - pvc.yaml

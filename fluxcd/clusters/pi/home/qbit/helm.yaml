@@ -22,9 +22,7 @@ spec:
         pod:
           securityContext:
             fsGroup: 1000
-          # Remove nodeSelector once verified working on other nodes
-          nodeSelector:
-            kubernetes.io/hostname: k3
+
         containers:
           gluetun:
             image:
@@ -34,19 +32,17 @@ spec:
               capabilities:
                 add: ["NET_ADMIN"]
             env:
-              VPN_SERVICE_PROVIDER: private internet access
-              VPN_TYPE: openvpn
-              SERVER_REGIONS: "US Houston"
-              OPENVPN_USER:
+              VPN_SERVICE_PROVIDER: protonvpn
+              VPN_TYPE: wireguard
+              SERVER_CITIES: "Dallas"
+              VPN_PORT_FORWARDING: "on"
+              HEALTH_TARGET_ADDRESS: "1.1.1.1:443"
+              UPDATER_PERIOD: "24h"
+              WIREGUARD_PRIVATE_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: pia-auth
-                    key: PIA_USER
-              OPENVPN_PASSWORD:
-                valueFrom:
-                  secretKeyRef:
-                    name: pia-auth
-                    key: PIA_PASS
+                    name: protonvpn-auth
+                    key: WIREGUARD_PRIVATE_KEY
             resources:
               requests:
                 memory: 64Mi
@@ -136,6 +132,48 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 3
 
+          port-sync:
+            image:
+              repository: curlimages/curl
+              tag: latest
+            env:
+              QBT_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: protonvpn-auth
+                    key: QBT_USERNAME
+              QBT_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: protonvpn-auth
+                    key: QBT_PASSWORD
+            command:
+              - /bin/sh
+              - -c
+              - |
+                while true; do
+                  PORT=$(cat /tmp/gluetun/forwarded_port 2>/dev/null)
+                  if [ -n "$PORT" ]; then
+                    curl -sf -c /tmp/qbt-cookies.txt -X POST \
+                      -d "username=${QBT_USERNAME}&password=${QBT_PASSWORD}" \
+                      http://localhost:8080/api/v2/auth/login > /dev/null
+                    curl -sf -b /tmp/qbt-cookies.txt -X POST \
+                      -d "json={\"listen_port\":${PORT}}" \
+                      http://localhost:8080/api/v2/app/setPreferences
+                    echo "$(date -u): port set to ${PORT}"
+                  else
+                    echo "$(date -u): port not yet available"
+                  fi
+                  sleep 30
+                done
+            resources:
+              requests:
+                memory: 8Mi
+                cpu: 5m
+              limits:
+                memory: 16Mi
+                cpu: 50m
+
     service:
       main:
         controller: main
@@ -159,3 +197,11 @@ spec:
           main:
             qbit:
               - path: /media
+      gluetun-tmp:
+        type: emptyDir
+        advancedMounts:
+          main:
+            gluetun:
+              - path: /tmp/gluetun
+            port-sync:
+              - path: /tmp/gluetun
