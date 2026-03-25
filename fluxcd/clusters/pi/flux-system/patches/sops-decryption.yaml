@@ -7,5 +7,4 @@ spec:
   decryption:
     provider: sops
     secretRef:
-      # Reference the new 'sops-gpg' secret
-      name: sops-gpg
+      name: sops-age
