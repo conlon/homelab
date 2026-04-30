@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: overseerr
-          image: lscr.io/linuxserver/overseerr:1.34.0
+          image: lscr.io/linuxserver/overseerr:1.35.0
           ports:
             - containerPort: 5055
               name: overseerr-port
