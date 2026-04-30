@@ -23,11 +23,16 @@ spec:
           securityContext:
             fsGroup: 1000
 
-        containers:
+        # gluetun as a native sidecar (k8s 1.28+): restartPolicy: Always means it starts
+        # before main containers and stays running. qBit's readiness probe on gluetun's
+        # port 8000 gates qBit startup, ensuring tun0 exists when qBit initialises its
+        # listen sockets. This eliminates the need for DNAT or routing table workarounds.
+        initContainers:
           gluetun:
             image:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.41.1
+            restartPolicy: Always
             securityContext:
               capabilities:
                 add: ["NET_ADMIN"]
@@ -36,6 +41,8 @@ spec:
               VPN_TYPE: wireguard
               SERVER_CITIES: "Dallas"
               VPN_PORT_FORWARDING: "on"
+              FIREWALL_OUTBOUND_SUBNETS: "10.42.0.0/16,10.43.0.0/16"
+              FIREWALL_INPUT_PORTS: "8080"
               HEALTH_TARGET_ADDRESS: "1.1.1.1:443"
               UPDATER_PERIOD: "24h"
               WIREGUARD_PRIVATE_KEY:
@@ -82,6 +89,7 @@ spec:
                   timeoutSeconds: 10
                   failureThreshold: 3
 
+        containers:
           qbit:
             image:
               repository: lscr.io/linuxserver/qbittorrent
