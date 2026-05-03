@@ -47,6 +47,34 @@
       "description": "Docker/container image updates auto-create PRs",
       "matchManagers": ["dockerfile", "docker-compose", "kubernetes"],
       "labels": ["docker"]
+    },
+    {
+      "matchPackageNames": ["louislam/uptime-kuma"],
+      "sourceUrl": "https://github.com/louislam/uptime-kuma"
+    },
+    {
+      "matchPackageNames": ["pihole/pihole"],
+      "sourceUrl": "https://github.com/pi-hole/docker-pi-hole"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/bazarr"],
+      "sourceUrl": "https://github.com/morpheus65535/bazarr"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/sonarr"],
+      "sourceUrl": "https://github.com/Sonarr/Sonarr"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/prowlarr"],
+      "sourceUrl": "https://github.com/Prowlarr/Prowlarr"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/radarr"],
+      "sourceUrl": "https://github.com/Radarr/Radarr"
+    },
+    {
+      "matchPackageNames": ["lscr.io/linuxserver/overseerr"],
+      "sourceUrl": "https://github.com/sctx/overseerr"
     }
   ]
 }
