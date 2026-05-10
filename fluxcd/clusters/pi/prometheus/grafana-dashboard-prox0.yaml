@@ -25,7 +25,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
           "id": 1,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
@@ -51,7 +51,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
           "id": 2,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
@@ -75,7 +75,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
           "id": 3,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
@@ -99,7 +99,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
           "id": 4,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
@@ -123,7 +123,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
           "id": 5,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
