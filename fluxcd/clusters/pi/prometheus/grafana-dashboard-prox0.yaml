@@ -25,7 +25,105 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+          "id": 5,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "node_hwmon_temp_celsius{job=\"prox0-node\"}",
+              "legendFormat": "{{chip}} {{sensor}}",
+              "refId": "A"
+            },
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "bmc_temp_celsius{job=\"prox0-node\", sensor=\"CPU0_TEMP\"}",
+              "legendFormat": "BMC CPU0_TEMP",
+              "refId": "B"
+            }
+          ],
+          "title": "CPU Temperature",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
+              "unit": "rotrpm"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+          "id": 4,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "bmc_fan_rpm{job=\"prox0-node\", fan=~\"CPU0_FAN|SYS_FAN[12]\"}",
+              "legendFormat": "{{fan}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Fan RPM (CPU0_FAN / SYS_FAN1/2)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "lineInterpolation": "smooth",
+                "showPoints": "never",
+                "fillOpacity": 10,
+                "stacking": {"mode": "normal", "group": "A"}
+              },
+              "min": 0,
+              "max": 1,
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+          "id": 6,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "avg by(mode) (rate(node_cpu_seconds_total{job=\"prox0-node\"}[5m]))",
+              "legendFormat": "{{mode}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Activity",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "lineInterpolation": "smooth",
+                "showPoints": "never",
+                "thresholdsStyle": {"mode": "line"}
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 40},
+                  {"color": "orange", "value": 46},
+                  {"color": "red", "value": 51}
+                ]
+              },
+              "unit": "celsius"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
           "id": 1,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
@@ -51,7 +149,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
           "id": 2,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
@@ -75,7 +173,7 @@ data:
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 40},
           "id": 3,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
@@ -94,47 +192,33 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {"mode": "palette-classic"},
-              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
-              "unit": "rotrpm"
+              "custom": {
+                "lineInterpolation": "smooth",
+                "showPoints": "never",
+                "fillOpacity": 5
+              },
+              "unit": "binBps"
             },
             "overrides": []
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
-          "id": 4,
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 48},
+          "id": 7,
           "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
           "targets": [
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
-              "expr": "bmc_fan_rpm{job=\"prox0-node\", fan=~\"SYS_FAN[12]\"}",
-              "legendFormat": "{{fan}}",
+              "expr": "rate(node_disk_read_bytes_total{job=\"prox0-node\", device=~\"sd[a-z]\"}[5m])",
+              "legendFormat": "{{device}} read",
               "refId": "A"
-            }
-          ],
-          "title": "CPU Fan RPM (SYS_FAN1/2)",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {"type": "prometheus", "uid": "${datasource}"},
-          "fieldConfig": {
-            "defaults": {
-              "color": {"mode": "palette-classic"},
-              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
-              "unit": "celsius"
             },
-            "overrides": []
-          },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
-          "id": 5,
-          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
-          "targets": [
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
-              "expr": "node_hwmon_temp_celsius{job=\"prox0-node\"}",
-              "legendFormat": "{{chip}} {{sensor}}",
-              "refId": "A"
+              "expr": "-rate(node_disk_written_bytes_total{job=\"prox0-node\", device=~\"sd[a-z]\"}[5m])",
+              "legendFormat": "{{device}} write",
+              "refId": "B"
             }
           ],
-          "title": "CPU Temperature (hwmon)",
+          "title": "HDD Read/Write Activity",
           "type": "timeseries"
         }
       ],

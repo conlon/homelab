@@ -30,6 +30,16 @@ def main():
         rpm  = entry.get("Reading")
         if name and rpm is not None:
             lines.append(f'bmc_fan_rpm{{fan="{name}"}} {rpm}')
+    lines += [
+        "",
+        "# HELP bmc_temp_celsius Temperature in Celsius from BMC Redfish Thermal",
+        "# TYPE bmc_temp_celsius gauge",
+    ]
+    for entry in data.get("Temperatures", []):
+        name = entry.get("Name") or entry.get("MemberID", "")
+        temp = entry.get("ReadingCelsius")
+        if name and temp is not None:
+            lines.append(f'bmc_temp_celsius{{sensor="{name}"}} {temp}')
     lines.append("")
 
     tmp = TEXTFILE_PATH + ".tmp"
