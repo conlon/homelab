@@ -119,6 +119,8 @@ data:
                   {"color": "red", "value": 51}
                 ]
               },
+              "softMin": 30,
+              "softMax": 50,
               "unit": "celsius"
             },
             "overrides": []
@@ -130,7 +132,7 @@ data:
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
               "expr": "hdd_temperature_celsius{job=\"prox0-node\"}",
-              "legendFormat": "{{drive}} {{model}}",
+              "legendFormat": "{{drive}} {{serial}}",
               "refId": "A"
             }
           ],
