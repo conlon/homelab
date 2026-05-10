@@ -1,0 +1,114 @@
+---
+- name: HDD fan curve | load prox0 secrets
+  community.sops.load_vars:
+    file: "{{ playbook_dir }}/inventory/host_vars/prox0.sops.yml"
+    expressions: evaluate-on-load
+
+- name: HDD fan curve | install node_exporter
+  ansible.builtin.apt:
+    name: prometheus-node-exporter
+    state: present
+  become: yes
+
+- name: HDD fan curve | ensure node_exporter textfile dir exists
+  ansible.builtin.file:
+    path: /var/lib/prometheus/node-exporter
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: '0755'
+  become: yes
+
+- name: HDD fan curve | create config directory
+  ansible.builtin.file:
+    path: /etc/hdd-fan-curve
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+  become: yes
+
+- name: HDD fan curve | deploy credentials file
+  ansible.builtin.template:
+    src: templates/hdd-fan-curve.credentials.j2
+    dest: /etc/hdd-fan-curve/credentials
+    owner: root
+    group: root
+    mode: '0600'
+  become: yes
+  no_log: true
+
+- name: HDD fan curve | deploy script
+  ansible.builtin.copy:
+    src: templates/hdd-fan-curve.py
+    dest: /usr/local/bin/hdd-fan-curve.py
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+
+- name: HDD fan curve | deploy systemd service
+  ansible.builtin.template:
+    src: templates/hdd-fan-curve.service.j2
+    dest: /lib/systemd/system/hdd-fan-curve.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: HDD fan curve | deploy systemd timer
+  ansible.builtin.template:
+    src: templates/hdd-fan-curve.timer.j2
+    dest: /lib/systemd/system/hdd-fan-curve.timer
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: BMC fan metrics | deploy script
+  ansible.builtin.copy:
+    src: templates/bmc-fan-metrics.py
+    dest: /usr/local/bin/bmc-fan-metrics.py
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+
+- name: BMC fan metrics | deploy systemd service
+  ansible.builtin.template:
+    src: templates/bmc-fan-metrics.service.j2
+    dest: /lib/systemd/system/bmc-fan-metrics.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: BMC fan metrics | deploy systemd timer
+  ansible.builtin.template:
+    src: templates/bmc-fan-metrics.timer.j2
+    dest: /lib/systemd/system/bmc-fan-metrics.timer
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: HDD fan curve | flush handlers before enabling timers
+  ansible.builtin.meta: flush_handlers
+
+- name: HDD fan curve | enable and start timer
+  ansible.builtin.systemd:
+    name: hdd-fan-curve.timer
+    enabled: yes
+    state: started
+  become: yes
+
+- name: BMC fan metrics | enable and start timer
+  ansible.builtin.systemd:
+    name: bmc-fan-metrics.timer
+    enabled: yes
+    state: started
+  become: yes

@@ -1,39 +1,29 @@
-ansible_user: michael
-ansible_become_pass: ENC[AES256_GCM,data:n+LcZ/57UX1gdulAHgAvbK3PWD/BqdRngQ==,iv:eeNl91i8nldANkrs32Vq0cdXqKKwgFDBefFTC/ZoMsU=,tag:fkJRkg810aWZm5uHxOTcOg==,type:str]
+ansible_user: ENC[AES256_GCM,data:8ZzrnDpILg==,iv:JF8dkv9MNbze5+TEfgKxGtKl2r/ky3S4sRIoAfEaKxU=,tag:MiSODShrQlNHNGFxoxhm5Q==,type:str]
+ansible_become_pass: ENC[AES256_GCM,data:8UROgadvWuCXAf8IiWltQgzZRx0lqx3XDA==,iv:tjoOLov9yt0cFEEmTo1NUsCbBjbA1siIho1RYnN69jw=,tag:eOoFMJ66aqZCBHcfCHY2Sg==,type:str]
 sops:
-    age:
-        - recipient: age14r59mmdatjfp34tpv29p729r6xusyny2l8wzqpa8l2t3f7nltp0qq27axt
-          enc: |
-            -----BEGIN AGE ENCRYPTED FILE-----
-            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA0S0g4TDhlUmNGS1VjNDlR
-            NGJNU2JNL25wRklsdXB6eG5jRElqNVJ5YWtBCmFXeXVycU8zTHdQL1cwRVpzOGVH
-            R2xwRUxzNlhTZ0ZqYzhvS3hkUDZ1TjQKLS0tIHVHRlQvbnZ2UVd2Si9yVW1jaGpN
-            Zm9CQ3N4QnhqYStUWVkwdTFLWEpqODgK9tFwk8B0iYHVAmYWkCw/whVS6yKXnRxH
-            lWkTAA5napE3ULBFQjyf54KIzsL7ph3JeiXuoYmxmrCxnGB9ndeVMw==
-            -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-04-20T21:55:22Z"
-    mac: ENC[AES256_GCM,data:GqXDAgUemLF6CT1L/GznoZE4UAYeQxKIfWYRyHiHR+2282nTM/VLeku4JgZv3MwIDoZJ2gv5/ZqPManXanze4YhLE3SQyWIjLwDyGDh8UzP91I5u8m7173Qn4rlpHIgdo+Ih7D2HnA7MDgbfCBsRxMQH8I6RkdskFRLItN6rX/4=,iv:m9EnkiE1kNCU2fzd/Oc8kvgWkU7rQuqzNbbYacnv02s=,tag:2ru62aeJrjQKkPNZps0zAw==,type:str]
+    lastmodified: "2026-05-10T20:38:42Z"
+    mac: ENC[AES256_GCM,data:b2VIhCN3rAorZDfEeHTDMBaZrBKIrz7n5+Iba3RHj+CBc+l2EE8U3SgDehJOUzYMr7woCrOOsM+myl+wpwUPQnYkvbztBN3p6xMVn6W9AeztKhaFkZSqSjKjWqAwd8GyRiyn39HCmJFKJW0Cx9h0Ud6xH5gHiJ/VDTg6DmGiJLc=,iv:T4sdPGfbT4Ps55xgo5pBJFGjDwFnefupcz8UH7iuSfg=,tag:oJxSwzHj8xFMkF4EFmPHbQ==,type:str]
     pgp:
-        - created_at: "2026-03-22T04:03:17Z"
+        - created_at: "2026-05-10T20:38:42Z"
           enc: |-
             -----BEGIN PGP MESSAGE-----
 
-            hQIMA2lsLFHyO10/AQ//VxDbATddKyIpnP32ZOibgKb2oUFUO2RR7PfLtsWcS9MR
-            BtiCD4O6L17NPnDsZAPMqj7lQ36ZILWvulvOURqhyR48efSy9SqSX1NRi9WmsKQi
-            NfwIA6iqmcYdTZmHNEO31T+zE8JdrswclKrLdGo1A3GHRwL5lDryKgfpucbZ8IBn
-            qPSR49Z/9UtcXlG/1ZkNxmaev/pFn0Z7d+jHgwdMIK3zT250qIQLFERPpYxqBVcp
-            YTk6hIsygzKih3aPC4iA5gd8F4q3MAiB7okFgRBgz9Zor1vcitgg+27e/pRE9a0b
-            eUMhv+n1/VN76a7z2HqvN0hzANy1tlJeQ+QvZJ0dalZiyK4vVY3/EigsNWopaxwY
-            6uxBpHDU20Lb4NRCxwVoASaH9yZgEMY4IE4bTGH3AcPhKnZMDS7pEBJcHQAIgWN8
-            viJm36hXRXDR+ZQt4N6jaTaspv8EZne0+BqzjY1+Lz4OMEd6B8rvdhFzXSLzMj6x
-            2rDkFfMv4s/19+VQVI3hz8AIxQ0rOotPabcGAWRgw9O1y/TUb4niPMDCsf4nJD+m
-            F/fqmdWXP0uMwTz4ZqpcqIX9D/9T5FcJbitVDIY6Lg1i9bJfsuaDIg4rHTwCeTCg
-            WyUXpRO5Qj6INGVCto+TWc53gz2rGTRIYJ4RT8Quj6+lA9LCeGFUzhZMQWw0kJXU
-            ZgEJAhBqKELvADMr4fqYSwMuAF2Tk9Lq/CiPV8gQxdaXmhSWLwYUxb8pCkXlYjq6
-            /UGAbsiM62NN1VnIDO6TXcUPar1hk3PTFsBUeB5OB8KLOy8tdXudGhZp3XyFi3jY
-            27GEug6CyQ==
-            =4b2h
+            hQIMAzSN9uM2UoaDAQ/9GLFuA2UiPUmyI4Oj8R7/PTG0YtBI9+7xu6aZwbeusc8b
+            cdazeDsL5PWouQfQVK++R0Z1g5bkid7P6yg+pUfyixHJf/kk3QgbXOs7zqPeI3CI
+            vU0ATUk0/SYPi8bReCq2L9M25aen3x2tpmDuHIgf6RMFwMYR477XiHvb5I1aHWkO
+            CaVt9ScP2kEFkqsXJWbMoESRgRSUy2TfsmtGe1bMBfpVbCA2pg5658YXW8bwt4ni
+            4rhulQd1f8t6NmgH1HstbM11eXUa/Cq/cjNkSPiKNW60B2mbsFLl1fIHiVYer6Hj
+            Aktl8feguyVI16WAeudUSYBeHC5uauDMvP1n3AaGjANnfB/HSmn5lzjiBE4okqrX
+            fA0c3lD774GRDlcZzGV61GaU+EU65g1iDHswte7NDVdpnKX9UVAU7PiRAqYJHR2x
+            c8oz/JbVSTuLWn3dNBxb+QcCzCtZdAd5dY8AGygIgnMijPzQ1gsXGCKu8ICvFnCj
+            qiYASfpL97jOdr0lV+sUukjpL0nT0yn2UJDDzA3VCtnjyzfIsg1KOhpluqe5kU7t
+            w10lfMheqHnO95/62BqnmzXl4+khBMVt9EYfm2q42qdBochTc3Ft6K4rGl8aaxeC
+            ZeSYMhr36Kr2OEGisFS0FWzyA2U4+BT45lzES0s2xMvXcgfuoBIYk8wssTexLCTU
+            aAEJAhA4JAxPQrwwfpuADrDvVVVN6NjlR3Fv+V+a8xPIYaCq289reWLh6BXaC6b9
+            RVr5Ivn9binTM9+AcYNMXarQcYFQeg8JU/wf+e0Z9ui0MQbpt0B5Ldj8nF/hhhI+
+            q+lvBbT9JYrk
+            =8Nti
             -----END PGP MESSAGE-----
-          fp: B762F357A4FF075827E3A5CFB2EC35573C2EB738
-    encrypted_regex: ^(ansible_become_pass)$
-    version: 3.8.0
+          fp: 77B66B06D2E06C5E776F4F92C7314867B986373D
+    encrypted_regex: ^(ansible_become_pass|ansible_user)$
+    version: 3.12.2

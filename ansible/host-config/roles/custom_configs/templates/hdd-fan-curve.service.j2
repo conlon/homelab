@@ -1,0 +1,10 @@
+[Unit]
+Description=HDD temperature fan curve for prox0
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/hdd-fan-curve.py
+EnvironmentFile=/etc/hdd-fan-curve/credentials
+StandardOutput=journal
+StandardError=journal

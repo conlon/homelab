@@ -38,8 +38,8 @@
     - "'worker' in group_names"
   become: yes
 
-- name: Include WOL tasks
-  ansible.builtin.include_tasks: wol.yml
+# - name: Include WOL tasks
+#   ansible.builtin.include_tasks: wol.yml
 
 - name: Add michael to sudoers with NOPASSWD
   lineinfile:
@@ -55,3 +55,7 @@
 - name: Include Coral Edge TPU specific tasks
   ansible.builtin.include_tasks: coral.yml
   when: "'nuc' in group_names"
+
+- name: Include HDD fan curve tasks (prox0 only)
+  ansible.builtin.include_tasks: hdd-fan-curve.yml
+  when: inventory_hostname == 'prox0'

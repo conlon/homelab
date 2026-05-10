@@ -1,0 +1,10 @@
+[Unit]
+Description=BMC fan RPM metrics poller for prox0
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/bmc-fan-metrics.py
+EnvironmentFile=/etc/hdd-fan-curve/credentials
+StandardOutput=journal
+StandardError=journal

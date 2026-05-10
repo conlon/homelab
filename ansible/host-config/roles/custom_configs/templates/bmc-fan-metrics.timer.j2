@@ -1,0 +1,9 @@
+[Unit]
+Description=Poll BMC fan RPMs every 10 seconds
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=10s
+
+[Install]
+WantedBy=timers.target
