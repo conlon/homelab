@@ -108,7 +108,7 @@ data:
               "custom": {
                 "lineInterpolation": "smooth",
                 "showPoints": "never",
-                "thresholdsStyle": {"mode": "line"}
+                "thresholdsStyle": {"mode": "dashed"}
               },
               "thresholds": {
                 "mode": "absolute",
