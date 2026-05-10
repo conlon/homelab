@@ -81,7 +81,7 @@ data:
                 "stacking": {"mode": "normal", "group": "A"}
               },
               "min": 0,
-              "max": 1,
+              "softMax": 0.5,
               "unit": "percentunit"
             },
             "overrides": []
@@ -92,7 +92,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
-              "expr": "avg by(mode) (rate(node_cpu_seconds_total{job=\"prox0-node\"}[5m]))",
+              "expr": "avg by(mode) (rate(node_cpu_seconds_total{job=\"prox0-node\", mode!=\"idle\"}[5m]))",
               "legendFormat": "{{mode}}",
               "refId": "A"
             }
