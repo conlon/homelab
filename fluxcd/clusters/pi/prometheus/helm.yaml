@@ -36,7 +36,7 @@ spec:
           - job_name: prox0-node
             static_configs:
               - targets:
-                  - prox0.local.fellowfreak.dev:9100
+                  - 192.168.86.4:9100
                 labels:
                   instance: prox0
                   host: prox0
