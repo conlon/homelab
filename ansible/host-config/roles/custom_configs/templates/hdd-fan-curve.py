@@ -46,8 +46,8 @@ PROFILE_NAME = "cpuFanCurve"
 # Previous linear curve (kept for A/B comparison — see sloped-fan-curve.py):
 #   CURVE = [(30, 30), (38, 45), (45, 70), (55, 100)]  # (°C, duty%) breakpoints
 STEPS = [
-    (40,  25),   # ≤40°C       → 25%  (quiet idle)
-    (46,  45),   # 40–46°C     → 45%  (warming under load)
+    (40,  35),   # ≤40°C       → 35%  (quiet idle)
+    (46,  55),   # 40–46°C     → 55%  (warming under load)
     (51,  72),   # 46–51°C     → 72%  (approaching concern zone)
     (999, 100),  # >51°C       → 100% (full blast)
 ]
