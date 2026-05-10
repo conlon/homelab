@@ -30,3 +30,13 @@ spec:
         key: vm
         operator: "Equal"
         value: "true"
+    prometheus:
+      prometheusSpec:
+        additionalScrapeConfigs:
+          - job_name: prox0-node
+            static_configs:
+              - targets:
+                  - prox0.local.fellowfreak.dev:9100
+                labels:
+                  instance: prox0
+                  host: prox0

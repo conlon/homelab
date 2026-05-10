@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-prox0
+  namespace: prometheus
+  labels:
+    grafana_dashboard: "1"
+data:
+  prox0-hdd-fans.json: |
+    {
+      "annotations": {"list": []},
+      "description": "prox0 HDD temperatures, computed fan duty, and BMC fan RPMs",
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
+              "unit": "celsius"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "id": 1,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "hdd_temperature_celsius{job=\"prox0-node\"}",
+              "legendFormat": "{{drive}} {{model}}",
+              "refId": "A"
+            }
+          ],
+          "title": "HDD Temperatures",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
+              "max": 100,
+              "min": 0,
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "id": 2,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "hdd_fan_duty_percent{job=\"prox0-node\"}",
+              "legendFormat": "Duty %",
+              "refId": "A"
+            }
+          ],
+          "title": "HDD Fan Duty %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
+              "unit": "rotrpm"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "id": 3,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "bmc_fan_rpm{job=\"prox0-node\", fan=~\"SYS_FAN[345]\"}",
+              "legendFormat": "{{fan}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Drive Fan RPM (SYS_FAN3/4/5)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
+              "unit": "rotrpm"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "id": 4,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "bmc_fan_rpm{job=\"prox0-node\", fan=~\"SYS_FAN[12]\"}",
+              "legendFormat": "{{fan}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Fan RPM (SYS_FAN1/2)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "${datasource}"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "palette-classic"},
+              "custom": {"lineInterpolation": "smooth", "showPoints": "never"},
+              "unit": "celsius"
+            },
+            "overrides": []
+          },
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+          "id": 5,
+          "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus", "uid": "${datasource}"},
+              "expr": "node_hwmon_temp_celsius{job=\"prox0-node\"}",
+              "legendFormat": "{{chip}} {{sensor}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Temperature (hwmon)",
+          "type": "timeseries"
+        }
+      ],
+      "refresh": "1m",
+      "schemaVersion": 38,
+      "tags": ["prox0", "hardware"],
+      "templating": {
+        "list": [
+          {
+            "current": {},
+            "hide": 0,
+            "includeAll": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "type": "datasource",
+            "label": "Datasource"
+          }
+        ]
+      },
+      "time": {"from": "now-3h", "to": "now"},
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "prox0 — HDD Fans & Temps",
+      "uid": "prox0-hdd-fans",
+      "version": 1
+    }

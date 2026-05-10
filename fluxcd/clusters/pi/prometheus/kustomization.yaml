@@ -7,3 +7,4 @@ resources:
   - helm.yaml
   - ingress-grafana.yaml
   - ingress-prometheus.yaml
+  - grafana-dashboard-prox0.yaml
