@@ -17,6 +17,7 @@ resources:
   - sonarr
   - sonarr-4k
   - prowlarr
+  - flaresolverr
   - bazarr
   # le stack
   - overseerr-le
