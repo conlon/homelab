@@ -1,0 +1,59 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sabnzbd
+  namespace: home
+  labels:
+    app: sabnzbd
+spec:
+  serviceName: sabnzbd
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sabnzbd
+  template:
+    metadata:
+      name: sabnzbd
+      namespace: home
+      labels:
+        app: sabnzbd
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: sabnzbd
+          image: lscr.io/linuxserver/sabnzbd:4.4.1
+          ports:
+            - containerPort: 8080
+              name: sabnzbd-port
+          envFrom:
+            - configMapRef:
+                name: common-configs
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1024Mi"
+              cpu: "1000m"
+          volumeMounts:
+            - name: sabnzbd-configs
+              mountPath: /config
+            - name: media-root
+              mountPath: /media
+      volumes:
+        - name: media-root
+          nfs:
+            server: 192.168.86.10
+            path: /nfs/media
+            readOnly: false
+  volumeClaimTemplates:
+    - metadata:
+        name: sabnzbd-configs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 1Gi
