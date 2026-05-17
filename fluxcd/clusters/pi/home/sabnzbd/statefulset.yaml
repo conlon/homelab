@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: sabnzbd
-          image: lscr.io/linuxserver/sabnzbd:4.4.1
+          image: lscr.io/linuxserver/sabnzbd:5.0.3
           ports:
             - containerPort: 8080
               name: sabnzbd-port

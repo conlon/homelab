@@ -25,6 +25,8 @@ resources:
   - uptime-kuma
   # photos
   - immich
+  # usenet
+  - sabnzbd
   # misc
   - sync
   - sync-truenas
