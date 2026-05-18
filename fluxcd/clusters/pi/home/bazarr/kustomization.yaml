@@ -4,7 +4,6 @@ kind: Kustomization
 metadata:
   name: home
 resources:
-  - deployment.yaml  # scaled to 0
   - statefulset.yaml
   - service.yaml
   - ingress.yaml
@@ -15,19 +14,6 @@ components:
   - ../0-components/security-context
 
 patches:
-  - patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/startupProbe/httpGet/port
-        value: 6767
-      - op: replace
-        path: /spec/template/spec/containers/0/livenessProbe/httpGet/port
-        value: 6767
-      - op: replace
-        path: /spec/template/spec/containers/0/readinessProbe/httpGet/port
-        value: 6767
-    target:
-      kind: Deployment
-      name: bazarr
   - patch: |-
       - op: replace
         path: /spec/template/spec/containers/0/startupProbe/httpGet/port
