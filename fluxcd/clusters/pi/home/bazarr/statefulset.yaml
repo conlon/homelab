@@ -44,8 +44,8 @@ spec:
       volumes:
         - name: media-root
           nfs:
-            server: 192.168.86.10
-            path: /nfs/media
+            server: 192.168.86.11
+            path: /mnt/nas/media
             readOnly: false
       #   - name: bazarr-configs
       #     persistentVolumeClaim:
