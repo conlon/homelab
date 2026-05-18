@@ -34,7 +34,7 @@ spec:
               memory: "256Mi"
               cpu: "100m"
             limits:
-              memory: "1024Mi"
+              memory: "2048Mi"
               cpu: "1000m"
           volumeMounts:
             - name: sabnzbd-configs
