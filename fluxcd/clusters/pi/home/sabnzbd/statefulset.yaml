@@ -20,6 +20,8 @@ spec:
         app: sabnzbd
     spec:
       terminationGracePeriodSeconds: 60
+      nodeSelector:
+        kubernetes.io/hostname: n0
       containers:
         - name: sabnzbd
           image: lscr.io/linuxserver/sabnzbd:5.0.3
@@ -31,11 +33,11 @@ spec:
                 name: common-configs
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "512Mi"
+              cpu: "500m"
             limits:
-              memory: "2048Mi"
-              cpu: "1000m"
+              memory: "4096Mi"
+              cpu: "3000m"
           volumeMounts:
             - name: sabnzbd-configs
               mountPath: /config
