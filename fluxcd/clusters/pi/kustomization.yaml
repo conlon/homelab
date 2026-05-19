@@ -12,6 +12,7 @@ resources:
   - cert-manager
   - longhorn
   - cnpg
+  - authentik
   - home
   - pihole
   - cloudflared

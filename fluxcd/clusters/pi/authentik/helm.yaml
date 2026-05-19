@@ -1,0 +1,99 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: authentik
+  namespace: authentik
+spec:
+  interval: 24h
+  url: https://charts.goauthentik.io
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: dandydev
+  namespace: authentik
+spec:
+  interval: 24h
+  url: https://dandydeveloper.github.io/charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authentik-redis
+  namespace: authentik
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: redis-ha
+      version: "4.35.10"
+      sourceRef:
+        kind: HelmRepository
+        name: dandydev
+        namespace: authentik
+      interval: 24h
+  values:
+    auth: false
+    hardAntiAffinity: false
+    replicas: 1
+    persistentVolume:
+      enabled: true
+      size: 1Gi
+      storageClass: longhorn
+    redis:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: authentik
+  namespace: authentik
+spec:
+  interval: 5m
+  dependsOn:
+    - name: authentik-redis
+  chart:
+    spec:
+      chart: authentik
+      version: "2026.2.3"
+      sourceRef:
+        kind: HelmRepository
+        name: authentik
+        namespace: authentik
+      interval: 24h
+  values:
+    postgresql:
+      enabled: false
+    authentik:
+      postgresql:
+        host: authentik-database-rw
+        name: authentik
+        port: 5432
+        user: authentik
+    global:
+      env:
+        - name: AUTHENTIK_REDIS__HOST
+          value: authentik-redis-redis-ha-announce-0.authentik.svc.cluster.local
+      envFrom:
+        - secretRef:
+            name: authentik-secrets
+    server:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+        limits:
+          memory: 1Gi
+    worker:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 768Mi
