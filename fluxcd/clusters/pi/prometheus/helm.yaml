@@ -30,6 +30,9 @@ spec:
         key: vm
         operator: "Equal"
         value: "true"
+    alertmanager:
+      alertmanagerSpec:
+        configSecret: alertmanager-discord
     prometheus:
       prometheusSpec:
         additionalScrapeConfigs:

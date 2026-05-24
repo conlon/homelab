@@ -1,0 +1,47 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: longhorn
+  namespace: longhorn-system
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: longhorn.volume
+      rules:
+        - alert: LonghornVolumeDegraded
+          expr: longhorn_volume_robustness == 2
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn volume {{ $labels.volume }} is degraded"
+            description: "Volume {{ $labels.volume }} on node {{ $labels.node }} has been degraded for 5 minutes. It is running with fewer replicas than configured."
+
+        - alert: LonghornVolumeFaulted
+          expr: longhorn_volume_robustness == 3
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn volume {{ $labels.volume }} is faulted"
+            description: "Volume {{ $labels.volume }} on node {{ $labels.node }} is faulted and may be unrecoverable."
+
+        - alert: LonghornNodeDiskNotReady
+          expr: longhorn_node_status{condition="diskpressure"} == 1
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Longhorn node {{ $labels.node }} has disk pressure"
+            description: "Node {{ $labels.node }} is experiencing disk pressure in Longhorn."
+
+        - alert: LonghornNodeNotReady
+          expr: longhorn_node_status{condition="ready"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn node {{ $labels.node }} is not ready"
+            description: "Longhorn node {{ $labels.node }} has been not ready for 5 minutes."
