@@ -20,8 +20,16 @@ spec:
         app: sabnzbd
     spec:
       terminationGracePeriodSeconds: 60
-      nodeSelector:
-        kubernetes.io/hostname: n0
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: vm
+                    operator: In
+                    values:
+                      - "true"
       containers:
         - name: sabnzbd
           image: lscr.io/linuxserver/sabnzbd:5.0.3

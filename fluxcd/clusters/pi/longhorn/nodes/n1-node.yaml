@@ -17,4 +17,6 @@ spec:
       path: /mnt/longhorn
       storageReserved: 536870912  # 512MB reserved (10% of ~5GB minimum)
       tags: []
+  tags:
+    - vm
 
