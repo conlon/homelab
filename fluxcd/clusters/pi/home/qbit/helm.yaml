@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: "3.x"
+      version: "3.7.3"
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -180,7 +180,7 @@ spec:
                 cpu: 5m
               limits:
                 memory: 16Mi
-                cpu: 50m
+                cpu: 200m
 
     service:
       main:
