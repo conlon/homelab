@@ -25,6 +25,15 @@ spec:
         namespace: prometheus
       interval: 24h
   values:
+    # k3s bundles controller-manager, scheduler, and proxy into the k3s
+    # binary — no separate pods exist to scrape. Node-level alerts
+    # (KubeNodeNotReady, KubeNodeUnreachable) cover control-plane failures.
+    kubeControllerManager:
+      enabled: false
+    kubeScheduler:
+      enabled: false
+    kubeProxy:
+      enabled: false
     tolerations:
       - effect: NoSchedule
         key: vm
