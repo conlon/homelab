@@ -6,6 +6,7 @@ metadata:
 resources:
   - namespace.yaml
   - common-configs.yaml
+  - authentik-middleware.yaml
   - truenas-configs.yaml
   - bjw-s-repo.yaml
   # wireguard + qbittorrent

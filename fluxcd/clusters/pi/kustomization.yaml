@@ -16,3 +16,4 @@ resources:
   - home
   - pihole
   - cloudflared
+  - authentik
