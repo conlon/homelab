@@ -44,14 +44,14 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
-              "expr": "node_thermal_zone_temp * on(instance) group_left(nodename) node_uname_info",
+              "expr": "max by(nodename) (node_thermal_zone_temp{job=\"node-exporter\"} * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info{job=\"node-exporter\"})))",
               "legendFormat": "{{nodename}}",
               "refId": "A"
             },
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
-              "expr": "node_hwmon_temp_celsius{job=~\"prox.-node\", chip=~\".*coretemp.*|.*k10temp.*\"}",
-              "legendFormat": "{{host}} {{sensor}}",
+              "expr": "max by(host) (node_hwmon_temp_celsius{job=~\"prox.-node\", chip!~\".*nvme.*\"})",
+              "legendFormat": "{{host}} (hottest core)",
               "refId": "B"
             }
           ],
@@ -132,14 +132,14 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
-              "expr": "node_thermal_zone_temp * on(instance) group_left(nodename) node_uname_info",
+              "expr": "max by(nodename) (node_thermal_zone_temp{job=\"node-exporter\"} * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info{job=\"node-exporter\"})))",
               "legendFormat": "{{nodename}} (SoC)",
               "refId": "A"
             },
             {
               "datasource": {"type": "prometheus", "uid": "${datasource}"},
-              "expr": "node_hwmon_temp_celsius{job=~\"prox.-node\", chip=~\".*coretemp.*|.*k10temp.*\"}",
-              "legendFormat": "{{host}} {{sensor}}",
+              "expr": "max by(host) (node_hwmon_temp_celsius{job=~\"prox.-node\", chip!~\".*nvme.*\"})",
+              "legendFormat": "{{host}} (hottest core)",
               "refId": "B"
             }
           ],

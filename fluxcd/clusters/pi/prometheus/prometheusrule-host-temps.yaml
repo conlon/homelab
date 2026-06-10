@@ -16,7 +16,7 @@ spec:
       rules:
         # --- CPU / SoC temperature ---------------------------------------------
         - alert: PiCPUTemperatureHigh
-          expr: node_thermal_zone_temp * on(instance) group_left(nodename) node_uname_info > 80
+          expr: max by(nodename) (node_thermal_zone_temp{job="node-exporter"} * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info{job="node-exporter"}))) > 80
           for: 5m
           labels:
             severity: warning
@@ -25,7 +25,7 @@ spec:
             description: "SoC temperature on {{ $labels.nodename }} has exceeded 80°C for 5m. Pis throttle around 80-85°C — check enclosure airflow and fans."
 
         - alert: PiCPUTemperatureCritical
-          expr: node_thermal_zone_temp * on(instance) group_left(nodename) node_uname_info > 85
+          expr: max by(nodename) (node_thermal_zone_temp{job="node-exporter"} * on(instance) group_left(nodename) (max by(instance, nodename) (node_uname_info{job="node-exporter"}))) > 85
           for: 2m
           labels:
             severity: critical
@@ -34,22 +34,22 @@ spec:
             description: "SoC temperature on {{ $labels.nodename }} has exceeded 85°C for 2m. Sustained heat at this level previously killed nodes (k1/k2). Intervene now."
 
         - alert: ProxmoxCPUTemperatureHigh
-          expr: node_hwmon_temp_celsius{job=~"prox.-node", chip=~".*coretemp.*|.*k10temp.*"} > 80
+          expr: max by(host) (node_hwmon_temp_celsius{job=~"prox.-node", chip!~".*nvme.*"}) > 80
           for: 5m
           labels:
             severity: warning
           annotations:
             summary: "{{ $labels.host }} CPU temperature high ({{ $value | printf \"%.0f\" }}°C)"
-            description: "CPU sensor {{ $labels.sensor }} on {{ $labels.host }} has exceeded 80°C for 5m."
+            description: "Hottest CPU core on {{ $labels.host }} has exceeded 80°C for 5m."
 
         - alert: ProxmoxCPUTemperatureCritical
-          expr: node_hwmon_temp_celsius{job=~"prox.-node", chip=~".*coretemp.*|.*k10temp.*"} > 90
+          expr: max by(host) (node_hwmon_temp_celsius{job=~"prox.-node", chip!~".*nvme.*"}) > 90
           for: 2m
           labels:
             severity: critical
           annotations:
             summary: "{{ $labels.host }} CPU temperature critical ({{ $value | printf \"%.0f\" }}°C)"
-            description: "CPU sensor {{ $labels.sensor }} on {{ $labels.host }} has exceeded 90°C for 2m."
+            description: "Hottest CPU core on {{ $labels.host }} has exceeded 90°C for 2m."
 
         # --- Drive temperature -------------------------------------------------
         - alert: DriveTemperatureHigh
