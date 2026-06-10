@@ -2,7 +2,7 @@
 - name: Gather active MAC addresses from k8s and proxmox groups
   set_fact:
     active_mac_addresses: "{{ external_wol_hosts | default({}) |
-      combine({item: hostvars[item]['ansible_default_ipv4']['macaddress']})
+      combine({item: hostvars[item]['ansible_facts']['default_ipv4']['macaddress']})
     }}"
   with_items: "{{ groups['k8s'] + groups['proxmox'] }}"
   run_once: yes
