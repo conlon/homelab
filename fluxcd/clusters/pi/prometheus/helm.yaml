@@ -42,6 +42,18 @@ spec:
     alertmanager:
       alertmanagerSpec:
         configSecret: alertmanager-discord
+    # The node-exporter DaemonSet runs on every k3s node. Mount the host textfile
+    # collector dir so the Pi disk-temp-exporter metrics (hdd_temperature_celsius,
+    # written by ansible — USB-SAT SSD temps aren't visible via hwmon) are picked
+    # up on its existing scrape. The hostPath is harmlessly empty on non-Pi nodes.
+    prometheus-node-exporter:
+      extraArgs:
+        - --collector.textfile.directory=/host/textfile
+      extraHostVolumeMounts:
+        - name: textfile
+          hostPath: /var/lib/node_exporter/textfile_collector
+          mountPath: /host/textfile
+          readOnly: true
     prometheus:
       prometheusSpec:
         additionalScrapeConfigs:
@@ -52,3 +64,12 @@ spec:
                 labels:
                   instance: prox0
                   host: prox0
+          # prox1 hosts the n0-n2 VM k3s nodes. node-exporter (installed via
+          # ansible) exposes its CPU coretemp and NVMe temp through node_hwmon_temp_celsius.
+          - job_name: prox1-node
+            static_configs:
+              - targets:
+                  - 192.168.86.6:9100
+                labels:
+                  instance: prox1
+                  host: prox1
