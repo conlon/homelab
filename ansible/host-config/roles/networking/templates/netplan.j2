@@ -1,7 +1,7 @@
 network:
   version: 2
   ethernets:
-    {{ interface | default('ens18') }}:
+    {{ ansible_facts['default_ipv4']['interface'] }}:
       dhcp4: false
       addresses:
         - {{ permanent_host_ip }}/24

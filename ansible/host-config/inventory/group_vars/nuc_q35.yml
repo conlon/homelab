@@ -1,5 +1,4 @@
 ---
-interface: enp6s18
 iommu:
   grub_options:
     - intel_iommu=on iommu=pt video=simplefb:off video=vesafb:off video=efifb:off disable_vga=1
