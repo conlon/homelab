@@ -56,6 +56,20 @@ spec:
           readOnly: true
     prometheus:
       prometheusSpec:
+        # Persist the TSDB on Longhorn (3 replicas via the longhorn storageclass)
+        # so history survives pod restarts and node loss — it was emptyDir before,
+        # so every reschedule wiped all history. Pinned to `longhorn` explicitly
+        # because both local-path and longhorn are currently marked (default).
+        retention: 30d
+        retentionSize: "18GB"
+        storageSpec:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              accessModes: ["ReadWriteOnce"]
+              resources:
+                requests:
+                  storage: 20Gi
         additionalScrapeConfigs:
           - job_name: prox0-node
             static_configs:
