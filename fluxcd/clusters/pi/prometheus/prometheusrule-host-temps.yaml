@@ -1,0 +1,93 @@
+---
+# Host hardware temperature alerts for the physical k3s nodes (Pis k0-k5) and the
+# Proxmox hosts (prox0/prox1). These exist because the June 2026 thermal outage —
+# SoCs at 85-90°C, SSDs at 72-93°C — went unnoticed: nothing was alerting on host
+# temps. Routes to the existing alertmanager-discord receiver via severity labels.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: host-hardware-temps
+  namespace: prometheus
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: node.temperature
+      rules:
+        # --- CPU / SoC temperature ---------------------------------------------
+        - alert: PiCPUTemperatureHigh
+          expr: node_thermal_zone_temp * on(instance) group_left(nodename) node_uname_info > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pi {{ $labels.nodename }} SoC temperature high ({{ $value | printf \"%.0f\" }}°C)"
+            description: "SoC temperature on {{ $labels.nodename }} has exceeded 80°C for 5m. Pis throttle around 80-85°C — check enclosure airflow and fans."
+
+        - alert: PiCPUTemperatureCritical
+          expr: node_thermal_zone_temp * on(instance) group_left(nodename) node_uname_info > 85
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Pi {{ $labels.nodename }} SoC temperature critical ({{ $value | printf \"%.0f\" }}°C)"
+            description: "SoC temperature on {{ $labels.nodename }} has exceeded 85°C for 2m. Sustained heat at this level previously killed nodes (k1/k2). Intervene now."
+
+        - alert: ProxmoxCPUTemperatureHigh
+          expr: node_hwmon_temp_celsius{job=~"prox.-node", chip=~".*coretemp.*|.*k10temp.*"} > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "{{ $labels.host }} CPU temperature high ({{ $value | printf \"%.0f\" }}°C)"
+            description: "CPU sensor {{ $labels.sensor }} on {{ $labels.host }} has exceeded 80°C for 5m."
+
+        - alert: ProxmoxCPUTemperatureCritical
+          expr: node_hwmon_temp_celsius{job=~"prox.-node", chip=~".*coretemp.*|.*k10temp.*"} > 90
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "{{ $labels.host }} CPU temperature critical ({{ $value | printf \"%.0f\" }}°C)"
+            description: "CPU sensor {{ $labels.sensor }} on {{ $labels.host }} has exceeded 90°C for 2m."
+
+        # --- Drive temperature -------------------------------------------------
+        - alert: DriveTemperatureHigh
+          expr: hdd_temperature_celsius > 60 or node_hwmon_temp_celsius{job="prox1-node", chip=~".*nvme.*"} > 60
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Drive temperature high on {{ $labels.node }}{{ $labels.host }} ({{ $value | printf \"%.0f\" }}°C)"
+            description: "Drive {{ $labels.drive }}{{ $labels.sensor }} on {{ $labels.node }}{{ $labels.host }} has exceeded 60°C for 5m. SMART spec max is typically 70°C."
+
+        - alert: DriveTemperatureCritical
+          expr: hdd_temperature_celsius > 70 or node_hwmon_temp_celsius{job="prox1-node", chip=~".*nvme.*"} > 70
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Drive temperature critical on {{ $labels.node }}{{ $labels.host }} ({{ $value | printf \"%.0f\" }}°C)"
+            description: "Drive {{ $labels.drive }}{{ $labels.sensor }} on {{ $labels.node }}{{ $labels.host }} has exceeded 70°C for 2m — above spec. The June 2026 outage was driven by SSDs running this hot."
+
+        # --- Collector / target down -------------------------------------------
+        # prox0/prox1 host node_exporter unreachable.
+        - alert: HostNodeExporterDown
+          expr: up{job=~"prox.-node"} == 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "node_exporter on {{ $labels.host }} is down"
+            description: "Prometheus has failed to scrape the {{ $labels.job }} target for 5m — host temps for {{ $labels.host }} are not being collected."
+
+        # Pi disk-temp-exporter textfile stale (systemd timer dead) — node-exporter
+        # exposes the textfile's mtime, so staleness means the collector stopped.
+        - alert: PiDiskTempExporterStale
+          expr: time() - node_textfile_mtime_seconds{file="disk-temp-exporter.prom"} > 600
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pi disk-temp-exporter stale on {{ $labels.instance }}"
+            description: "The disk-temp-exporter textfile on {{ $labels.instance }} hasn't updated in over 10m — drive temps for this Pi are not being collected (timer likely dead)."

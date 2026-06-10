@@ -9,4 +9,5 @@ resources:
   - ingress-prometheus.yaml
   - grafana-dashboard-prox0.yaml
   - grafana-dashboard-k3s-hosts.yaml
+  - prometheusrule-host-temps.yaml
   - alertmanager-discord-secret.sops.yaml
