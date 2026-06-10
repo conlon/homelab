@@ -1,0 +1,64 @@
+---
+# Pi USB-SSD temperature exporter. USB-SAT drive temps aren't exposed via hwmon,
+# so node-exporter can't see them on its own — this textfile collector fills the
+# gap. The in-cluster node-exporter DaemonSet reads the textfile dir (see the
+# prometheus-node-exporter values in fluxcd/clusters/pi/prometheus/helm.yaml).
+
+- name: Disk temp exporter | install smartmontools
+  ansible.builtin.apt:
+    name: smartmontools
+    state: present
+  become: yes
+
+- name: Disk temp exporter | ensure node-exporter textfile dir exists
+  ansible.builtin.file:
+    path: /var/lib/node_exporter/textfile_collector
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+
+- name: Disk temp exporter | deploy script
+  ansible.builtin.copy:
+    src: templates/disk-temp-exporter.py
+    dest: /usr/local/bin/disk-temp-exporter.py
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+
+- name: Disk temp exporter | deploy systemd service
+  ansible.builtin.template:
+    src: templates/disk-temp-exporter.service.j2
+    dest: /lib/systemd/system/disk-temp-exporter.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: Disk temp exporter | deploy systemd timer
+  ansible.builtin.template:
+    src: templates/disk-temp-exporter.timer.j2
+    dest: /lib/systemd/system/disk-temp-exporter.timer
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: Disk temp exporter | flush handlers before enabling timer
+  ansible.builtin.meta: flush_handlers
+
+- name: Disk temp exporter | enable and start timer
+  ansible.builtin.systemd:
+    name: disk-temp-exporter.timer
+    enabled: yes
+    state: started
+  become: yes
+
+- name: Disk temp exporter | run once now to populate metrics
+  ansible.builtin.command: /usr/local/bin/disk-temp-exporter.py
+  become: yes
+  changed_when: false

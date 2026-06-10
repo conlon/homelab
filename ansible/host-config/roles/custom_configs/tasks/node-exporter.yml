@@ -1,0 +1,19 @@
+---
+# prox1 hardware monitoring. Unlike the Pis, prox1 is not a k3s node, so it has
+# no in-cluster node-exporter DaemonSet — install the host package directly
+# (mirrors prox0). Its CPU temp (coretemp) and NVMe temp are both surfaced via
+# hwmon, so node_hwmon_temp_celsius covers both with no textfile collector.
+# Prometheus scrapes it as the `prox1-node` static target (see helm.yaml).
+
+- name: Node exporter | install prometheus-node-exporter
+  ansible.builtin.apt:
+    name: prometheus-node-exporter
+    state: present
+  become: yes
+
+- name: Node exporter | enable and start service
+  ansible.builtin.systemd:
+    name: prometheus-node-exporter
+    enabled: yes
+    state: started
+  become: yes

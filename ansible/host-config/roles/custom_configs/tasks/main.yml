@@ -59,3 +59,21 @@
 - name: Include HDD fan curve tasks (prox0 only)
   ansible.builtin.include_tasks: hdd-fan-curve.yml
   when: inventory_hostname == 'prox0'
+
+- name: Include host node-exporter tasks (prox1 only)
+  ansible.builtin.include_tasks:
+    file: node-exporter.yml
+    # apply: propagates the tag to the included child tasks so they're selected
+    # when running with `--tags hardware-temps` (dynamic includes don't inherit it).
+    apply:
+      tags: hardware-temps
+  when: inventory_hostname == 'prox1'
+  tags: hardware-temps
+
+- name: Include disk temp exporter tasks (Pi k3s nodes)
+  ansible.builtin.include_tasks:
+    file: disk-temp-exporter.yml
+    apply:
+      tags: hardware-temps
+  when: "'pi' in group_names"
+  tags: hardware-temps

@@ -1,0 +1,9 @@
+[Unit]
+Description=Export USB-SSD SMART temperatures to node-exporter textfile collector
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/disk-temp-exporter.py
+StandardOutput=journal
+StandardError=journal
