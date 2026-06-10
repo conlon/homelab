@@ -3,7 +3,7 @@ ansible_become_pass: ENC[AES256_GCM,data:rs5lMftt6naD5mpl5QAe55wYoOeoVK1cUA==,iv
 flannel_iface: ens18
 k3s_node_ip: '{{ ansible_facts[flannel_iface]["ipv4"]["address"] }}'
 extra_args: --flannel-iface={{ flannel_iface }} --node-ip={{ k3s_node_ip }}
-extra_agent_args: '{{ extra_args }} --kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark --node-label vm=true'
+extra_agent_args: '{{ extra_args }} --kubelet-arg=allowed-unsafe-sysctls=net.ipv4.conf.all.src_valid_mark --kubelet-arg=feature-gates=SidecarContainers=true --node-label vm=true'
 sops:
     age:
         - recipient: age14r59mmdatjfp34tpv29p729r6xusyny2l8wzqpa8l2t3f7nltp0qq27axt
@@ -15,8 +15,8 @@ sops:
             TGZEUHRnNy9UY0syUFJBRzRzUmRHN2sKuec5glxUrEntZN7slXDsYJSAoSH+FXHe
             yBjQYsqOpvAKkQ45L2YIrxmT0KWckmovic5NR10OXlZUFrPazoSQNA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2026-05-25T02:15:28Z"
-    mac: ENC[AES256_GCM,data:jJZShnHvItayvlVFQ4IdVU5cOEN1oKudba5PCXE7U2lq1xMTtOFuuO91RSBjwYx2NJLwIPKdEIrYOSwPOzsTr0jT5IGnJ6w6qslLHexQDNN9F5/xfKaWmwPdmNx8HZheks3VrpsarCmF20jnNrJvU2EMSeDAfGgXue+9HtQcM28=,iv:LhCSWKuDKUvU8o+tmvgG1XUXh9ezMOcxnWjZdCFFFNU=,tag:zELIw8yUP/tu7A3UA8BIbg==,type:str]
+    lastmodified: "2026-06-10T15:59:16Z"
+    mac: ENC[AES256_GCM,data:piqhiiT2UymOfNbwX4FHe1iqsp2puujxJ7vbE41C7WG6EOrT4F9UvHxKaCCQsziVoif9rzZwgqB4F6XW5OfHOEWUvFyGVi9N/ntqE6Sf6NS9bulHMacoCpFt0UjmtqvWbmS3k6vuomneh7TPOeUztyx38ohe7yaH8wMfEI0A/c4=,iv:MgjALQqCgS9g9Bc1RlOggj0MBfQqMn6AEnmu7G4Nyis=,tag:9Jm2HLcbxpCHDZtF47hBYw==,type:str]
     pgp:
         - created_at: "2026-03-22T04:03:17Z"
           enc: |-
