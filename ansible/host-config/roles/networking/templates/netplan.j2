@@ -4,7 +4,7 @@ network:
     ens18:
       dhcp4: false
       addresses:
-        - {{ desired_host }}/24
+        - {{ permanent_host_ip }}/24
       nameservers:
         addresses:
 {% for nameserver in nameservers %}

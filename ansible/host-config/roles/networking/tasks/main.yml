@@ -1,22 +1,19 @@
-- name: set resolv.conf
-  template:
-    src: resolv.j2
-    dest: /etc/resolv.conf
-    owner: root
-    group: root
-    mode: '0644'
+# Pis run NetworkManager (migrated off Raspberry Pi OS / dhcpcd). Pin the static IP,
+# gateway, and DNS on the existing "Wired connection 1" eth0 profile. Writing the
+# profile is non-disruptive; it's applied by the `reboot pi` handler at end of play
+# (which also picks up the cgroup cmdline change and reconnects at the node's new IP
+# for a node mid-cutover). Router DHCP reservations back this up.
+- name: Configure static networking on eth0 via NetworkManager
+  community.general.nmcli:
+    conn_name: "Wired connection 1"
+    ifname: eth0
+    type: ethernet
+    method4: manual
+    ip4: "{{ permanent_host_ip }}/24"
+    gw4: "{{ routers | first }}"
+    dns4: "{{ nameservers }}"
+    state: present
   become: yes
-  when: "'pi' in group_names"
-
-- name: set dhcpcd.conf
-  template:
-    src: dhcpcd.j2
-    dest: /etc/dhcpcd.conf
-    owner: root
-    group: root
-    mode: '0644'
-  become: yes
-  notify: restart dhcpcd
   when: "'pi' in group_names"
 
 - name: configure netplan
