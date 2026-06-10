@@ -7,10 +7,6 @@
     #   delegate_to: "{{ item }}"
     #   with_items: "{{ groups['k8s'] + groups['proxmox'] }}"
     #   when: hostvars[item]['ansible_default_ipv4'] is not defined
-    - name: Load encrypted credentials
-      community.sops.load_vars:
-        file: inventory/group_vars/vm.sops.yml
-        expressions: evaluate-on-load
   roles:
     - _bootstrap
     - networking
@@ -20,6 +16,3 @@
         - longhorn
     - hostname
     - custom_configs
-
-# - name: Run k0s playbook
-#   import_playbook: k0s-ansible/site.yml

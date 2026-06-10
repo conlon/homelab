@@ -1,0 +1,30 @@
+ansible_become_pass: ENC[AES256_GCM,data:vKgZB6wyaKz8,iv:gjMxGuLF/PHI4IQJ4/8hwjc6eDRmI7QJBf8Zr/EyNG8=,tag:pgZQ5IrOPsI8wetev5LntQ==,type:str]
+wol_interfaces:
+    - eth0
+sops:
+    lastmodified: "2026-06-09T22:18:00Z"
+    mac: ENC[AES256_GCM,data:7cfJagXK9bBstAXkH2AhUY2LFo0W4M6e0Wa/LmX7wGd3/j49gdmW/WIty5Luds9c4I7nk6D30E/chECALXFEMXTz61gdDrtYzmeTFtt8bNbShYLBnhdkpIh8wBUajGAUpPAHz/CivppNOgBmMzMPmpD5ZcpcKl4BUSpOiGhXQPA=,iv:v/GRey/BYsYgW294EZkCvg7AetAU/C8qmwoauVCrKyw=,tag:SznL/u4Oga/T903kgoU9BQ==,type:str]
+    pgp:
+        - created_at: "2026-06-09T22:16:37Z"
+          enc: |-
+            -----BEGIN PGP MESSAGE-----
+
+            hQIMAzSN9uM2UoaDAQ//Th+aOjvGbMGlxqhfxFBG0I/0VXwmbojgKvvy2kDMMN9c
+            bqyid9ivis/7YHxQi2TPCZTTLItScHcrx8MHP2l/eHxw1nO8sjXUxsOb96I//odV
+            I9pKnYTOmYPV7ezcIhENTsMMI1rERTZSsPoX0e6kqSnveOLvtJ5PSXms6xoWQifd
+            +FH/OOtRipKJJIBGjXO8xZS+xe4y6r7WyS0F15iMbhZLn4WjkIBwJIv2ONaEG1Hz
+            MrqiIjHnQlQHS6bWlzTQGuKDCtubJopHWC+gfF3Ub53CG8aO/z6OpWL675Vqpr8W
+            fCwRdien48KTCTqbrmVB220r+B2I3q3zQ9FoIbbiE/Tt1ApIXYuwAwSdz7K8bdv2
+            6Ut6K1Io1tP4YjipQCiNrwgL/5JzClgfRbub0S6NBRxConBleD56zDz+PSGatV0D
+            fBg8WVMfqjmZVkxxPMti+/6BgMp6rBUfqVWqpuiK3Yqh0n1zUGH9LcKFoUiK3VMS
+            eRIdjN12tHaG7ZoD+ppiq4+KtpYyBm2aDay4IN3If2uuBSIqd35vCPrGVD12exPV
+            hYtBNZiZlj3XjNpGest7Ehsm+bqt0cirJ1H5YxqiFTQyBHd2/q+RKqe4CnXPkpBY
+            vzws160NVdXlBVEl8tGIWz1fkUegjsH4GyMRM6IuGCBi/Wu3MTE5SXzUW622l87U
+            aAEJAhCKKurGCbK0TdMyKOpg9ipvRRYQfiSsXiUgM5M5M7wDcPnEx+2I0xYF7n6O
+            AIrbU6rTeZNpkSh9L2hDlD6rvaEo5//OvbZrV1CnQ8+ShZqK1zEoZis1N3yMnXTb
+            isFtH8niihNx
+            =dqUY
+            -----END PGP MESSAGE-----
+          fp: 77B66B06D2E06C5E776F4F92C7314867B986373D
+    encrypted_regex: ^(ansible_become_pass|ansible_user)$
+    version: 3.12.2
