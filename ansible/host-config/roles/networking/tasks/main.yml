@@ -6,7 +6,7 @@
 - name: Configure static networking on eth0 via NetworkManager
   community.general.nmcli:
     conn_name: "Wired connection 1"
-    ifname: eth0
+    ifname: "{{ interface | default('eth0') }}"
     type: ethernet
     method4: manual
     ip4: "{{ permanent_host_ip }}/24"

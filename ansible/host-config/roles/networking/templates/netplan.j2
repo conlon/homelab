@@ -1,7 +1,7 @@
 network:
   version: 2
   ethernets:
-    ens18:
+    {{ interface | default('ens18') }}:
       dhcp4: false
       addresses:
         - {{ permanent_host_ip }}/24
