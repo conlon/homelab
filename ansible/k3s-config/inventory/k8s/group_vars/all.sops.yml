@@ -4,13 +4,20 @@ ansible_user: pi
 systemd_dir: /etc/systemd/system
 # Set your timezone
 system_timezone: America/Chicago
-# interface which will be used for flannel
-flannel_iface: eth0
+# Underlay NIC flannel sends VXLAN traffic out of (NOT flannel's own flannel.1).
+# Auto-discovered from the default route, so it survives interface renames
+# (e.g. ens18->enp6s18 on a Proxmox machine-type change). k3s_node_ip follows it.
+# This is correct only while a node is single-homed. If you ever dual-home a node
+# (e.g. a temporary second NIC during a vnet migration), the default route is
+# ambiguous: pin this host explicitly in host_vars/<node>.yml, e.g.
+#   flannel_iface: enp6s18   # the NIC peers should reach this node on
+# and remove it once the node is single-homed on the new vnet again.
+flannel_iface: '{{ ansible_facts["default_ipv4"]["interface"] }}'
 # apiserver_endpoint is virtual ip-address which will be configured on each master
 apiserver_endpoint: 192.168.86.19
 # k3s_token is required  masters can talk together securely
 # this token should be alpha numeric only
-k3s_token: ENC[AES256_GCM,data:+ksvkGZLDssTvIJB1Mu4lLuqRg==,iv:aJA91DbE/1lDOGQ4uoeLWEvDJYBxqcPSsANKbg3wicQ=,tag:QUx5y+O4BGCOtrxMMogpDw==,type:str]
+k3s_token: ENC[AES256_GCM,data:67awS5geAjFQKNye7/aOHaEMaA==,iv:aXf5D9RlOF/eZ/6Q1noLdy0gMi58n1zjYMe6/lkDiWg=,tag:KjYNbvO8zZRaktxDc3PMWw==,type:str]
 # The IP on which the node is reachable in the cluster.
 # Here, a sensible default is provided, you can still override
 # it for each of your hosts, though.
@@ -65,28 +72,28 @@ proxmox_lxc_ct_ids:
     - 204
 retry_count: 30
 sops:
-    lastmodified: "2026-04-28T22:57:58Z"
-    mac: ENC[AES256_GCM,data:laG2AVGneQNGxfD6trMlvsGu+RifdM8A47M3eAGJqxIQ85Jm1lZBCBdsue9gOrB6HIqcrkDeJDoFX/Lx6W74Nq33sag8gHp38MKgzAHHdLRRn14toVKjFclTUfMd9InYu13IfuVhVs0/5CQ62yrw/jADCIKP2Xgj3kKULkdcUgE=,iv:0mSrdtJiVJzjACfu9ojgD2QyQ22FyM12CErdUeZJw7g=,tag:1QsF59uPvQo5VLWXOHmv0w==,type:str]
+    lastmodified: "2026-06-10T21:03:30Z"
+    mac: ENC[AES256_GCM,data:Gew1vOSPd+s3pGpHacIi+R9bSwtT7/yACmYjTL35yxz0iqWQYKPuJd3dGYv1tSFBRvvoFnu132GM1QbrmQ/H23mcLaBSDOOE1ZKV2toRz7mCYT/sfNkFzbcux6HiNUPXwW6YetEKF3uDb5PnOJeI8KirImHzefzOJ2RyfrK9GkE=,iv:T2eY+QilLNiGT9H5WCFX9YbuFnpxX/Bs8nIun9gIPDw=,tag:iJyy/ewd4bCdrsFa57Nqzw==,type:str]
     pgp:
-        - created_at: "2026-04-28T22:57:57Z"
+        - created_at: "2026-06-10T21:03:30Z"
           enc: |-
             -----BEGIN PGP MESSAGE-----
 
-            hQIMAzSN9uM2UoaDAQ//Qj0YR1vo07HOf3s/ee+LVSWjLNagyuqjB9g5l82p4jKq
-            HP8pIaqL8//UytuJzgPVSr7qfGovM1qXyjrYG3JqnGvQiG73y/GBHPUFkcTKiKV+
-            WYXAe4mK0SHb9ucqdOIQoR4x6+DayuUqdvzabFAANSM7Ahr3ssV6iV0VTIIwxMki
-            1XBHu3AzA6m3IEfORzULJ24Zo8gQGBQz/h8sFy6aMuvho54BKqbxxKIl9dxVJROf
-            3FiIEHNzHrDdOAyJEYAj2mAsNaRiC6BN/J68sJ3PVRwX9SS6Veoq4j6FS00qRB2w
-            IvWVkXH90tA+qDgMWi1mI8M+VUjYLAiJTL5CuQVVya1SRvjTWSLVen3xNz7VTGNp
-            RgN+0X+2VsRqbi643FMFdbg89iYdFue8rC8urKHfxi9L5L7zvj0feushU8wQpiCs
-            cH90eOJSdRId6XVUfy0dPvTjAHxAhzyzLHN6IuolTiwrWFcyZzhuM0pTJP1UCwRt
-            mOJYqqhzOSBmgtrN/bCPUYqHiNREOaycuJvc1UlcY6KQRkwVVAQNEggYjEHmjPuk
-            oSV5oJ/hI9U5tSO/CJAScE0m2Qdtga+5wkVnhjLO7PnkUnYrtYxclaT75UBZe87v
-            aVzpG0Mq3oA/H/xXtocVXnt4BzSQB1btQh5GV9BiE2dSPNsnxU1yXS3exwuTz27U
-            aAEJAhDAQaA2BAJrCDOKdRi9t4v3xYKk7M3uB5c6F6ZNxKLNNpj1xmS9W9HDrNcj
-            1VQV8nTsMwgd0pLA55Et5pZPgwoBAoENuKFNPfBaHP6FnrEm8+2LHBbpg4zuovND
-            kONCNQ79OVJo
-            =OfDj
+            hQIMAzSN9uM2UoaDAQ/7B9t6TVcsaM7NRfw4EzXn0g0U+oic51VErJwxPkUkLwMC
+            6D7r5IbG14S5AwoTjRX6OIxYT9fQlN9mRgC6PgJ4WvlXDkKYnSZLnD8lAyHs6J06
+            QrZce3aEjrqs211l+BZOlV+tjLH9TSU4XwZX6rwrry5dbF9c0+ezNx6XizKsugCj
+            YBo54FXgSqLJCFtUzIoQpAIHJ+OZLziAizfzWXgr5XZTcbwL9H9qZkxBWt7dfTiG
+            oM0VIdhWEBcin9Ov194pxJb0G0DeF5cY80IHcEE3jl014TdgjINFBZZlDv7aGgsh
+            QKufVIRbajsCiSwJW8TquH+6PQOvTSP/+xqwwR6LswuiBqUkzt+AmKWeMWCXjtfM
+            zcaCFOYS4FRHjZY9IXPbIN5gLCHoXFSlx6m6lEbosO9xcvqR86hXC1MXvuuWFdBj
+            GjuW5SNxBy0lRfCWwJcvsst5b3KcO6y9NDEaXDy3E97dXloe2vYQuAztm2Vnl05A
+            qVqQo2to65bjyIMpgbTnMMygz9sIq9Aw385KVhj5uhH8euzGN2xJAKbI9LvscCwd
+            61dDGuTjzXoohELTWRXLBgVYrfU58M8s0CJC70J9TkxTWpQnJSfMv0aGaFo96x46
+            GOIWBlduEkDGGfs+buVUWylfkiiv9iNId35NXOC23ipxRvNZr31FeCSVhdJJBy7U
+            aAEJAhD385vJF6NC/tZVkcFExWJ11B4sQOGAvv6tpo8tQhQ0Rp/v4TjgpKHJGWhL
+            SthTDn6HhUlB4kGANdkF/JDNhTQIfJdimA8yIdRed/nt1I7Qv2nrx0Fv1hX0ujlc
+            2V1Jppw7636q
+            =XVWS
             -----END PGP MESSAGE-----
           fp: 77B66B06D2E06C5E776F4F92C7314867B986373D
     encrypted_regex: ^(k3s_token|ansible_become_pass)$
