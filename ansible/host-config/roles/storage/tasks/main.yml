@@ -76,7 +76,7 @@
   when: >-
     'longhorn' in group_names and
     sdb_exists.stat.exists and
-    sdb1_final_check.rc == 0 and
+    (sdb1_final_check.rc | default(1)) == 0 and
     sdb1_check.rc != 0
 
 - name: Check if /dev/sdb1 is formatted
@@ -99,7 +99,7 @@
   when: "'longhorn' in group_names"
 
 - name: Check if mount point is currently mounted
-  ansible.builtin.mount:
+  ansible.posix.mount:
     path: /mnt/longhorn
     state: unmounted
   register: unmount_result
@@ -132,7 +132,7 @@
   when: "'longhorn' in group_names"
 
 - name: Mount longhorn storage drive
-  ansible.builtin.mount:
+  ansible.posix.mount:
     path: /mnt/longhorn
     src: /dev/sdb1
     fstype: ext4
