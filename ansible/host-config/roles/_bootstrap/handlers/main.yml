@@ -27,3 +27,29 @@
     state: restarted
   become: yes
   when: "'proxmox' in group_names"
+
+# Single reboot that applies kernel-cmdline (cgroups) and NetworkManager static-IP
+# changes together. Handlers run in definition order, so: fire the reboot, switch
+# the connection to the node's permanent IP (set_fact outranks inventory and runs
+# controller-side, so it works even as the box goes down), then wait for it to
+# return — at the new IP for a node mid-cutover (k1/k2), same IP otherwise.
+- name: reboot pi  # fire-and-forget; the wait below reconnects
+  ansible.builtin.shell: "sleep 5 && reboot"
+  async: 1
+  poll: 0
+  become: yes
+  listen: reboot pi
+  when: "'pi' in group_names"
+
+- name: switch to permanent IP after reboot
+  ansible.builtin.set_fact:
+    ansible_host: "{{ permanent_host_ip }}"
+  listen: reboot pi
+  when: "'pi' in group_names"
+
+- name: wait for pi to come back
+  ansible.builtin.wait_for_connection:
+    delay: 15
+    timeout: 300
+  listen: reboot pi
+  when: "'pi' in group_names"

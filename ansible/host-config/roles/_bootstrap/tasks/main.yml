@@ -58,10 +58,8 @@
 
 - name: set cgroup features
   include_tasks: cgroup-features.yml
-  when:
-    - ansible_facts['distribution'] == 'Raspbian'
+  when: "'pi' in group_names"
 
 - name: disable swap
   include_tasks: disable-swap.yml
-  when:
-    - ansible_facts['distribution'] == 'Raspbian'
+  when: "'pi' in group_names"

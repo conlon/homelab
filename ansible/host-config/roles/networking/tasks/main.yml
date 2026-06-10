@@ -14,6 +14,7 @@
     dns4: "{{ nameservers }}"
     state: present
   become: yes
+  notify: reboot pi
   when: "'pi' in group_names"
 
 - name: configure netplan

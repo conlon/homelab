@@ -1,21 +1,32 @@
 ---
-# See https://raspberrypi.stackexchange.com/q/84390/6506
-- name: Disable swap.
-  shell: >
-    dphys-swapfile swapoff &&
-    dphys-swapfile uninstall &&
-    update-rc.d -f dphys-swapfile remove
-  when:
-    - ansible_facts['swaptotal_mb'] > 0
-    - ansible_facts['distribution'] == 'Raspbian'
-  become: yes
+# k8s wants swap off. Raspberry Pi OS ships dphys-swapfile; disabling the service
+# keeps swap from coming back on boot, pinning the size to 0 is belt-and-suspenders,
+# and swapoff clears anything active now. No reboot needed — swapoff is immediate.
+# (ansible_distribution is 'Debian' on current images, so this is gated on the `pi`
+# group at the include site, not the distro string. dphys is absent on k1/k2.)
+- name: Check for dphys-swapfile
+  ansible.builtin.stat:
+    path: /etc/dphys-swapfile
+  register: dphys_conf
 
-- name: Permanently disable swap.
-  lineinfile:
+- name: Disable dphys-swapfile service so swap can't return on boot
+  ansible.builtin.systemd:
+    name: dphys-swapfile
+    enabled: false
+    state: stopped
+  become: yes
+  when: dphys_conf.stat.exists
+
+- name: Pin dphys swap size to 0
+  ansible.builtin.lineinfile:
     path: /etc/dphys-swapfile
     regexp: '^CONF_SWAPSIZE='
     line: CONF_SWAPSIZE=0
-  when:
-    - ansible_facts['swaptotal_mb'] > 0
-    - ansible_facts['distribution'] == 'Raspbian'
   become: yes
+  when: dphys_conf.stat.exists
+
+- name: Turn off any active swap now
+  ansible.builtin.command: swapoff -a
+  become: yes
+  when: ansible_facts['swaptotal_mb'] | int > 0
+  changed_when: true
