@@ -77,3 +77,7 @@
       tags: hardware-temps
   when: "'pi' in group_names"
   tags: hardware-temps
+
+- name: Include tfenv/terraform tasks (vm hosts)
+  ansible.builtin.include_tasks: tfenv.yml
+  when: "'vm' in group_names"

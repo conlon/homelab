@@ -1,0 +1,38 @@
+---
+- name: Install tfenv dependencies
+  apt:
+    name:
+      - git
+      - unzip
+    state: present
+  become: yes
+
+- name: Check if tfenv is installed
+  stat:
+    path: "{{ ansible_facts['env']['HOME'] }}/.tfenv"
+  register: tfenv_dir
+
+- name: Clone tfenv
+  git:
+    repo: https://github.com/tfutils/tfenv.git
+    dest: "{{ ansible_facts['env']['HOME'] }}/.tfenv"
+    version: "{{ tfenv_version | default('v3.0.0') }}"
+  when: not tfenv_dir.stat.exists
+
+- name: Add tfenv to PATH in bashrc
+  blockinfile:
+    dest: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
+    marker: "# {mark} TFENV CONFIGURATION"
+    block: |
+      export PATH="$HOME/.tfenv/bin:$PATH"
+    create: yes
+
+- name: Install Terraform via tfenv
+  shell: |
+    export PATH="{{ ansible_facts['env']['HOME'] }}/.tfenv/bin:$PATH"
+    tfenv install {{ terraform_version | default('latest') }}
+    tfenv use {{ terraform_version | default('latest') }}
+  args:
+    executable: /bin/bash
+  register: tfenv_output
+  changed_when: "'is already installed' not in tfenv_output.stdout"
