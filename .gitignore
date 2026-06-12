@@ -1,4 +1,5 @@
 .env/
 *.log
 *secret.yaml
+*secrets.yaml
 docs/
