@@ -79,7 +79,10 @@ resource "proxmox_virtual_environment_vm" "node" {
   scsi_hardware = "virtio-scsi-single"
   on_boot       = true
 
-  agent { enabled = true }
+  # Guest agent disabled — qemu-guest-agent isn't pre-installed on Ubuntu cloud
+  # images. To enable: either add a cloud-init snippet that installs it via
+  # user_data_file_id, or bake it into a golden template image.
+  agent { enabled = false }
 
   cpu {
     type  = "x86-64-v2-AES" # vendor-neutral — stable on the AMD Ryzen host
