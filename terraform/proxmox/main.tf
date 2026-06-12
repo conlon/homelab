@@ -62,7 +62,7 @@ resource "proxmox_virtual_environment_download_file" "ubuntu" {
   datastore_id = "local"
   node_name    = split(":", each.key)[0]
   url          = local.releases[split(":", each.key)[1]]
-  file_name    = "ubuntu-${split(":", each.key)[1]}-cloudimg.img"
+  file_name    = "ubuntu-${split(":", each.key)[1]}-cloudimg.qcow2"
 }
 
 # ---------------------------------------------------------------------------
