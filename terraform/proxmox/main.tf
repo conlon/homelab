@@ -37,12 +37,7 @@ locals {
   }
 
   # One image download per (pve_node, release) pair — keyed as "prox0:noble" etc.
-  used_node_releases = {
-    for k, n in local.nodes : "${n.pve_node}:${n.release}" => {
-      pve_node = n.pve_node
-      release  = n.release
-    }
-  }
+  used_node_releases = toset([for n in local.nodes : "${n.pve_node}:${n.release}"])
 }
 
 provider "proxmox" {
@@ -65,9 +60,9 @@ resource "proxmox_virtual_environment_download_file" "ubuntu" {
 
   content_type = "import"
   datastore_id = "local"
-  node_name    = each.value.pve_node
-  url          = local.releases[each.value.release]
-  file_name    = "ubuntu-${each.value.release}-cloudimg.img"
+  node_name    = split(":", each.key)[0]
+  url          = local.releases[split(":", each.key)[1]]
+  file_name    = "ubuntu-${split(":", each.key)[1]}-cloudimg.img"
 }
 
 # ---------------------------------------------------------------------------
