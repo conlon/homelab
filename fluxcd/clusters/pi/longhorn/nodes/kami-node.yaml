@@ -1,11 +1,8 @@
 ---
-# Longhorn Node configuration for joi
-# This configures joi to use /mnt/longhorn as the default disk path
-# instead of /var/lib/longhorn/ (which is on the root disk)
 apiVersion: longhorn.io/v1beta2
 kind: Node
 metadata:
-  name: joi
+  name: kami
   namespace: longhorn-system
 spec:
   allowScheduling: true
@@ -15,8 +12,7 @@ spec:
       diskType: filesystem
       evictionRequested: false
       path: /mnt/longhorn
-      storageReserved: 536870912  # 512MB reserved (10% of ~5GB minimum)
+      storageReserved: 536870912
       tags: []
   tags:
     - vm
-

@@ -4,7 +4,9 @@ kind: Kustomization
 metadata:
   name: longhorn-nodes
 resources:
-  - joi-node.yaml
+  - ava-node.yaml
+  - kami-node.yaml
+  - kyoko-node.yaml
   - n0-node.yaml
   - n1-node.yaml
   - n2-node.yaml

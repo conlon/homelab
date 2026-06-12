@@ -1,0 +1,18 @@
+---
+apiVersion: longhorn.io/v1beta2
+kind: Node
+metadata:
+  name: kyoko
+  namespace: longhorn-system
+spec:
+  allowScheduling: true
+  disks:
+    default-disk:
+      allowScheduling: true
+      diskType: filesystem
+      evictionRequested: false
+      path: /mnt/longhorn
+      storageReserved: 536870912
+      tags: []
+  tags:
+    - vm
