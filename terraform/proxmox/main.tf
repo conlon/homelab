@@ -13,7 +13,6 @@ data "sops_file" "secrets" {
 locals {
   secrets = data.sops_file.secrets.data
 
-  pve_node   = "prox0"
   datastore  = "local-lvm"
   gateway    = "192.168.86.1"
   ci_user    = "michael"
@@ -29,13 +28,21 @@ locals {
   # The fleet. hostname == map key.
   #   - add a host:     add an entry, `./run.sh apply`
   #   - migrate a host: change its `release`, `./run.sh plan` (verify!), apply
-  # TODO: set the real per-node IPs before first apply.
+  # pve_node: which Proxmox host to place the VM on.
+  # cores/memory: null falls back to defaults (4 cores, 4096 MB).
   nodes = {
-    kami  = { vmid = 102, ip = "192.168.86.30", release = "noble" }
-    kyoko = { vmid = 103, ip = "192.168.86.31", release = "noble" }
+    kami  = { vmid = 102, ip = "192.168.86.8",  release = "noble", pve_node = "prox0", cores = null, memory = null }
+    kyoko = { vmid = 103, ip = "192.168.86.9",  release = "noble", pve_node = "prox0", cores = null, memory = null }
+    n3    = { vmid = 104, ip = "192.168.86.29", release = "noble", pve_node = "prox1", cores = 2,    memory = 4096 }
   }
 
-  used_releases = toset([for n in local.nodes : n.release])
+  # One image download per (pve_node, release) pair — keyed as "prox0:noble" etc.
+  used_node_releases = {
+    for k, n in local.nodes : "${n.pve_node}:${n.release}" => {
+      pve_node = n.pve_node
+      release  = n.release
+    }
+  }
 }
 
 provider "proxmox" {
@@ -54,13 +61,13 @@ provider "proxmox" {
 # Base images — downloaded once per referenced release, cached on the node.
 # ---------------------------------------------------------------------------
 resource "proxmox_virtual_environment_download_file" "ubuntu" {
-  for_each = local.used_releases
+  for_each = local.used_node_releases
 
   content_type = "import"
   datastore_id = "local"
-  node_name    = local.pve_node
-  url          = local.releases[each.key]
-  file_name    = "ubuntu-${each.key}-cloudimg.img"
+  node_name    = each.value.pve_node
+  url          = local.releases[each.value.release]
+  file_name    = "ubuntu-${each.value.release}-cloudimg.img"
 }
 
 # ---------------------------------------------------------------------------
@@ -71,7 +78,7 @@ resource "proxmox_virtual_environment_vm" "node" {
 
   name          = each.key # -> guest hostname via cloud-init
   vm_id         = each.value.vmid
-  node_name     = local.pve_node
+  node_name     = each.value.pve_node
   machine       = "q35"
   bios          = "ovmf"
   scsi_hardware = "virtio-scsi-single"
@@ -81,11 +88,11 @@ resource "proxmox_virtual_environment_vm" "node" {
 
   cpu {
     type  = "x86-64-v2-AES" # vendor-neutral — stable on the AMD Ryzen host
-    cores = 4
+    cores = coalesce(each.value.cores, 4)
   }
 
   memory {
-    dedicated = 4096
+    dedicated = coalesce(each.value.memory, 4096)
   }
 
   efi_disk {
@@ -102,7 +109,7 @@ resource "proxmox_virtual_environment_vm" "node" {
     iothread     = true
     ssd          = true
     discard      = "on"
-    import_from  = proxmox_virtual_environment_download_file.ubuntu[each.value.release].id
+    import_from  = proxmox_virtual_environment_download_file.ubuntu["${each.value.pve_node}:${each.value.release}"].id
   }
 
   # --- Persistent data disk: static, MUST survive OS migration ---------------
