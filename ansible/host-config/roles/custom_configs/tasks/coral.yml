@@ -37,6 +37,7 @@
   become: yes
   args:
     executable: /bin/bash
+    creates: "{{ ansible_facts['env']['HOME'] }}/.pyenv/versions/coral-env"
 
 - name: Install pycoral in pyenv virtual environment
   shell: |
