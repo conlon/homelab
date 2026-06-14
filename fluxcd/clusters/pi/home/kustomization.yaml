@@ -29,6 +29,8 @@ resources:
   - immich
   # usenet
   - sabnzbd
+  # plex monitoring
+  - tautulli
   # misc
   - sync
   - sync-truenas

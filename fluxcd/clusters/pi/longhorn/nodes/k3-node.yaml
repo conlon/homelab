@@ -1,0 +1,14 @@
+---
+apiVersion: longhorn.io/v1beta2
+kind: Node
+metadata:
+  name: k3
+  namespace: longhorn-system
+spec:
+  disks:
+    default-disk-68f6fa3e0d78a662:
+      diskType: filesystem
+      path: /var/lib/longhorn/
+      storageReserved: 194501946573  # 181.1 GiB reserved (20% of ~906 GiB)
+      tags: []
+  tags: []

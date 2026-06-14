@@ -5,14 +5,11 @@ metadata:
   name: ava
   namespace: longhorn-system
 spec:
-  allowScheduling: true
   disks:
     default-disk:
-      allowScheduling: true
       diskType: filesystem
-      evictionRequested: false
       path: /mnt/longhorn
-      storageReserved: 536870912  # 512MB reserved (10% of ~5GB minimum)
+      storageReserved: 42048102400  # 39.2 GiB reserved (20% of ~196 GiB)
       tags: []
   tags:
     - vm

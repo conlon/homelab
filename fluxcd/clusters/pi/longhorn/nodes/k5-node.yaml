@@ -1,0 +1,14 @@
+---
+apiVersion: longhorn.io/v1beta2
+kind: Node
+metadata:
+  name: k5
+  namespace: longhorn-system
+spec:
+  disks:
+    default-disk-127143daf51e5136:
+      diskType: filesystem
+      path: /var/lib/longhorn/
+      storageReserved: 49125049139  # 45.8 GiB reserved (20% of ~229 GiB)
+      tags: []
+  tags: []

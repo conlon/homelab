@@ -5,14 +5,11 @@ metadata:
   name: kami
   namespace: longhorn-system
 spec:
-  allowScheduling: true
   disks:
     default-disk:
-      allowScheduling: true
       diskType: filesystem
-      evictionRequested: false
       path: /mnt/longhorn
-      storageReserved: 536870912
+      storageReserved: 21017642598  # 19.6 GiB reserved (20% of ~98 GiB)
       tags: []
   tags:
     - vm
