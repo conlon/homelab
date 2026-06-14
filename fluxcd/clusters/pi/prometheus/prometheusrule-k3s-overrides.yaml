@@ -1,0 +1,31 @@
+---
+# k3s embeds the API server and kubelet in a single process — there are no
+# standalone pods for kube-prometheus-stack's ServiceMonitors to scrape.
+# KubeAPIDown and KubeletDown use absent() and fire permanently in k3s clusters.
+# Override them here to suppress the noise without silencing the alertmanager.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: k3s-alert-overrides
+  namespace: prometheus
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: kubernetes-system-apiserver
+      rules:
+        - alert: KubeAPIDown
+          expr: vector(0)
+          labels:
+            severity: critical
+          annotations:
+            summary: "Disabled: k3s embeds the API server (no standalone scrape target)"
+
+    - name: kubernetes-system-kubelet
+      rules:
+        - alert: KubeletDown
+          expr: vector(0)
+          labels:
+            severity: critical
+          annotations:
+            summary: "Disabled: k3s embeds kubelet (no standalone scrape target)"
