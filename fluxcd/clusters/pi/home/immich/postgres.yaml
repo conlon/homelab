@@ -5,7 +5,7 @@ metadata:
   name: immich-database
   namespace: home
 spec:
-  instances: 1
+  instances: 2
 
   imageName: ghcr.io/tensorchord/cloudnative-vectorchord:16.9-0.4.3
 
