@@ -5,8 +5,10 @@ metadata:
   name: ava
   namespace: longhorn-system
 spec:
+  allowScheduling: false
   disks:
     default-disk:
+      allowScheduling: false
       diskType: filesystem
       path: /mnt/longhorn
       storageReserved: 42048102400  # 39.2 GiB reserved (20% of ~196 GiB)
