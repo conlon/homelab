@@ -9,3 +9,6 @@ metadata:
     kustomize.toolkit.fluxcd.io/prune: disabled
 spec:
   replicas: 3
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
