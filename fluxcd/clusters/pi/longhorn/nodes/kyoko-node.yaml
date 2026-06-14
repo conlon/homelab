@@ -5,8 +5,10 @@ metadata:
   name: kyoko
   namespace: longhorn-system
 spec:
+  allowScheduling: true
   disks:
     default-disk:
+      allowScheduling: true
       diskType: filesystem
       path: /mnt/longhorn
       storageReserved: 21017642598  # 19.6 GiB reserved (20% of ~98 GiB)

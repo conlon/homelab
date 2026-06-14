@@ -5,10 +5,12 @@ metadata:
   name: k3
   namespace: longhorn-system
 spec:
+  allowScheduling: true
   disks:
     default-disk-68f6fa3e0d78a662:
+      allowScheduling: true
       diskType: filesystem
       path: /var/lib/longhorn/
-      storageReserved: 194501946573  # 181.1 GiB reserved (20% of ~906 GiB)
+      storageReserved: 73687573709  # 68.6 GiB reserved (30% of ~229 GiB)
       tags: []
   tags: []
