@@ -19,7 +19,7 @@ spec:
       labels:
         app: overseerr
     spec:
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 120
       containers:
         - name: overseerr
           image: lscr.io/linuxserver/overseerr:1.35.0
@@ -36,6 +36,10 @@ spec:
             limits:
               memory: "500Mi"
               cpu: "1000m"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sync; sleep 5"]
           volumeMounts:
             - name: overseerr-configs
               mountPath: /config

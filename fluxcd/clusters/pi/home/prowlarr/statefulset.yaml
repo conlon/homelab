@@ -19,7 +19,7 @@ spec:
       labels:
         app: prowlarr
     spec:
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 120
       containers:
         - name: prowlarr
           image: lscr.io/linuxserver/prowlarr:1.37.0
@@ -36,6 +36,10 @@ spec:
             limits:
               memory: "300Mi"
               cpu: "300m"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sync; sleep 5"]
           volumeMounts:
             - name: prowlarr-configs
               mountPath: /config

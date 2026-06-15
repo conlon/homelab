@@ -19,7 +19,7 @@ spec:
       labels:
         app: sabnzbd
     spec:
-      terminationGracePeriodSeconds: 60
+      terminationGracePeriodSeconds: 120
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -46,6 +46,10 @@ spec:
             limits:
               memory: "4096Mi"
               cpu: "3000m"
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sync; sleep 5"]
           volumeMounts:
             - name: sabnzbd-configs
               mountPath: /config
