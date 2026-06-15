@@ -5,10 +5,10 @@ metadata:
   name: n0
   namespace: longhorn-system
 spec:
-  allowScheduling: false
+  allowScheduling: true
   disks:
     default-disk:
-      allowScheduling: false
+      allowScheduling: true
       diskType: filesystem
       path: /mnt/longhorn
       storageReserved: 42155619942  # 39.3 GiB reserved (20% of ~196 GiB)
