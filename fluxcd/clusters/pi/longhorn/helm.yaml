@@ -31,6 +31,20 @@ spec:
       storageReservedPercentageForDefaultDisk: 10
       defaultDataLocality: best-effort
       defaultReplicaCount: 2
+      # Refuse to create/attach a volume unless its full replica count can be
+      # satisfied — prevents half-born volumes with robustness:unknown.
+      allowVolumeCreationWithDegradedAvailability: false
+      # Keep the safest drain policy: evict every replica before completing a drain.
+      nodeDrainPolicy: block-for-eviction
+      # Proactively spread replicas across nodes (least-effort only acts on empty nodes).
+      replicaAutoBalance: best-effort
+      # Gentler rebuilds to avoid I/O storms on slower nodes.
+      concurrentReplicaRebuildPerNodeLimit: 2
+      # Lock in safety settings so live patches can't drift.
+      replicaSoftAntiAffinity: false
+      autoSalvage: true
+      snapshotDataIntegrity: fast-check
+      disableRevisionCounter: false
       taintTolerations:
         - effect: NoSchedule
           key: vm
