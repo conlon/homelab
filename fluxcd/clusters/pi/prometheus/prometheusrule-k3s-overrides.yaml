@@ -15,7 +15,7 @@ spec:
     - name: kubernetes-system-apiserver
       rules:
         - alert: KubeAPIDown
-          expr: vector(0)
+          expr: vector(0) > 1
           labels:
             severity: critical
           annotations:
@@ -24,7 +24,7 @@ spec:
     - name: kubernetes-system-kubelet
       rules:
         - alert: KubeletDown
-          expr: vector(0)
+          expr: vector(0) > 1
           labels:
             severity: critical
           annotations:
