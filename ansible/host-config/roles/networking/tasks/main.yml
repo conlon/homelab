@@ -31,15 +31,15 @@
 # arp_ignore=1: Only reply to ARP requests if the target IP address is configured on the incoming interface.
 # arp_announce=2: Forces the kernel to use the correct IP/MAC pair for the interface the packet is actually leaving from.
 - name: Prevent ARP Flux with two ethernet interfaces
-  ansible.builtin.lineinfile:
-    path: /etc/sysctl.conf
-    line: "{{ item }}"
-    create: yes
-    mode: 0644
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_file: /etc/sysctl.d/99-homelab.conf
+    reload: yes
   become: yes
-  with_items:
-    - net.ipv4.conf.all.arp_ignore = 1
-    - net.ipv4.conf.all.arp_announce = 2
-    - net.ipv4.conf.default.arp_ignore = 1
-    - net.ipv4.conf.default.arp_announce = 2
+  loop:
+    - { name: net.ipv4.conf.all.arp_ignore, value: '1' }
+    - { name: net.ipv4.conf.all.arp_announce, value: '2' }
+    - { name: net.ipv4.conf.default.arp_ignore, value: '1' }
+    - { name: net.ipv4.conf.default.arp_announce, value: '2' }
   when: "'proxmox' in group_names"

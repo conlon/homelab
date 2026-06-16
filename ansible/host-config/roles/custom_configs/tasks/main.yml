@@ -31,9 +31,11 @@
 
 # https://connect.resilio.com/hc/en-us/articles/360011329820-Agent-run-out-of-system-notify-watchers
 - name: Increase max_user_watches (for resilio sync). Default is 8192
-  lineinfile:
-    dest: /etc/sysctl.conf
-    line: fs.inotify.max_user_watches=32768
+  ansible.posix.sysctl:
+    name: fs.inotify.max_user_watches
+    value: '32768'
+    sysctl_file: /etc/sysctl.d/99-homelab.conf
+    reload: yes
   when:
     - "'worker' in group_names"
   become: yes
@@ -50,6 +52,17 @@
     validate: /usr/sbin/visudo -cf %s
   when:
     - "'vm' in group_names"
+  become: yes
+
+- name: Add pi to sudoers with NOPASSWD
+  lineinfile:
+    path: /etc/sudoers.d/user
+    line: 'pi    ALL=(ALL) NOPASSWD:ALL'
+    create: yes
+    mode: 0440
+    validate: /usr/sbin/visudo -cf %s
+  when:
+    - "'pi' in group_names"
   become: yes
 
 - name: Include Coral Edge TPU specific tasks
