@@ -1,0 +1,16 @@
+---
+apiVersion: longhorn.io/v1beta2
+kind: Node
+metadata:
+  name: k2
+  namespace: longhorn-system
+spec:
+  allowScheduling: true
+  disks:
+    default-disk-8966994df4115a88:
+      allowScheduling: true
+      diskType: filesystem
+      path: /var/lib/longhorn/
+      storageReserved: 36616066252  # 34.1 GiB reserved (30% of ~114 GiB)
+      tags: []
+  tags: []

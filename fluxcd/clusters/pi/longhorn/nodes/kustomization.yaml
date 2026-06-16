@@ -7,6 +7,9 @@ resources:
   - ava-node.yaml
   - kami-node.yaml
   - kyoko-node.yaml
+  - k0-node.yaml
+  - k1-node.yaml
+  - k2-node.yaml
   - k3-node.yaml
   - k4-node.yaml
   - k5-node.yaml
