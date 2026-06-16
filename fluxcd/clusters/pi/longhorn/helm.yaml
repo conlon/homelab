@@ -50,15 +50,27 @@ spec:
           key: vm
           operator: "Equal"
           value: "true"
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: "Equal"
+          value: "true"
     longhornManager:
       tolerations:
         - effect: NoSchedule
           key: vm
           operator: "Equal"
           value: "true"
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: "Equal"
+          value: "true"
     longhornDriver:
       tolerations:
         - effect: NoSchedule
           key: vm
+          operator: "Equal"
+          value: "true"
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
           operator: "Equal"
           value: "true"
