@@ -6,7 +6,6 @@ metadata:
   namespace: longhorn-system
 spec:
   allowScheduling: false
-  evictionRequested: true
   disks:
     default-disk:
       allowScheduling: false
