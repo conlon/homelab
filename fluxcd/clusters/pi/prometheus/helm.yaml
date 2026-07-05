@@ -61,7 +61,7 @@ spec:
         # so every reschedule wiped all history. Pinned to `longhorn` explicitly
         # because both local-path and longhorn are currently marked (default).
         retention: 30d
-        retentionSize: "18GB"
+        retentionSize: "25GB"
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -69,7 +69,7 @@ spec:
               accessModes: ["ReadWriteOnce"]
               resources:
                 requests:
-                  storage: 20Gi
+                  storage: 30Gi
         additionalScrapeConfigs:
           - job_name: prox0-node
             static_configs:
