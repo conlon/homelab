@@ -31,6 +31,8 @@ resources:
   - sabnzbd
   # plex monitoring
   - tautulli
+  # automation
+  - n8n
   # misc
   - sync
   - sync-truenas
