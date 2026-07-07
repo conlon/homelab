@@ -22,7 +22,7 @@ spec:
       terminationGracePeriodSeconds: 120
       containers:
         - name: bazarr
-          image: lscr.io/linuxserver/bazarr:1.5.6
+          image: lscr.io/linuxserver/bazarr:1.6.0
           ports:
             - containerPort: 6767
               name: bazarr-port
