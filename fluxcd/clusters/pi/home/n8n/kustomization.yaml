@@ -5,6 +5,7 @@ resources:
   - statefulset.yaml
   - service.yaml
   - ingress.yaml
+  - telegram-bot-token-secret.sops.yaml
 
 components:
   - ../0-components/health-checks
