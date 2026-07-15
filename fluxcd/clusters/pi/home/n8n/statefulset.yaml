@@ -43,6 +43,10 @@ spec:
               value: "America/Chicago"
             - name: NODE_OPTIONS
               value: "--max-old-space-size=1024"
+            # Must be the literal string "false"; n8n blocks $env in
+            # expressions unless this exactly equals "false".
+            - name: N8N_BLOCK_ENV_ACCESS_IN_NODE
+              value: "false"
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
