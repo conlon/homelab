@@ -19,6 +19,14 @@ spec:
       labels:
         app: n8n
     spec:
+      # Pin to n2 (x86 VM: fast CPU, 30GB RAM, and holds a local Longhorn
+      # replica of n8n-data). SQLite is write-heavy and was unusable when the
+      # outage rescheduled n8n onto a Pi 4 (slow SD/USB disk + all-remote
+      # replicas → executions hung and piled up). It ran fine all day on faster
+      # hardware. Hard pin: if n2 is down n8n stays down rather than landing on
+      # a slow node again — deliberate.
+      nodeSelector:
+        kubernetes.io/hostname: n2
       terminationGracePeriodSeconds: 120
       securityContext:
         fsGroup: 1000
