@@ -47,6 +47,13 @@ spec:
             # expressions unless this exactly equals "false".
             - name: N8N_BLOCK_ENV_ACCESS_IN_NODE
               value: "false"
+            # Unbounded production concurrency. Single-tenant instance, and an
+            # ungraceful shutdown (node outage) leaks concurrency-semaphore
+            # slots held by orphaned "running" executions, which then deadlocks
+            # every new poll with "timeout while waiting for mutex". -1 removes
+            # the semaphore so leaked slots can't wedge the workflow.
+            - name: N8N_CONCURRENCY_PRODUCTION_LIMIT
+              value: "-1"
             - name: TELEGRAM_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
