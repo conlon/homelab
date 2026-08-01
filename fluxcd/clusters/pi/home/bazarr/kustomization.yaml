@@ -7,7 +7,6 @@ resources:
   - statefulset.yaml
   - service.yaml
   - ingress.yaml
-  - pvc.yaml
 
 components:
   - ../0-components/health-checks
