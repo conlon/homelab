@@ -74,6 +74,24 @@ spec:
 
     valkey:
       enabled: true
+      # Prefer the amd64 NUCs so the cache doesn't re-pile onto a hot Pi.
+      # See project_thermal_outage.
+      defaultPodOptions:
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                preference:
+                  matchExpressions:
+                    - key: kubernetes.io/arch
+                      operator: In
+                      values: ["amd64"]
+              - weight: 50
+                preference:
+                  matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: In
+                      values: ["n1", "n2"]
       persistence:
         data:
           enabled: true
