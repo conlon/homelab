@@ -2,3 +2,4 @@
 *.log
 *secret.yaml
 docs/
+.DS_Store
