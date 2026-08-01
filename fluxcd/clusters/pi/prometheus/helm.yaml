@@ -56,6 +56,25 @@ spec:
           readOnly: true
     prometheus:
       prometheusSpec:
+        # Keep the TSDB (heavy, constant writes + compactions) off the thermally
+        # fragile Pi USB-SSDs: strongly prefer the amd64 NUCs (n1/n2 have cooling +
+        # RAM headroom), falling back to other amd64 nodes, and only a Pi as a last
+        # resort. Soft so scheduling never hard-fails. See project_thermal_outage.
+        affinity:
+          nodeAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 100
+                preference:
+                  matchExpressions:
+                    - key: kubernetes.io/arch
+                      operator: In
+                      values: ["amd64"]
+              - weight: 50
+                preference:
+                  matchExpressions:
+                    - key: kubernetes.io/hostname
+                      operator: In
+                      values: ["n1", "n2"]
         # Persist the TSDB on Longhorn (3 replicas via the longhorn storageclass)
         # so history survives pod restarts and node loss — it was emptyDir before,
         # so every reschedule wiped all history. Pinned to `longhorn` explicitly
