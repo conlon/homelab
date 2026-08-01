@@ -53,13 +53,13 @@ spec:
 
         # --- Drive temperature -------------------------------------------------
         - alert: DriveTemperatureHigh
-          expr: hdd_temperature_celsius > 60 or node_hwmon_temp_celsius{job="prox1-node", chip=~".*nvme.*"} > 60
-          for: 5m
+          expr: hdd_temperature_celsius > 65 or node_hwmon_temp_celsius{job="prox1-node", chip=~".*nvme.*"} > 60
+          for: 10m
           labels:
             severity: warning
           annotations:
             summary: "Drive temperature high on {{ $labels.node }}{{ $labels.host }} ({{ $value | printf \"%.0f\" }}°C)"
-            description: "Drive {{ $labels.drive }}{{ $labels.sensor }} on {{ $labels.node }}{{ $labels.host }} has exceeded 60°C for 5m. SMART spec max is typically 70°C."
+            description: "Drive {{ $labels.drive }}{{ $labels.sensor }} on {{ $labels.node }}{{ $labels.host }} has exceeded 65°C for 10m. SMART spec max is typically 70°C — investigate cooling/airflow. Pi SSDs (SanDisk SSD PLUS) idle at 55-60°C and spike to 63-65°C on Longhorn backup reads; the 65°C/10m threshold filters that noise while still leaving 5°C headroom before the 70°C critical."
 
         - alert: DriveTemperatureCritical
           expr: hdd_temperature_celsius > 70 or node_hwmon_temp_celsius{job="prox1-node", chip=~".*nvme.*"} > 70
