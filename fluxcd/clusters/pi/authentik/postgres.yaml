@@ -6,6 +6,27 @@ metadata:
   namespace: authentik
 spec:
   instances: 2
+
+  # Keep Postgres off the thermally fragile Pi USB-SSDs: strongly prefer the
+  # amd64 NUCs (n1/n2), fall back to other amd64, Pi only as last resort. Soft
+  # so scheduling never hard-fails. NOTE: applying rolls the instances (brief
+  # switchover if the primary is on a Pi). See project_thermal_outage.
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          preference:
+            matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values: ["amd64"]
+        - weight: 50
+          preference:
+            matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values: ["n1", "n2"]
+
   storage:
     size: 5Gi
     storageClass: longhorn
