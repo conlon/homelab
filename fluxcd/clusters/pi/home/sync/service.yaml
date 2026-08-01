@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sync
+  namespace: home
+spec:
+  selector:
+    app: sync
+  ports:
+    - name: sync-web-ui
+      port: 80
+      targetPort: sync-web-ui
