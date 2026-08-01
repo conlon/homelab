@@ -64,6 +64,23 @@ spec:
       controllers:
         main:
           strategy: Recreate
+          containers:
+            main:
+              # Was BestEffort (no requests/limits at all), which made these the
+              # first pods evicted under node memory pressure — immich-dark's ML
+              # took a SIGTERM (exit 143) on 2026-07-31 consistent with that.
+              # Sized from 14d Prometheus peaks across all three instances:
+              # memory peaked at 1034Mi, CPU at 0.96 cores (both on immich-dark
+              # during a scan; the others sat idle). Requests cover the observed
+              # peak so the pods are genuinely protected, limits give ~2x headroom
+              # for bursts. Inference is bursty — idle draw is only ~2m/250Mi.
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 1Gi
+                limits:
+                  cpu: 2000m
+                  memory: 2Gi
       persistence:
         cache:
           enabled: true
