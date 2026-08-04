@@ -30,10 +30,13 @@
     line: "source {{ ansible_facts['env']['HOME'] }}/.bash_aliases"
 
 # https://connect.resilio.com/hc/en-us/articles/360011329820-Agent-run-out-of-system-notify-watchers
+# Resilio holds one inotify watch per synced directory; the tree passed 34k dirs
+# and exhausted the old 32768 limit, dropping it to periodic-rescan mode. 524288
+# gives ~15x headroom (~0.5GB kernel memory worst case, negligible on these nodes).
 - name: Increase max_user_watches (for resilio sync). Default is 8192
   ansible.posix.sysctl:
     name: fs.inotify.max_user_watches
-    value: '32768'
+    value: '524288'
     sysctl_file: /etc/sysctl.d/99-homelab.conf
     reload: yes
   when:

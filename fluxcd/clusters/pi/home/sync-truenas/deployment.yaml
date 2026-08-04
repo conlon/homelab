@@ -18,6 +18,27 @@ spec:
       labels:
         app: sync-truenas
     spec:
+      # Keep Resilio off the thermally fragile Pis: it holds one inotify watch per
+      # synced directory (~34k today) and does constant filesystem scanning, so it
+      # wants the RAM headroom and cooling of the amd64 nodes. Same two-tier soft
+      # preference used for the TSDB — weight 100 for any amd64 node, weight 50 for
+      # n1/n2 specifically. Soft so scheduling never hard-fails onto a Pi if the
+      # amd64 nodes are all unavailable.
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/arch
+                    operator: In
+                    values: ["amd64"]
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: ["n1", "n2"]
       containers:
         - name: sync-truenas
           image: lscr.io/linuxserver/resilio-sync:3.0.0.1409-1-ls198
