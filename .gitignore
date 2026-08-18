@@ -1,5 +1,19 @@
 .env/
 *.log
-*secret.yaml
 docs/
 .DS_Store
+
+# Plaintext secrets. The negations matter: SOPS-encrypted files are meant to be
+# committed, and a broader glob would silently ignore new ones.
+*secret.yaml
+*secrets.yaml
+!*.sops.yaml
+!*.sops.yml
+
+# Terraform state holds provider credentials in plaintext — never commit it.
+# .terraform.lock.hcl is deliberately NOT ignored; it should be tracked.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+crash.log
