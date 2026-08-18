@@ -33,6 +33,8 @@ resources:
   - tautulli
   # automation
   - n8n
+  # plex
+  - plex
   # misc
   - sync
   - sync-truenas

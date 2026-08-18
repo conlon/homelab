@@ -1,0 +1,19 @@
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: plex-ingress-route
+  namespace: home
+  annotations:
+    kubernetes.io/ingress.class: traefik-external
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`plex.fellowfreak.dev`)
+      kind: Rule
+      services:
+        - name: plex
+          port: 32400
+  tls:
+    secretName: fellowfreak-dev-production-tls
