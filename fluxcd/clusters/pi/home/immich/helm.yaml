@@ -60,6 +60,21 @@ spec:
         main:
           enabled: false  # using Traefik IngressRoute
 
+      persistence:
+        # Resilio-synced folders, exposed for Immich external libraries.
+        # Same NAS export sync-truenas uses; subPath keeps the space out of the
+        # NFS export path. Read-only on purpose: Immich only indexes external
+        # libraries in place, and anything it wrote here would replicate to
+        # every Resilio peer.
+        resilio:
+          type: nfs
+          server: 192.168.86.11
+          path: /mnt/nas/sync
+          globalMounts:
+            - path: /resilio
+              subPath: "storage/folders/Resilio Sync"
+              readOnly: true
+
     machine-learning:
       controllers:
         main:
