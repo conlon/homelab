@@ -30,35 +30,3 @@ spec:
       storage: 500Gi
   volumeName: immich-library
   storageClassName: ""
----
-# Resilio Sync root folder — mounted read-only as external library source
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: immich-resilio
-spec:
-  capacity:
-    storage: 500Gi
-  accessModes:
-    - ReadWriteMany
-  nfs:
-    server: 192.168.86.11
-    path: "/mnt/nas/sync/storage/folders/Resilio Sync"
-  persistentVolumeReclaimPolicy: Retain
-  claimRef:
-    name: immich-resilio
-    namespace: home
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: immich-resilio
-  namespace: home
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 500Gi
-  volumeName: immich-resilio
-  storageClassName: ""

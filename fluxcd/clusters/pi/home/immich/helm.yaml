@@ -62,14 +62,18 @@ spec:
 
       persistence:
         # Resilio-synced folders, exposed for Immich external libraries.
-        # Matches the immich-dark/immich-priv pattern (fluxcd-priv): a static
-        # PV/PVC per instance (see pvc.yaml) rather than an inline nfs volume,
-        # so it's visible via kubectl get pvc/pv like every other mount here.
+        # Inline nfs volume, not a PV/PVC: this mount gets repointed at
+        # different subfolders periodically, and spec.persistentVolumeSource
+        # on a PV is immutable once created, so a PVC-backed mount means
+        # delete+recreate on every repoint. Same root path across all three
+        # immich instances (immich-dark/immich-priv in fluxcd-priv).
         # Read-only on purpose: Immich only indexes external libraries in
         # place, and anything it wrote here would replicate to every Resilio
         # peer.
         resilio:
-          existingClaim: immich-resilio
+          type: nfs
+          server: 192.168.86.11
+          path: "/mnt/nas/sync/storage/folders/Resilio Sync"
           globalMounts:
             - path: /resilio
               readOnly: true
