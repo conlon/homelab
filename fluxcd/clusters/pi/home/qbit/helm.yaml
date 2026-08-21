@@ -22,6 +22,19 @@ spec:
         pod:
           securityContext:
             fsGroup: 1000
+          # Keep qbit off the Pis: torrent throughput (40–80 MB/s sustained) saturates
+          # the Pi 4's shared USB bus (NIC + SSD on same controller), cascading into
+          # D-state load spikes that take the node down. Same soft-preference pattern
+          # used for other high-throughput workloads. See project_thermal_outage.
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  preference:
+                    matchExpressions:
+                      - key: vm
+                        operator: In
+                        values: ["true"]
 
         # gluetun as a native sidecar (k8s 1.28+): restartPolicy: Always means it starts
         # before main containers and stays running. qBit's readiness probe on gluetun's
