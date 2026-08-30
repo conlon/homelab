@@ -29,3 +29,19 @@ For non-trivial changes, verify before committing:
    ```sh
    flux resume helmrelease <name> -n <namespace>
    ```
+
+## Cluster access (SSH + kubeconfig)
+
+Node inventory — names → IPs and the `master`/`node`/`vm`/`nas` groups — lives in
+`ansible/k3s-config/inventory/k8s/hosts.yml`. Check it before guessing hosts.
+
+- **SSH user is `pi`** for the Raspberry Pi nodes (k0–k5), with passwordless
+  sudo. VMs (ava, kami, kyoko, n0/n1/n2) may use a different user. The NAS is
+  `michael@truenas:4242`.
+- **The API endpoint `192.168.86.19:6443` is a kube-vip VIP — no host owns it.**
+  The real control-plane nodes are **k0 (.20), ava (.7), n0 (.26)**
+  (`kubectl get nodes -l node-role.kubernetes.io/control-plane`); k3s runs there,
+  act on k0. `kyoko` is a worker, not a master.
+- **Expired kubeconfig** (symptom: `the server has asked for the client to provide
+  credentials`) → runbook at `docs/k3s-cluster-access.md`. Flux is unaffected (it
+  uses an in-cluster ServiceAccount), so reconciliation continues.
