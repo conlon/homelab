@@ -68,6 +68,15 @@ spec:
         namespace: authentik
       interval: 24h
   values:
+    # Generic hook for out-of-repo blueprints: mount the `authentik-blueprints`
+    # CM, which fluxcd-priv builds (ns authentik) by bundling per-app blueprint
+    # files (chat, and future apps). Only keys ending in `.yaml` are discovered;
+    # the worker applies them and they appear under Customization -> Blueprints.
+    # This line never changes when apps are added — they just add files to that
+    # CM. The CM MUST exist in this namespace before this HelmRelease reconciles.
+    blueprints:
+      configMaps:
+        - authentik-blueprints
     postgresql:
       enabled: false
     authentik:
