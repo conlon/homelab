@@ -21,6 +21,12 @@ patches:
       - op: replace
         path: /spec/template/spec/containers/0/readinessProbe/httpGet/port
         value: 8989
+      # Liveness delay raised from the shared 60s to 90s: the first boot after a
+      # long downtime runs DB migrations that can stall the web server past 60s and
+      # trigger a needless restart. Bump higher if migrations still get killed.
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/initialDelaySeconds
+        value: 90
     target:
       kind: StatefulSet
       name: sonarr-4k
