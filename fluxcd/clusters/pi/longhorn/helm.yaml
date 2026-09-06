@@ -30,7 +30,11 @@ spec:
       backupTargetCredentialSecret: minio-secret
       storageReservedPercentageForDefaultDisk: 10
       defaultDataLocality: best-effort
-      defaultReplicaCount: 2
+      # NOTE: this only governs volumes NOT created through the `longhorn`
+      # StorageClass. That SC comes from the chart with numberOfReplicas: 3 and its
+      # parameters win, so every PVC-provisioned volume is 3. Set to 3 so git matches
+      # reality — see persistence.defaultClassReplicaCount below to change both.
+      defaultReplicaCount: 3
       # Refuse to create/attach a volume unless its full replica count can be
       # satisfied — prevents half-born volumes with robustness:unknown.
       allowVolumeCreationWithDegradedAvailability: false
@@ -40,6 +44,25 @@ spec:
       replicaAutoBalance: best-effort
       # Gentler rebuilds to avoid I/O storms on slower nodes.
       concurrentReplicaRebuildPerNodeLimit: 2
+      # An engine that loses its replicas crashes, and Longhorn then detaches and
+      # reattaches the volume with a NEW /dev/sdX — stranding kubelet's mount on the
+      # old device (docs/longhorn-stale-mount.md). n2 sustains ~29% PSI io pressure
+      # and 217% CPU limit overcommit, so the 8s default is too tight to ride out a
+      # pressure spike. 20s trades slower genuine-failure detection for far fewer
+      # spurious engine restarts.
+      engineReplicaTimeout: 20
+      # Was 0 (disabled), which left 25 of 37 volumes on engine v1.5.1 under a v1.6.4
+      # manager — an unsupported skew carrying the v1.5.1 attach bugs documented in
+      # docs/longhorn-migration-retrospective.md §4. Engine upgrade is an in-place
+      # binary swap, no data rebuild.
+      concurrentAutomaticEngineUpgradePerNodeLimit: 3
+      # Reap orphaned replica *directories* — on-disk replica data with no owning
+      # Replica CR, left behind by evictions and rebuilds. 40 had accumulated, all
+      # verified unreferenced; n0 and ava were each holding a full replica directory
+      # (26G and 2.9G) despite having scheduling disabled and zero active replicas
+      # since the June 2026 drain. Note this does NOT reap failed Replica CRs — those
+      # are governed by staleReplicaTimeout.
+      orphanAutoDeletion: true
       # Lock in safety settings so live patches can't drift.
       replicaSoftAntiAffinity: false
       autoSalvage: true
