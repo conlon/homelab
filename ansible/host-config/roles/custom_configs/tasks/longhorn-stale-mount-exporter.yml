@@ -1,0 +1,65 @@
+---
+# Longhorn stale-mount detector. When a Longhorn engine restarts, the volume's
+# iSCSI device is recreated with a new /dev/sdX while kubelet's mount stays pinned
+# to the old device number — every I/O then returns EIO while Longhorn still
+# reports the volume "healthy". Upstream cannot self-heal this (see the header of
+# longhorn-stale-mount-exporter.py), and apps report it as database corruption, so
+# it has repeatedly cost hours to diagnose. This textfile collector makes it
+# visible in ~60s. Recovery runbook: docs/longhorn-stale-mount.md
+#
+# Runs on every k3s node (Pis and VMs) — any node that can mount a Longhorn volume.
+# The in-cluster node-exporter DaemonSet reads the textfile dir (see the
+# prometheus-node-exporter values in fluxcd/clusters/pi/prometheus/helm.yaml).
+
+- name: Longhorn stale mount exporter | ensure node-exporter textfile dir exists
+  ansible.builtin.file:
+    path: /var/lib/node_exporter/textfile_collector
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+
+- name: Longhorn stale mount exporter | deploy script
+  ansible.builtin.copy:
+    src: templates/longhorn-stale-mount-exporter.py
+    dest: /usr/local/bin/longhorn-stale-mount-exporter.py
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+
+- name: Longhorn stale mount exporter | deploy systemd service
+  ansible.builtin.template:
+    src: templates/longhorn-stale-mount-exporter.service.j2
+    dest: /lib/systemd/system/longhorn-stale-mount-exporter.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: Longhorn stale mount exporter | deploy systemd timer
+  ansible.builtin.template:
+    src: templates/longhorn-stale-mount-exporter.timer.j2
+    dest: /lib/systemd/system/longhorn-stale-mount-exporter.timer
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: reload systemd
+
+- name: Longhorn stale mount exporter | flush handlers before enabling timer
+  ansible.builtin.meta: flush_handlers
+
+- name: Longhorn stale mount exporter | enable and start timer
+  ansible.builtin.systemd:
+    name: longhorn-stale-mount-exporter.timer
+    enabled: yes
+    state: started
+  become: yes
+
+- name: Longhorn stale mount exporter | run once now to populate metrics
+  ansible.builtin.command: /usr/local/bin/longhorn-stale-mount-exporter.py
+  become: yes
+  changed_when: false

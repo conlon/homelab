@@ -45,3 +45,40 @@ spec:
           annotations:
             summary: "Longhorn node {{ $labels.node }} is not ready"
             description: "Longhorn node {{ $labels.node }} has been not ready for 5 minutes."
+
+    # Detects the failure mode that repeatedly presented as "database corruption":
+    # a Longhorn engine restart recreates the volume's iSCSI device with a new
+    # /dev/sdX while kubelet's mount stays pinned to the old device number. Every
+    # I/O then returns EIO, but Longhorn still reports the volume healthy, so none
+    # of the alerts above fire. Upstream cannot self-heal this, and a pod restart
+    # does not fix it — see docs/longhorn-stale-mount.md.
+    # Metrics come from the longhorn-stale-mount-exporter textfile collector
+    # (ansible/host-config/roles/custom_configs/tasks/longhorn-stale-mount-exporter.yml).
+    - name: longhorn.stalemount
+      rules:
+        - alert: LonghornStaleMount
+          expr: longhorn_stale_mount == 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn volume {{ $labels.volume }} has a stale mount on {{ $labels.node }}"
+            description: >-
+              The mount for {{ $labels.volume }} on {{ $labels.node }} points at device
+              {{ $labels.device }}, which no longer exists. All I/O is returning EIO and the
+              application may be reporting data corruption even though the volume is intact.
+              Longhorn will report this volume as healthy. Restarting the pod will NOT fix it —
+              scale the workload to 0, wait for the volume to detach, then scale back to 1.
+              Runbook: docs/longhorn-stale-mount.md
+
+        - alert: LonghornStaleMountExporterStale
+          expr: time() - node_textfile_mtime_seconds{file=~".*longhorn-stale-mount-exporter.prom"} > 600
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Stale-mount detector not reporting on {{ $labels.instance }}"
+            description: >-
+              longhorn-stale-mount-exporter has not written metrics for over 10 minutes on
+              {{ $labels.instance }}. Stale Longhorn mounts on this node would go undetected.
+              Check `systemctl status longhorn-stale-mount-exporter.timer`.

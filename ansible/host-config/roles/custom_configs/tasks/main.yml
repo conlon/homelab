@@ -93,3 +93,13 @@
       tags: hardware-temps
   when: "'pi' in group_names"
   tags: hardware-temps
+
+# All k3s nodes (pi + vm) — any node that can mount a Longhorn volume can strand
+# a mount on a removed device. Observed on n1 and n2 so far, but not node-specific.
+- name: Include Longhorn stale mount exporter tasks (all k3s nodes)
+  ansible.builtin.include_tasks:
+    file: longhorn-stale-mount-exporter.yml
+    apply:
+      tags: longhorn-monitoring
+  when: "'k8s' in group_names"
+  tags: longhorn-monitoring

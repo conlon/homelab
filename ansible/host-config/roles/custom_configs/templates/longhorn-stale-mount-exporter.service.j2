@@ -1,0 +1,9 @@
+[Unit]
+Description=Export Longhorn stale-mount state to node-exporter textfile collector
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/longhorn-stale-mount-exporter.py
+StandardOutput=journal
+StandardError=journal
