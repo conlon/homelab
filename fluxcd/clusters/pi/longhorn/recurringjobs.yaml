@@ -1,0 +1,37 @@
+---
+# Backup and snapshot schedules. These previously existed ONLY in the live cluster
+# (created via the Longhorn UI), so they were invisible in git and would be lost on
+# a reinstall. Values below mirror what was already running as of 2026-09-05 — applying
+# this is a no-op.
+#
+# Volumes opt in via the `recurring-job-group.longhorn.io/default: enabled` label,
+# which Longhorn applies automatically to volumes in the `default` group.
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: default-backups
+  namespace: longhorn-system
+spec:
+  name: default-backups
+  task: backup
+  groups:
+    - default
+  cron: "0 3 * * *"   # 03:00 local, daily
+  retain: 14
+  concurrency: 2
+  labels: {}
+---
+apiVersion: longhorn.io/v1beta2
+kind: RecurringJob
+metadata:
+  name: default-snapshots
+  namespace: longhorn-system
+spec:
+  name: default-snapshots
+  task: snapshot
+  groups:
+    - default
+  cron: "30 */12 * * *"   # 00:30 and 12:30 local
+  retain: 3
+  concurrency: 2
+  labels: {}

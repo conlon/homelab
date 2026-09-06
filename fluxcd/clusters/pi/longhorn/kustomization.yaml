@@ -11,3 +11,4 @@ resources:
   - nodes/
   - servicemonitor.yaml
   - prometheusrule.yaml
+  - recurringjobs.yaml
