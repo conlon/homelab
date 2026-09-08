@@ -38,6 +38,18 @@
 #   longhorn_stale_mount{volume="...",device="8:208",node="<hostname>"} 1
 #   longhorn_stale_mount_count{node="<hostname>"} <number of stale volumes>
 #   longhorn_stale_mount_scrape_success{node="<hostname>"} 1
+#
+# SECOND failure mode, added after radarr/radarr-priv on 2026-09-06: the device
+# stays present and correct, but ext4 aborts its journal after an I/O error (e.g.
+# replicas vanishing mid-write). The filesystem then fails every write with EIO
+# while /proc/mounts still reports "rw", and Longhorn still reports the volume
+# healthy — because the damage is in the filesystem, not the block device. The
+# stale-mount check above cannot see this: the device is fine.
+# ext4 latches this in the superblock and exposes a counter in sysfs, so:
+#   longhorn_fs_errors{volume="...",device="sdg",node="..."} 1   (ext4 errors_count)
+#   longhorn_fs_readonly{volume="...",device="sdg",node="..."} 1 (remounted ro)
+# Recovery is the same shape as a stale mount — scale to 0 — but additionally
+# needs e2fsck to replay the journal and clear the error flag.
 
 import os
 import socket
@@ -77,16 +89,58 @@ def longhorn_mounts():
         yield source[len(DEV_PREFIX):], parts[2], parts[4]
 
 
+def is_read_only(dev_t):
+    """True if any mount of this device carries the 'ro' option."""
+    try:
+        with open(MOUNTINFO) as fh:
+            for line in fh:
+                parts = line.split()
+                if len(parts) > 5 and parts[2] == dev_t:
+                    if "ro" in parts[5].split(","):
+                        return True
+    except OSError:
+        pass
+    return False
+
+
+def ext4_state(dev_t):
+    """Return (errors_count, device_name) for a mounted ext4 device, or (None, None).
+
+    ext4 latches I/O errors in the superblock and exposes the count at
+    /sys/fs/ext4/<dev>/errors_count. Non-zero means the filesystem hit an error
+    and, if the journal aborted, is now refusing writes even though the mount
+    still reports rw and the block device is perfectly healthy.
+    """
+    try:
+        name = os.path.basename(os.path.realpath(os.path.join("/sys/dev/block", dev_t)))
+    except OSError:
+        return None, None
+    try:
+        with open(os.path.join("/sys/fs/ext4", name, "errors_count")) as fh:
+            return int(fh.read().strip()), name
+    except (OSError, ValueError):
+        return None, name
+
+
 def main():
     # A volume is stale if ANY of its mounts points at a device that is gone.
     # Both the CSI globalmount and the per-pod bind mount share one dev_t, so
     # collapse to one series per volume to keep the alert readable.
     stale = {}
+    fs_state = {}   # volume -> (device_name, errors_count, read_only)
     for volume, dev, _mountpoint in longhorn_mounts():
         gone = not os.path.exists(os.path.join("/sys/dev/block", dev))
         # Once stale, stay stale — never let a healthy sibling mount mask it.
         if volume not in stale or gone:
             stale[volume] = (dev, gone)
+        if not gone:
+            errs, name = ext4_state(dev)
+            if errs is not None:
+                ro = is_read_only(dev)
+                prev = fs_state.get(volume)
+                # keep the worst reading across this volume's mounts
+                if prev is None or errs > prev[1] or ro:
+                    fs_state[volume] = (name, errs, ro)
 
     lines = [
         "# HELP longhorn_stale_mount Longhorn mount whose backing device no longer exists (1 = stale, needs scale-to-0 remount)",
@@ -97,6 +151,21 @@ def main():
         lines.append(
             f'longhorn_stale_mount{{volume="{volume}",device="{dev}",node="{NODE}"}} {1 if gone else 0}'
         )
+
+    lines += [
+        "# HELP longhorn_fs_errors ext4 errors_count for a Longhorn volume (>0 = filesystem hit an I/O error; writes may be failing while the volume looks healthy)",
+        "# TYPE longhorn_fs_errors gauge",
+    ]
+    for volume in sorted(fs_state):
+        name, errs, _ro = fs_state[volume]
+        lines.append(f'longhorn_fs_errors{{volume="{volume}",device="{name}",node="{NODE}"}} {errs}')
+    lines += [
+        "# HELP longhorn_fs_readonly Longhorn volume whose filesystem was remounted read-only after an error",
+        "# TYPE longhorn_fs_readonly gauge",
+    ]
+    for volume in sorted(fs_state):
+        name, _errs, ro = fs_state[volume]
+        lines.append(f'longhorn_fs_readonly{{volume="{volume}",device="{name}",node="{NODE}"}} {1 if ro else 0}')
 
     lines += [
         "# HELP longhorn_stale_mount_count Number of Longhorn volumes on this node with a dead backing device",

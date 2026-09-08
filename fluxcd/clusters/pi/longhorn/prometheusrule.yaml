@@ -71,6 +71,39 @@ spec:
               scale the workload to 0, wait for the volume to detach, then scale back to 1.
               Runbook: docs/longhorn-stale-mount.md
 
+        # Second failure mode, found via radarr/radarr-priv on 2026-09-06: the block
+        # device is present and correct, but ext4 aborted its journal after an I/O
+        # error (replicas vanishing mid-write). Every write then fails with EIO while
+        # /proc/mounts still says "rw" and Longhorn still reports the volume healthy —
+        # the damage is in the filesystem, not the block device, so LonghornStaleMount
+        # and LonghornVolumeDegraded both stay silent. Six volumes sat broken for two
+        # days before a user noticed an app hanging at login.
+        # Recovery needs e2fsck, not just a remount — see docs/longhorn-stale-mount.md.
+        - alert: LonghornFilesystemErrors
+          expr: longhorn_fs_errors > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn volume {{ $labels.volume }} has ext4 errors on {{ $labels.node }}"
+            description: >-
+              The filesystem on {{ $labels.volume }} ({{ $labels.device }}, node {{ $labels.node }})
+              has recorded {{ $value }} ext4 error(s). If the journal aborted, the application is
+              getting EIO on every write while Longhorn still reports the volume healthy. Apps
+              report this as database corruption. Fix: scale the workload to 0, then run
+              `e2fsck -fy` on the detached volume. Runbook: docs/longhorn-stale-mount.md
+
+        - alert: LonghornFilesystemReadOnly
+          expr: longhorn_fs_readonly == 1
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Longhorn volume {{ $labels.volume }} remounted read-only on {{ $labels.node }}"
+            description: >-
+              {{ $labels.volume }} on {{ $labels.node }} was remounted read-only after a filesystem
+              error. The application cannot write. Runbook: docs/longhorn-stale-mount.md
+
         - alert: LonghornStaleMountExporterStale
           expr: time() - node_textfile_mtime_seconds{file=~".*longhorn-stale-mount-exporter.prom"} > 600
           for: 10m
