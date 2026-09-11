@@ -13,8 +13,23 @@
 # mounts that directory (read-only) and exposes the metrics on its existing scrape,
 # so no extra Prometheus target is needed.
 #
-# Metric (matches the prox0 convention in hdd-fan-curve.py for dashboard reuse):
+# Also exports drive health/wear from the SAME smartctl call. Added 2026-09-11 after
+# k3's SSD reached 0% available reserved space ("Drive failure expected in less than
+# 24 hours") with nobody noticing -- this script had been reading the attribute table
+# every 60s for months and discarding everything except attribute 194.
+#
+# Note the wear metrics are NOT a write-volume story: k5 has written 80.7 TiB over 848
+# average P/E cycles and sits at 100% reserve, while k3 failed at 57 P/E cycles in 57
+# days. Reserve exhaustion on a lightly-used drive means defects, not wear.
+#
+# Metrics (hdd_temperature_celsius matches the prox0 convention in hdd-fan-curve.py):
 #   hdd_temperature_celsius{drive="/dev/sda",model="...",node="<hostname>"} <temp>
+#   smart_health_passed{...}                     1 = SMART self-assessment PASSED
+#   smart_available_reserved_space_percent{...}  spare blocks left; <5 = drive declares failure
+#   smart_reallocated_sector_count{...}          blocks retired to spares
+#   smart_erase_fail_count{...}                  controller could not erase a block (defect signal)
+#   smart_power_on_hours{...}
+#   smart_total_writes_gib{...}                  where the drive reports it
 
 import os
 import re
@@ -50,6 +65,59 @@ def scan_devices():
         dtype = parts[2] if len(parts) >= 3 and parts[1] == "-d" else "auto"
         devices.append((dev, dtype))
     return devices
+
+
+# Vendor names differ for the same concept; map them onto stable metric names.
+ATTR_MAP = {
+    "Perc_Avail_Resrvd_Space":  ("smart_available_reserved_space_percent", "value"),
+    "Available_Reservd_Space":  ("smart_available_reserved_space_percent", "value"),
+    "Reallocated_Sector_Ct":    ("smart_reallocated_sector_count", "raw"),
+    "Erase_Fail_Count":         ("smart_erase_fail_count", "raw"),
+    "Program_Fail_Count":       ("smart_program_fail_count", "raw"),
+    "Power_On_Hours":           ("smart_power_on_hours", "raw"),
+    "Total_Writes_GiB":         ("smart_total_writes_gib", "raw"),
+    "Unexpect_Power_Loss_Ct":   ("smart_unexpected_power_loss_count", "raw"),
+    "Wear_Leveling_Count":      ("smart_wear_leveling_count", "raw"),
+    "Media_Wearout_Indicator":  ("smart_media_wearout_indicator", "value"),
+}
+
+
+def read_health_and_attrs(dev, dtype):
+    """Return (health_passed|None, {metric_name: number}) from one `smartctl -H -A`.
+
+    Only the -d type that `smartctl --scan` reported is ever used. Do NOT probe
+    speculative -d types: on 2026-09-06 iterating through usbjmicron/usbsunplus/etc
+    hung the USB bridges on k1 and k2 and took both nodes offline.
+    """
+    # smartctl exits NON-ZERO on a failing drive (bit 3 = "DISK FAILING", bit 4 =
+    # prefail attribute at/below threshold). check_output would raise there, so this
+    # metric would go missing precisely on the drives it exists to catch -- which is
+    # what happened on k3 in testing. Read stdout regardless of exit status; only a
+    # parse failure or missing binary counts as an error.
+    try:
+        proc = subprocess.run(["smartctl", "-H", "-A", "-d", dtype, dev],
+                              capture_output=True, text=True)
+        out = proc.stdout
+    except Exception:
+        return None, {}
+    if not out:
+        return None, {}
+    health, attrs = None, {}
+    for line in out.splitlines():
+        low = line.lower()
+        if "overall-health" in low:
+            health = 1 if "passed" in low else 0
+            continue
+        f = line.split()
+        # attribute rows: ID# NAME FLAG VALUE WORST THRESH TYPE UPDATED WHEN_FAILED RAW
+        if len(f) >= 10 and f[0].isdigit() and f[1] in ATTR_MAP:
+            name, which = ATTR_MAP[f[1]]
+            token = f[3] if which == "value" else f[9]
+            try:
+                attrs[name] = int(str(token).split()[0])
+            except (ValueError, IndexError):
+                pass
+    return health, attrs
 
 
 def read_temp(dev, dtype):
@@ -88,14 +156,32 @@ def main():
         "# HELP hdd_temperature_celsius Drive temperature from SMART (USB-SAT SSDs not visible via hwmon)",
         "# TYPE hdd_temperature_celsius gauge",
     ]
+    health_lines, attr_lines = [], []
     for dev, dtype in scan_devices():
-        temp = read_temp(dev, dtype)
-        if temp is None:
-            continue  # empty card-reader slots / drives without a temp sensor
         model = read_model(dev, dtype)
-        lines.append(
-            f'hdd_temperature_celsius{{drive="{dev}",model="{model}",node="{NODE}"}} {temp}'
-        )
+        labels = f'drive="{dev}",model="{model}",node="{NODE}"'
+
+        temp = read_temp(dev, dtype)
+        if temp is not None:  # empty slots / no temp sensor still get health+wear below
+            lines.append(f'hdd_temperature_celsius{{{labels}}} {temp}')
+
+        health, attrs = read_health_and_attrs(dev, dtype)
+        if health is not None:
+            health_lines.append(f'smart_health_passed{{{labels}}} {health}')
+        for name, val in sorted(attrs.items()):
+            attr_lines.append(f'{name}{{{labels}}} {val}')
+    lines.append("")
+
+    if health_lines:
+        lines += [
+            "# HELP smart_health_passed SMART overall-health self-assessment (1 = PASSED, 0 = FAILED)",
+            "# TYPE smart_health_passed gauge",
+        ] + health_lines
+    if attr_lines:
+        lines += [
+            "# HELP smart_available_reserved_space_percent Spare blocks remaining; drives declare failure below ~5",
+            "# TYPE smart_available_reserved_space_percent gauge",
+        ] + attr_lines
     lines.append("")
 
     os.makedirs(TEXTFILE_DIR, exist_ok=True)

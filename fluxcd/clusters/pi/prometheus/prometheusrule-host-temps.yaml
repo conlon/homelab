@@ -81,10 +81,52 @@ spec:
             summary: "node_exporter on {{ $labels.host }} is down"
             description: "Prometheus has failed to scrape the {{ $labels.job }} target for 5m — host temps for {{ $labels.host }} are not being collected."
 
+        # Drive self-assessment. k3's SSD reported FAILED with 0% spare blocks
+        # ("Drive failure expected in less than 24 hours") while hosting 16 Longhorn
+        # replicas, and nothing surfaced it -- disk-temp-exporter had been reading the
+        # attribute table every 60s and keeping only the temperature.
+        - alert: SmartHealthFailed
+          expr: smart_health_passed == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Drive {{ $labels.drive }} on {{ $labels.node }} reports SMART FAILURE"
+            description: >-
+              {{ $labels.drive }} ({{ $labels.model }}) on {{ $labels.node }} is self-reporting
+              imminent failure. Evacuate Longhorn replicas from this node and replace the drive.
+
+        # Spare-block exhaustion is the leading indicator; drives declare failure below 5%.
+        # Alerting at 20 gives weeks of warning instead of hours. Note this is NOT a
+        # write-wear signal: k5 sits at 100% after 80.7 TiB written, while k3 hit 0% in
+        # 57 days -- exhaustion on a young drive means defects.
+        - alert: SmartSpareBlocksLow
+          expr: smart_available_reserved_space_percent < 20
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Drive {{ $labels.drive }} on {{ $labels.node }} is low on spare blocks ({{ $value }}%)"
+            description: >-
+              Reserved space on {{ $labels.drive }} ({{ $labels.node }}) is down to {{ $value }}%.
+              Below ~5% the drive can no longer remap bad blocks and will start returning
+              medium errors. Plan a replacement.
+
+        - alert: SmartReallocatedSectorsRising
+          expr: increase(smart_reallocated_sector_count[24h]) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Drive {{ $labels.drive }} on {{ $labels.node }} retired new sectors in the last 24h"
+            description: >-
+              Reallocated sector count on {{ $labels.drive }} ({{ $labels.node }}) increased.
+              Sectors are being retired to the spare pool; watch smart_available_reserved_space_percent.
+
         # Pi disk-temp-exporter textfile stale (systemd timer dead) — node-exporter
         # exposes the textfile's mtime, so staleness means the collector stopped.
         - alert: PiDiskTempExporterStale
-          expr: time() - node_textfile_mtime_seconds{file="disk-temp-exporter.prom"} > 600
+          expr: time() - node_textfile_mtime_seconds{file=~".*disk-temp-exporter.prom"} > 600
           for: 5m
           labels:
             severity: warning
