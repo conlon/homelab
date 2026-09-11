@@ -29,32 +29,73 @@ everything at once. It does not throttle for you, and
 This mistake has now been made in at least three separate sessions. Assume you are
 about to make it again.
 
-## Rule 1a — Per-replica `evictionRequested` does NOT work. Use bump-delete-restore.
+## Rule 1a — Use the DOCUMENTED eviction procedure, throttled
 
-Setting `evictionRequested: true` on an individual Replica CR is **silently cancelled**
-by Longhorn's node controller within seconds:
+Source: [Longhorn 1.6.4 — Disks or Nodes Eviction](https://longhorn.io/docs/1.6.4/nodes-and-volumes/nodes/disks-or-nodes-eviction/)
+and [Settings reference](https://longhorn.io/docs/1.6.4/references/settings/).
 
-```
-"Cancelling replica eviction" func="controller.(*NodeController).syncReplicaEvictionRequested"
-```
+**Do not hand-roll replica moves.** Setting `evictionRequested: true` on an individual
+*Replica* CR does not work — Longhorn's node controller silently cancels it within
+seconds (`"Cancelling replica eviction" NodeController.syncReplicaEvictionRequested`).
+Eviction is only honoured at **node or disk** level.
 
-Longhorn only honours eviction at the **node/disk** level — which moves *everything at
-once* and violates Rule 1. So there is no built-in mechanism for a controlled,
-one-at-a-time move.
+The documented procedure, with the throttle that makes it safe here:
 
-**The safe technique, which never reduces the live copy count:**
+1. **Verify capacity** on the remaining schedulable nodes, and confirm they can sustain
+   the I/O (Rule 2 — free space is not enough).
+2. **Throttle first.** Set `concurrentReplicaRebuildPerNodeLimit` to **1**
+   (default is 5; this cluster ships 2). The docs state this setting *"controls how many
+   replicas on a node can be rebuilt simultaneously"* and that it **affects eviction**.
+   This is the supported knob for making an eviction gradual — use it instead of
+   improvising.
+3. **Disable scheduling** on the source node/disk. This is a documented *prerequisite*:
+   *"This eviction feature can only be enabled when the selected disks or nodes have
+   scheduling disabled."*
+4. **Set `evictionRequested: true`** on the node or disk.
+5. Longhorn handles per-volume safety itself: *"Longhorn only evicts a replica per volume
+   after the replica rebuild for this volume is a success."* It does **not** limit how
+   many volumes move concurrently — that is what step 2 controls.
+6. **Watch target-node load throughout.** Abort (set `evictionRequested: false`) if any
+   target exceeds its core count in load average. Eviction is resumable.
+7. **Restore** `concurrentReplicaRebuildPerNodeLimit` afterwards.
 
-1. `numberOfReplicas` N → N+1 — a spare builds on a healthy node (ensure the bad node is
-   `allowScheduling: false` first, per Rule 2)
-2. Wait until the engine reports **N+1 `RW`** replicas — not `running`, `RW`
-3. Delete the replica on the node you are draining
-4. `numberOfReplicas` back to N
+> Even at limit=2, evacuating k3 drove k5 to load 23.75. On Pi-class nodes use **1**.
 
-At no point does the volume drop below N readable copies. Deleting first and letting it
-rebuild does the opposite: it creates a single-copy window on a 2-replica volume.
+## Rule 1b — Every replica-set change is a hazard, not just bulk ones
 
-If the spare never reaches `RW`, revert to N and leave the original in place. Do not
-force it.
+Changing a volume's replica set while it is under write load can make the engine return
+an unrecoverable **medium error** to the client, which aborts the ext4 journal and
+remounts the filesystem read-only.
+
+Confirmed three times in this cluster, same signature each time
+(`critical medium error ... op 0x1:(WRITE)` → `Detected aborted journal` → `Remounting
+filesystem read-only`):
+
+| When | Volumes | Trigger |
+|---|---|---|
+| 2026-09-05 23:56 | 6 volumes | k1/k2 replicas vanished (speculative smartctl probing) |
+| 2026-09-10 00:32 | uptime, sonarr-4k | replica churn |
+| 2026-09-11 14:02 | authentik-database-2 | a deliberate, single-volume replica move |
+
+The third was a careful, one-volume-at-a-time operation on a healthy volume and it still
+happened. **So "do it gradually" is necessary but not sufficient.**
+
+Per the Longhorn KB [`volume readonly or I/O error`](https://longhorn.io/kb/troubleshooting-volume-readonly-or-io-error/),
+engine crashes of this kind come from lost replica connections caused by CPU starvation,
+insufficient network bandwidth, latency, or slow disks. Longhorn's own
+[best practices](https://longhorn.io/docs/1.6.4/best-practices/) note that
+*"latency plays a much more important role in volume stability than IOPS or throughput"*
+and recommend **10 Gbps between nodes** and a **dedicated storage network** — this
+cluster has 1 Gbps shared with application traffic. We are operating below the
+documented baseline, so treat every replica movement as carrying real risk.
+
+**Therefore: only move replicas when there is a concrete reason.** Do not rebalance for
+tidiness. Prefer scheduling constraints that prevent bad placement over moves that
+correct it after the fact.
+
+**Note this is NOT the known COW corruption bug** ([KB](https://longhorn.io/kb/analysis-filesystem-corrupted-issues-due-to-error-on-cow-while-rebuilding-replicas/)):
+that affects v1.1.x–v1.3.1 (fixed in v1.2.6/v1.3.2), and its symptom is corrupted inodes
+discovered after a rebuild, not medium errors during one. This cluster runs v1.6.4.
 
 ## Rule 2 — Free space is not a placement signal. Constrain targets FIRST.
 
@@ -167,7 +208,9 @@ hoping one works.
 
 Before any Longhorn operation, answer all of these in writing:
 
-- [ ] How many replicas will move? (**>2 → stop, batch it**)
+- [ ] How many replicas will move? (**>2 → stop, throttle it per Rule 1a**)
+- [ ] Is `concurrentReplicaRebuildPerNodeLimit` set to 1 (Pi targets) before starting?
+- [ ] Is there a concrete reason to move these at all? (Rule 1b — every move is a hazard)
 - [ ] Which nodes can receive them, and are all unsuitable ones `allowScheduling: false`?
 - [ ] For each affected volume: how many `RW` replicas remain *during* the operation?
 - [ ] Is Flux suspended, or is the end state committed?
@@ -181,3 +224,23 @@ Before any Longhorn operation, answer all of these in writing:
 - [ ] No node above its core count in load average
 - [ ] Applications can actually write (test, don't assume)
 - [ ] Flux resumed and reconciling clean
+
+
+---
+
+## Where this cluster sits against Longhorn's documented baseline
+
+From [best practices](https://longhorn.io/docs/1.6.4/best-practices/) — worth knowing
+before blaming Longhorn for instability:
+
+| Longhorn recommends | This cluster |
+|---|---|
+| 10 Gbps between nodes | **1 Gbps**, shared with application traffic |
+| Dedicated storage network | **None** — `storage-network` is empty |
+| SSD/NVMe; *"latency matters more than IOPS or throughput"* | VMs on NVMe (good); Pis on **USB-attached** SSDs |
+| 4 vCPU / 4 GiB per node minimum | Pis are 4 core / 4–8 GiB — at the floor |
+| `replicaAutoBalance: least-effort` | `best-effort` (more churn than recommended) |
+| Default replica count 2 for lower system impact | StorageClass forces **3** |
+
+None of these are fatal, but together they mean replica operations carry more risk here
+than the documentation assumes. That is the context for Rules 1, 1a and 1b.
