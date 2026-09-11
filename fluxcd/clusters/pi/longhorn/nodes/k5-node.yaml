@@ -5,7 +5,14 @@ metadata:
   name: k5
   namespace: longhorn-system
 spec:
-  allowScheduling: true
+  # TEMPORARY (2026-09-11) -- revert to true once the cluster has stabilised.
+  # Evacuating k3 sent 14 replicas here because Longhorn schedules on free space
+  # alone and k5 had the most (184G). k5 is a Pi with ONE USB SSD carrying the OS,
+  # containerd and 22 replicas; it hit load 23.75 (pure I/O wait) and four database
+  # volumes dropped to a single copy. Measured: 2.6 MB/s of physical writes to serve
+  # 178 KB/s of application data -- replica COUNT is the cost on a Pi, not throughput.
+  # Disabled so evicted replicas stop landing back here while k5 drains.
+  allowScheduling: false
   disks:
     default-disk-127143daf51e5136:
       allowScheduling: true
