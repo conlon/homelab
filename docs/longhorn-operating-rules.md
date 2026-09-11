@@ -244,3 +244,85 @@ before blaming Longhorn for instability:
 
 None of these are fatal, but together they mean replica operations carry more risk here
 than the documentation assumes. That is the context for Rules 1, 1a and 1b.
+
+---
+
+## Hardware: minimum and recommended
+
+From [Longhorn 1.6.4 best practices](https://longhorn.io/docs/1.6.4/best-practices/),
+with this cluster measured against it.
+
+### Longhorn's stated minimum
+
+| | Minimum |
+|---|---|
+| Nodes | 3 |
+| CPU | 4 vCPU per node |
+| Memory | 4 GiB per node |
+| Disk | SSD/NVMe or equivalent block device (HDD supported but discouraged) |
+
+### What actually determines stability
+
+Longhorn is explicit that **latency, not throughput, is what matters**:
+
+> *"latency plays a much more important role in volume stability than IOPS or throughput"*
+
+This is the single most useful sentence in their docs for this cluster, and it is borne
+out by measurement here. n2 showed 29% I/O pressure while moving only 183 KB/s; k5 hit
+load 23.75 doing 2.6 MB/s. In both cases throughput was trivial and **latency** was the
+problem. Do not reason about storage load in MB/s — reason about I/O wait
+(`/proc/pressure/io`, D-state process counts, `await`).
+
+Corollary: on a Pi the cost of a volume is **per-replica overhead** (snapshot files,
+metadata, checksums) × replica count, largely independent of how busy the volume is.
+On k5, 15 of its 22 volumes wrote *nothing at all* and still contributed. Judge a node by
+**replica count**, not aggregate write rate.
+
+### Network
+
+| | Recommended | Here |
+|---|---|---|
+| Bandwidth between nodes | **10 Gbps** | 1 Gbps |
+| Storage network | **Dedicated** | shared with application traffic (`storage-network` empty) |
+
+Longhorn's KB also notes 1 Gbps serves roughly 3 volumes *under heavy load*. That figure
+does not apply to idle volumes — measured steady-state across all 37 volumes here is
+~340 KB/s, under 1% of the link — but it does apply during rebuilds, which is exactly
+when things break.
+
+### This cluster, per node
+
+| Node type | CPU / RAM | Storage | Verdict |
+|---|---|---|---|
+| VMs (n1, n2, kami, kyoko) | 3–4 vCPU / 4–30 GiB | dedicated virtual disk on NVMe (Samsung 990 PRO) | Meets recommendations |
+| Pi 4 (k1, k2) | 4 / 4 GiB | **Lexar USB flash drive**, no SMART | Below minimum — replace |
+| Pi (k3) | 4 / 8 GiB | **SanDisk pSSD**, 0% spare blocks, SMART FAILED | Failed — replace |
+| Pi 4/5 (k0, k4, k5) | 4 / 4–8 GiB | SanDisk SSD PLUS 240GB via USB | At the floor; workable |
+
+**Pi nodes share one USB controller between the NIC and the SSD.** Throughput on one
+starves the other — already documented for qbit (40–80 MB/s saturating the bus and taking
+nodes down). This is why Pis tolerate replicas poorly even when CPU and disk look idle.
+
+### Buying rule for Pi boot/storage media
+
+"Solid state flash drive" is marketing, not a specification. The test that matters is
+**SAT passthrough**, because no SMART means no health telemetry at all:
+
+```sh
+smartctl -d sat -i /dev/sdX   # must return a "Device Model:" line
+smartctl -d sat -A /dev/sdX   # must include attribute 194 Temperature_Celsius
+```
+
+If `smartctl --scan` finds nothing, return it — that is the Lexar signature. Prefer a
+real SSD in a known-good USB bridge (ASMedia ASM1153/ASM235CM, JMicron JMS578/583,
+Realtek RTL9210). **Never** iterate speculative `-d` types to find one that works
+(Rule 10).
+
+### Practical implication
+
+This cluster runs below the documented baseline on network bandwidth, storage network
+isolation, and Pi disk latency simultaneously. Longhorn still works — no data has been
+lost across three incidents — but **replica operations carry more risk here than the
+documentation assumes**. That is the justification for Rules 1, 1a and 1b, and the reason
+placement policy (keeping replicas off weak nodes) is worth more than any amount of
+careful manual rebalancing.

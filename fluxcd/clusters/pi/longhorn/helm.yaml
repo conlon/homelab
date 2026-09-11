@@ -42,8 +42,13 @@ spec:
       nodeDrainPolicy: block-for-eviction
       # Proactively spread replicas across nodes (least-effort only acts on empty nodes).
       replicaAutoBalance: best-effort
-      # Gentler rebuilds to avoid I/O storms on slower nodes.
-      concurrentReplicaRebuildPerNodeLimit: 2
+      # Gentler rebuilds to avoid I/O storms on slower nodes. Longhorn's default is 5.
+      # 2 was still too aggressive: evacuating k3 rebuilt onto k5 (a Pi with one USB SSD)
+      # fast enough to drive it to load 23.75 in pure I/O wait and drop four database
+      # volumes to a single copy. This is the documented throttle for eviction --
+      # per the settings reference it "controls how many replicas on a node can be
+      # rebuilt simultaneously" and explicitly affects eviction. Use 1 on Pi-class nodes.
+      concurrentReplicaRebuildPerNodeLimit: 1
       # An engine that loses its replicas crashes, and Longhorn then detaches and
       # reattaches the volume with a NEW /dev/sdX — stranding kubelet's mount on the
       # old device (docs/longhorn-stale-mount.md). n2 sustains ~29% PSI io pressure
