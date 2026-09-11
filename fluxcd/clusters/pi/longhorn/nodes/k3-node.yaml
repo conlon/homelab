@@ -5,10 +5,18 @@ metadata:
   name: k3
   namespace: longhorn-system
 spec:
-  allowScheduling: true
+  # DRIVE FAILING (2026-09-11). k3's SanDisk pSSD reports SMART overall-health FAILED
+  # with Perc_Avail_Resrvd_Space at 0 against a threshold of 5 -- no spare blocks left
+  # to remap bad sectors, and the drive states "failure expected in less than 24 hours".
+  # Not write wear: only 1365 power-on hours and 57 avg P/E cycles, versus k5 which is
+  # healthy at 100% reserve after 80.7 TiB and 848 cycles. Different (lower-grade) model.
+  # Scheduling disabled and replicas evicted; restore to true only after the drive is
+  # replaced with an SSD PLUS to match k0/k4/k5.
+  allowScheduling: false
   disks:
     default-disk-68f6fa3e0d78a662:
-      allowScheduling: true
+      allowScheduling: false
+      evictionRequested: true
       diskType: filesystem
       path: /var/lib/longhorn/
       storageReserved: 73687573709  # 68.6 GiB reserved (30% of ~229 GiB)
