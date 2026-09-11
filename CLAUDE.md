@@ -30,6 +30,23 @@ For non-trivial changes, verify before committing:
    flux resume helmrelease <name> -n <namespace>
    ```
 
+## Longhorn — READ THE RULES FIRST
+
+**Before ANY Longhorn operation, read `docs/longhorn-operating-rules.md`.** It is a
+strict rule set, not guidance — every rule exists because breaking it caused a cascading
+failure here. The one that recurs most:
+
+> **Never move replicas in bulk. Max 2 in flight cluster-wide, max 1 per target node.**
+> Longhorn schedules on *free disk space alone* and has no notion of whether a node can
+> sustain the I/O, so it will happily pile a whole node's worth of replicas onto the
+> weakest machine. Constrain targets (`allowScheduling: false`) BEFORE starting, never
+> after.
+
+Also note: Longhorn reporting a volume `healthy` means its *replicas* are healthy and
+nothing more — not the filesystem inside it, not the node's mount, not whether the app
+can write. See `docs/longhorn-stale-mount.md` for the failure modes that look like data
+corruption but aren't.
+
 ## Cluster access (SSH + kubeconfig)
 
 Node inventory — names → IPs and the `master`/`node`/`vm`/`nas` groups — lives in
