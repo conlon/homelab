@@ -94,6 +94,16 @@
   when: "'pi' in group_names"
   tags: hardware-temps
 
+# Headless cluster nodes have no Bluetooth peripherals; on trixie the bluez package
+# also enables mpris-proxy as a user service, which respawns on every login.
+- name: Include disable-bluetooth tasks (Pi k3s nodes)
+  ansible.builtin.include_tasks:
+    file: disable-bluetooth.yml
+    apply:
+      tags: bluetooth
+  when: "'pi' in group_names"
+  tags: bluetooth
+
 # All k3s nodes (pi + vm) — any node that can mount a Longhorn volume can strand
 # a mount on a removed device. Observed on n1 and n2 so far, but not node-specific.
 - name: Include Longhorn stale mount exporter tasks (all k3s nodes)

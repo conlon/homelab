@@ -1,0 +1,44 @@
+---
+# Disable Bluetooth on the Raspberry Pi cluster nodes. They are headless k3s members
+# with no Bluetooth peripherals, so bluez is pure overhead.
+#
+# It is not merely idle. On Debian 13 (trixie) the bluez package enables
+# mpris-proxy.service as a *user* service, so every login spawns
+# systemd --user -> dbus-daemon --session -> mpris-proxy. Each of those spikes CPU on
+# start, and on a monitored node being polled over SSH the stack is torn down and
+# rebuilt constantly -- k3 showed 70%/66%/33% CPU across those three processes with
+# ELAPSED 00:00, contributing several points of load average while doing nothing useful.
+#
+# The fleet is split: k1/k2/k3 run trixie (mpris-proxy enabled), k0/k4/k5 run bookworm
+# (no mpris-proxy). Disabling at both levels covers both, and is a no-op where a unit
+# does not exist.
+#
+# Masked rather than merely disabled because bluez is D-Bus activatable and would
+# otherwise be restarted on demand. Reverse with `systemctl unmask bluetooth hciuart`.
+#
+# NOTE: this does not free the Pi's UART. That needs `dtoverlay=disable-bt` in
+# /boot/firmware/config.txt plus a reboot, which is deliberately not done here.
+
+- name: Disable Bluetooth | stop, disable and mask system services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+    masked: yes
+  loop:
+    - bluetooth.service
+    - hciuart.service
+  failed_when: false          # hciuart is absent on some images
+  become: yes
+
+- name: Disable Bluetooth | disable mpris-proxy for all users (trixie ships it enabled)
+  ansible.builtin.command: systemctl --global disable mpris-proxy.service
+  become: yes
+  changed_when: false
+  failed_when: false          # unit does not exist on bookworm
+
+- name: Disable Bluetooth | stop any running user-session mpris-proxy
+  ansible.builtin.command: pkill -x mpris-proxy
+  become: yes
+  changed_when: false
+  failed_when: false          # non-zero simply means none were running
