@@ -85,8 +85,18 @@ spec:
         # ("Drive failure expected in less than 24 hours") while hosting 16 Longhorn
         # replicas, and nothing surfaced it -- disk-temp-exporter had been reading the
         # attribute table every 60s and keeping only the temperature.
+        # MAINTENANCE EXCLUSION until ~2026-10-04 (opened 2026-09-13).
+        # k3's SanDisk pSSD reports SMART FAILED with 0% spare blocks. Known, accepted,
+        # and already mitigated: Longhorn replicas are evacuated and k3 has
+        # allowScheduling=false, so nothing stateful depends on that disk. A replacement
+        # is ~2 weeks out. Excluded here rather than via an Alertmanager silence because
+        # this cluster's Alertmanager runs on emptyDir -- silences do not survive a pod
+        # restart, and it has restarted 6 times.
+        # REMOVE THE node!="k3" CLAUSE once the drive is replaced.
+        # Note SmartReallocatedSectorsRising is deliberately NOT excluded, so further
+        # degradation of this same drive still alerts.
         - alert: SmartHealthFailed
-          expr: smart_health_passed == 0
+          expr: smart_health_passed{node!="k3"} == 0
           for: 5m
           labels:
             severity: critical
@@ -100,8 +110,9 @@ spec:
         # Alerting at 20 gives weeks of warning instead of hours. Note this is NOT a
         # write-wear signal: k5 sits at 100% after 80.7 TiB written, while k3 hit 0% in
         # 57 days -- exhaustion on a young drive means defects.
+        # Same k3 maintenance exclusion as above -- remove when the drive is replaced.
         - alert: SmartSpareBlocksLow
-          expr: smart_available_reserved_space_percent < 20
+          expr: smart_available_reserved_space_percent{node!="k3"} < 20
           for: 30m
           labels:
             severity: warning
