@@ -59,7 +59,7 @@ spec:
             severity: warning
           annotations:
             summary: "Drive temperature high on {{ $labels.node }}{{ $labels.host }} ({{ $value | printf \"%.0f\" }}°C)"
-            description: "Drive {{ $labels.drive }}{{ $labels.sensor }} on {{ $labels.node }}{{ $labels.host }} has exceeded 65°C for 10m. SMART spec max is typically 70°C — investigate cooling/airflow. Pi SSDs (SanDisk SSD PLUS) idle at 55-60°C and spike to 63-65°C on Longhorn backup reads; the 65°C/10m threshold filters that noise while still leaving 5°C headroom before the 70°C critical."
+            description: "Drive {{ $labels.drive }}{{ $labels.sensor }} on {{ $labels.node }}{{ $labels.host }} has exceeded 65°C for 10m (SMART spec max is typically 70°C). Pi SSDs idle at 55-60°C; sustained reads push them past 70°C. Likely a read-heavy workload: Longhorn backups/rebuilds, or a pod at its memory limit re-reading evicted file cache (flaresolverr at 512Mi did this at ~270 MB/s). Check per-pod container_fs_reads_bytes_total. If reads are idle, suspect cooling."
 
         - alert: DriveTemperatureCritical
           expr: hdd_temperature_celsius > 70 or node_hwmon_temp_celsius{job="prox1-node", chip=~".*nvme.*"} > 70

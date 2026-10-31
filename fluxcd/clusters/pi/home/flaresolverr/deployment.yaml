@@ -16,6 +16,16 @@ spec:
       labels:
         app: flaresolverr
     spec:
+      # Pinned to nodes that export drive temps (disk-temp-exporter). Under memory
+      # pressure Chromium re-reads its files from disk for hours; keep that visible.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values: ["k4", "k5"]
       containers:
         - name: flaresolverr
           image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
