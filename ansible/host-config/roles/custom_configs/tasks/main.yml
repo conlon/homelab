@@ -73,8 +73,12 @@
   when: "'nuc' in group_names"
 
 - name: Include HDD fan curve tasks (prox0 only)
-  ansible.builtin.include_tasks: hdd-fan-curve.yml
+  ansible.builtin.include_tasks:
+    file: hdd-fan-curve.yml
+    apply:
+      tags: hardware-temps
   when: inventory_hostname == 'prox0'
+  tags: hardware-temps
 
 - name: Include host node-exporter tasks (prox1 only)
   ansible.builtin.include_tasks:

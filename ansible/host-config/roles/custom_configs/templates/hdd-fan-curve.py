@@ -83,7 +83,7 @@ def hdd_drive_data():
                                             text=True, stderr=subprocess.DEVNULL)
             temp = None
             for line in out_a.splitlines():
-                if re.search(r'\b194\b', line):
+                if re.match(r'\s*194\s', line):
                     temp = int(line.split()[9])
                     break
             out_i = subprocess.check_output(["smartctl", "-i", dev],
