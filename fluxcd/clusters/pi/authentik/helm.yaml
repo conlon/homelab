@@ -93,6 +93,20 @@ spec:
         - secretRef:
             name: authentik-secrets
     server:
+      # gunicorn recycles each worker after web.max_requests (default 1000).
+      # Every new worker leaks a set of PID-named prometheus multiproc files
+      # into /dev/shm (64Mi, counts against the memory limit) that authentik's
+      # worker_exit hook never removes — it filled shm to 96% after ~150 days.
+      # Health probes were ~93% of all requests, so: probe less often and
+      # recycle less often. Raise max_requests further only after watching
+      # memory (server sat at ~750Mi of the 1Gi limit).
+      env:
+        - name: AUTHENTIK_WEB__MAX_REQUESTS
+          value: "5000"
+      livenessProbe:
+        periodSeconds: 30
+      readinessProbe:
+        periodSeconds: 30
       resources:
         requests:
           cpu: 100m
