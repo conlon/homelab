@@ -28,7 +28,7 @@ spec:
                     values: ["k4", "k5"]
       containers:
         - name: flaresolverr
-          image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
+          image: ghcr.io/flaresolverr/flaresolverr:v3.5.2
           ports:
             - containerPort: 8191
               name: http
