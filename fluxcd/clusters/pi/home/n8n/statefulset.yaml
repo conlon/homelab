@@ -8,7 +8,7 @@ metadata:
     app: n8n
 spec:
   serviceName: n8n
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: n8n
