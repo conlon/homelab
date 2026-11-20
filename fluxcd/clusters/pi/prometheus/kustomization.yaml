@@ -9,6 +9,7 @@ resources:
   - ingress-prometheus.yaml
   - grafana-dashboard-prox0.yaml
   - grafana-dashboard-k3s-hosts.yaml
+  - grafana-dashboard-arr.yaml
   - prometheusrule-host-temps.yaml
   - prometheusrule-k3s-overrides.yaml
   - ingress-alertmanager.yaml
