@@ -135,7 +135,7 @@ spec:
           exportarr:
             image:
               repository: ghcr.io/onedr0p/exportarr
-              tag: v2.3.0
+              tag: v2.2.0  # v2.3.0 calls /api/v3/wanted/cutoff, absent in Radarr 4.7.5 -> 500
             args: ["radarr"]
             env:
               PORT: "9707"
@@ -185,7 +185,7 @@ spec:
           exportarr:
             image:
               repository: ghcr.io/onedr0p/exportarr
-              tag: v2.3.0
+              tag: v2.2.0  # v2.3.0 calls /api/v3/wanted/cutoff, absent in Radarr 4.7.5 -> 500
             args: ["radarr"]
             env:
               PORT: "9707"
@@ -235,7 +235,7 @@ spec:
           exportarr:
             image:
               repository: ghcr.io/onedr0p/exportarr
-              tag: v2.3.0
+              tag: v2.2.0  # v2.3.0 calls /api/v3/wanted/cutoff, absent in Radarr 4.7.5 -> 500
             args: ["radarr"]
             env:
               PORT: "9707"
