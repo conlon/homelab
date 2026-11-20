@@ -33,8 +33,6 @@ resources:
   - sabnzbd
   # plex monitoring
   - tautulli
-  # automation
-  - n8n
   # plex
   - plex
   # misc
