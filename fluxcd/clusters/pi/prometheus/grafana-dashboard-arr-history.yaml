@@ -1,0 +1,2623 @@
+---
+# *arr history dashboard: initial downloads vs upgrades over any time range, read
+# straight from each Sonarr/Radarr instance's history API via the Infinity
+# datasources provisioned in helm.yaml (grafana.additionalDataSources). Unlike
+# grafana-dashboard-arr.yaml it isn't bounded by Prometheus retention.
+# Generated layout; JSONata in root_selector runs in Infinity's backend (jsonata-go):
+# keep group-by keys simple and avoid blocks inside lambdas — both misbehave there.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-arr-history
+  namespace: prometheus
+  labels:
+    grafana_dashboard: "1"
+data:
+  arr-history.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "title": "*arr History",
+      "uid": "arr-history",
+      "description": "Initial downloads vs upgrades from the Sonarr/Radarr history APIs (Infinity datasource). Reaches back as far as each app's history; queries are heavy, so no auto-refresh.",
+      "editable": true,
+      "graphTooltip": 1,
+      "id": null,
+      "refresh": "",
+      "schemaVersion": 38,
+      "tags": [
+        "media",
+        "arr"
+      ],
+      "time": {
+        "from": "now-1y",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": []
+      },
+      "timezone": "utc",
+      "links": [
+        {
+          "title": "*arr Activity & Library (Prometheus)",
+          "type": "link",
+          "url": "/d/arr-activity",
+          "icon": "dashboard"
+        }
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "bucket",
+            "label": "Bucket",
+            "type": "custom",
+            "query": "Week : 604800000, Day : 86400000",
+            "current": {
+              "text": "Week",
+              "value": "604800000"
+            },
+            "options": [
+              {
+                "text": "Week",
+                "value": "604800000",
+                "selected": true
+              },
+              {
+                "text": "Day",
+                "value": "86400000",
+                "selected": false
+              }
+            ],
+            "hide": 0,
+            "multi": false,
+            "includeAll": false
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "row",
+          "title": "All instances",
+          "collapsed": false,
+          "id": 1,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "panels": []
+        },
+        {
+          "type": "timeseries",
+          "title": "New downloads per ${bucket:text}",
+          "description": "Imports that weren't replacing an existing file (imports \u2212 upgrades), from each app's own history API via Infinity. Not limited by Prometheus retention.",
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Mixed --"
+          },
+          "id": 2,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://sonarr.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "3"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := ${ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Sonarr imports",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "B",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://sonarr.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "5"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := $[data.reason = 'Upgrade']{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Sonarr upgrades",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "C",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr-4k"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://sonarr-4k.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "3"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := ${ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Sonarr 4K imports",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "D",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr-4k"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://sonarr-4k.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "5"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := $[data.reason = 'Upgrade']{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Sonarr 4K upgrades",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "E",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://radarr.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "3"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := ${ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Radarr imports",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "F",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://radarr.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "6"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := $[data.reason = 'Upgrade']{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Radarr upgrades",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "G",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-4k"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://radarr-4k.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "3"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := ${ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Radarr 4K imports",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "H",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-4k"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://radarr-4k.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "6"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := $[data.reason = 'Upgrade']{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Radarr 4K upgrades",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "I",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-le"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://radarr-le.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "3"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := ${ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Radarr LE imports",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            },
+            {
+              "refId": "J",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-le"
+              },
+              "type": "json",
+              "source": "url",
+              "parser": "backend",
+              "format": "table",
+              "url": "http://radarr-le.home.svc.cluster.local/api/v3/history/since",
+              "url_options": {
+                "method": "GET",
+                "data": "",
+                "params": [
+                  {
+                    "key": "date",
+                    "value": "${__from:date:iso}"
+                  },
+                  {
+                    "key": "eventType",
+                    "value": "6"
+                  }
+                ]
+              },
+              "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $c := $[data.reason = 'Upgrade']{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $count(date) }; $map([0..$n], function($i){ { 't': $s + $i * $b, 'n': $nz($lookup($c, $string($s + $i * $b))) } }) )",
+              "columns": [
+                {
+                  "selector": "t",
+                  "text": "time",
+                  "type": "timestamp_epoch"
+                },
+                {
+                  "selector": "n",
+                  "text": "Radarr LE upgrades",
+                  "type": "number"
+                }
+              ],
+              "filters": [],
+              "computed_columns": []
+            }
+          ],
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "time",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Sonarr imports",
+                  "operator": "-",
+                  "right": "Sonarr upgrades"
+                },
+                "alias": "Sonarr",
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Sonarr 4K imports",
+                  "operator": "-",
+                  "right": "Sonarr 4K upgrades"
+                },
+                "alias": "Sonarr 4K",
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Radarr imports",
+                  "operator": "-",
+                  "right": "Radarr upgrades"
+                },
+                "alias": "Radarr",
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Radarr 4K imports",
+                  "operator": "-",
+                  "right": "Radarr 4K upgrades"
+                },
+                "alias": "Radarr 4K",
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "calculateField",
+              "options": {
+                "mode": "binary",
+                "binary": {
+                  "left": "Radarr LE imports",
+                  "operator": "-",
+                  "right": "Radarr LE upgrades"
+                },
+                "alias": "Radarr LE",
+                "replaceFields": false
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "names": [
+                    "time",
+                    "Sonarr",
+                    "Sonarr 4K",
+                    "Radarr",
+                    "Radarr 4K",
+                    "Radarr LE"
+                  ]
+                }
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "min": 0,
+              "custom": {
+                "drawStyle": "bars",
+                "fillOpacity": 85,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "barAlignment": 0,
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "sum"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Upgrades per ${bucket:text}",
+          "description": "Files replaced by a better release (history: file deleted, reason Upgrade).",
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "id": 3,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 10
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 2,
+              "withTransforms": false
+            }
+          ],
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "time",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "filterFieldsByName",
+              "options": {
+                "include": {
+                  "pattern": "time|.* upgrades"
+                }
+              }
+            },
+            {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "(.*) upgrades",
+                "renamePattern": "$1"
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "min": 0,
+              "custom": {
+                "drawStyle": "bars",
+                "fillOpacity": 85,
+                "lineWidth": 1,
+                "showPoints": "never",
+                "barAlignment": 0,
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                }
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "right",
+              "calcs": [
+                "sum"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "type": "bargauge",
+          "title": "Totals in selected range",
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "id": 4,
+          "gridPos": {
+            "h": 9,
+            "w": 24,
+            "x": 0,
+            "y": 19
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "datasource",
+                "uid": "-- Dashboard --"
+              },
+              "panelId": 2,
+              "withTransforms": false
+            }
+          ],
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "time",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "reduce",
+              "options": {
+                "reducers": [
+                  "sum"
+                ],
+                "mode": "reduceFields",
+                "includeTimeField": false
+              }
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "min": 0,
+              "color": {
+                "mode": "palette-classic"
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "orientation": "horizontal",
+            "displayMode": "basic",
+            "showUnfilled": true,
+            "valueMode": "color",
+            "namePlacement": "left",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            }
+          }
+        },
+        {
+          "type": "row",
+          "title": "Sonarr \u2014 breakdown",
+          "collapsed": true,
+          "id": 5,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 28
+          },
+          "panels": [
+            {
+              "type": "timeseries",
+              "title": "Sonarr: grabs by indexer per ${bucket:text}",
+              "description": "Releases grabbed, by indexer.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr"
+              },
+              "id": 6,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 29
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "1"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(data.indexer)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(data.indexer) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "timeseries",
+              "title": "Sonarr: imports by quality per ${bucket:text}",
+              "description": "Files imported, by the quality of the new file.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr"
+              },
+              "id": 7,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 29
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(quality.quality.name)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(quality.quality.name) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Sonarr: upgraded away from (old quality)",
+              "description": "Quality of the files that upgrades replaced, in the selected range.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr"
+              },
+              "id": 8,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 37
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "5"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := $[data.reason = 'Upgrade']{ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "upgrades",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Sonarr: all imports by quality (range total)",
+              "description": "Every file imported in the selected range, by quality. The history API doesn't tag which imports were upgrades, so compare with the panel on the left.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr"
+              },
+              "id": 9,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 37
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := ${ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "imports",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Sonarr 4K \u2014 breakdown",
+          "collapsed": true,
+          "id": 10,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 30
+          },
+          "panels": [
+            {
+              "type": "timeseries",
+              "title": "Sonarr 4K: grabs by indexer per ${bucket:text}",
+              "description": "Releases grabbed, by indexer.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr-4k"
+              },
+              "id": 11,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 31
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "1"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(data.indexer)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(data.indexer) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "timeseries",
+              "title": "Sonarr 4K: imports by quality per ${bucket:text}",
+              "description": "Files imported, by the quality of the new file.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr-4k"
+              },
+              "id": 12,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 31
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(quality.quality.name)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(quality.quality.name) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Sonarr 4K: upgraded away from (old quality)",
+              "description": "Quality of the files that upgrades replaced, in the selected range.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr-4k"
+              },
+              "id": 13,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 39
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "5"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := $[data.reason = 'Upgrade']{ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "upgrades",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Sonarr 4K: all imports by quality (range total)",
+              "description": "Every file imported in the selected range, by quality. The history API doesn't tag which imports were upgrades, so compare with the panel on the left.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-sonarr-4k"
+              },
+              "id": 14,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 39
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-sonarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://sonarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := ${ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "imports",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Radarr \u2014 breakdown",
+          "collapsed": true,
+          "id": 15,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 32
+          },
+          "panels": [
+            {
+              "type": "timeseries",
+              "title": "Radarr: grabs by indexer per ${bucket:text}",
+              "description": "Releases grabbed, by indexer.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr"
+              },
+              "id": 16,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 33
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "1"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(data.indexer)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(data.indexer) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "timeseries",
+              "title": "Radarr: imports by quality per ${bucket:text}",
+              "description": "Files imported, by the quality of the new file.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr"
+              },
+              "id": 17,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 33
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(quality.quality.name)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(quality.quality.name) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Radarr: upgraded away from (old quality)",
+              "description": "Quality of the files that upgrades replaced, in the selected range.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr"
+              },
+              "id": 18,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 41
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "6"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := $[data.reason = 'Upgrade']{ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "upgrades",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Radarr: all imports by quality (range total)",
+              "description": "Every file imported in the selected range, by quality. The history API doesn't tag which imports were upgrades, so compare with the panel on the left.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr"
+              },
+              "id": 19,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 41
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := ${ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "imports",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Radarr 4K \u2014 breakdown",
+          "collapsed": true,
+          "id": 20,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 34
+          },
+          "panels": [
+            {
+              "type": "timeseries",
+              "title": "Radarr 4K: grabs by indexer per ${bucket:text}",
+              "description": "Releases grabbed, by indexer.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-4k"
+              },
+              "id": 21,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 35
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "1"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(data.indexer)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(data.indexer) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "timeseries",
+              "title": "Radarr 4K: imports by quality per ${bucket:text}",
+              "description": "Files imported, by the quality of the new file.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-4k"
+              },
+              "id": 22,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 35
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(quality.quality.name)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(quality.quality.name) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Radarr 4K: upgraded away from (old quality)",
+              "description": "Quality of the files that upgrades replaced, in the selected range.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-4k"
+              },
+              "id": 23,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 43
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "6"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := $[data.reason = 'Upgrade']{ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "upgrades",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Radarr 4K: all imports by quality (range total)",
+              "description": "Every file imported in the selected range, by quality. The history API doesn't tag which imports were upgrades, so compare with the panel on the left.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-4k"
+              },
+              "id": 24,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 43
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-4k"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-4k.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := ${ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "imports",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "title": "Radarr LE \u2014 breakdown",
+          "collapsed": true,
+          "id": 25,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 36
+          },
+          "panels": [
+            {
+              "type": "timeseries",
+              "title": "Radarr LE: grabs by indexer per ${bucket:text}",
+              "description": "Releases grabbed, by indexer.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-le"
+              },
+              "id": 26,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 37
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-le"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-le.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "1"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(data.indexer)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(data.indexer) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "timeseries",
+              "title": "Radarr LE: imports by quality per ${bucket:text}",
+              "description": "Files imported, by the quality of the new file.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-le"
+              },
+              "id": 27,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 37
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-le"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-le.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $b := ${bucket}; $o := $b = 604800000 ? 345600000 : 0; $s := $floor((${__from} - $o) / $b) * $b + $o; $n := $floor((${__to} - $s) / $b); $nz := function($x){ $exists($x) ? $x : 0 }; $r := $; $ks := $distinct($r.(quality.quality.name)); $g := $r{ $string($floor(($toMillis(date) - $o) / $b) * $b + $o): $ }; $map($keys($g), function($k){ $merge([{ 't': $number($k) }, $map($ks, function($q){ { $q: $count($lookup($g, $k)[(quality.quality.name) = $q]) } })]) })^(t) )",
+                  "columns": [],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "transformations": [
+                {
+                  "id": "convertFieldType",
+                  "options": {
+                    "conversions": [
+                      {
+                        "targetField": "t",
+                        "destinationType": "time"
+                      }
+                    ],
+                    "fields": {}
+                  }
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "custom": {
+                    "drawStyle": "bars",
+                    "fillOpacity": 85,
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0,
+                    "stacking": {
+                      "mode": "normal",
+                      "group": "A"
+                    }
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "displayMode": "table",
+                  "placement": "right",
+                  "calcs": [
+                    "sum"
+                  ]
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Radarr LE: upgraded away from (old quality)",
+              "description": "Quality of the files that upgrades replaced, in the selected range.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-le"
+              },
+              "id": 28,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 45
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-le"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-le.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "6"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := $[data.reason = 'Upgrade']{ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "upgrades",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-BlPu"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            },
+            {
+              "type": "bargauge",
+              "title": "Radarr LE: all imports by quality (range total)",
+              "description": "Every file imported in the selected range, by quality. The history API doesn't tag which imports were upgrades, so compare with the panel on the left.",
+              "datasource": {
+                "type": "yesoreyeram-infinity-datasource",
+                "uid": "infinity-radarr-le"
+              },
+              "id": 29,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 45
+              },
+              "targets": [
+                {
+                  "refId": "A",
+                  "datasource": {
+                    "type": "yesoreyeram-infinity-datasource",
+                    "uid": "infinity-radarr-le"
+                  },
+                  "type": "json",
+                  "source": "url",
+                  "parser": "backend",
+                  "format": "table",
+                  "url": "http://radarr-le.home.svc.cluster.local/api/v3/history/since",
+                  "url_options": {
+                    "method": "GET",
+                    "data": "",
+                    "params": [
+                      {
+                        "key": "date",
+                        "value": "${__from:date:iso}"
+                      },
+                      {
+                        "key": "eventType",
+                        "value": "3"
+                      }
+                    ]
+                  },
+                  "root_selector": "( $c := ${ quality.quality.name: $count(date) }; $map($keys($c), function($k){ { 'quality': $k, 'n': $lookup($c, $k) } })^(>n) )",
+                  "columns": [
+                    {
+                      "selector": "quality",
+                      "text": "quality",
+                      "type": "string"
+                    },
+                    {
+                      "selector": "n",
+                      "text": "imports",
+                      "type": "number"
+                    }
+                  ],
+                  "filters": [],
+                  "computed_columns": []
+                }
+              ],
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "short",
+                  "min": 0,
+                  "color": {
+                    "mode": "continuous-GrYlRd"
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "orientation": "horizontal",
+                "displayMode": "basic",
+                "showUnfilled": true,
+                "valueMode": "color",
+                "namePlacement": "left",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": true
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "version": 1
+    }

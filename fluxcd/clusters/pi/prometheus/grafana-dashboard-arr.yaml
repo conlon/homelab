@@ -16,11 +16,18 @@ data:
       "annotations": {
         "list": []
       },
-      "description": "*arr stack activity and library state from exportarr. Activity is limited to Prometheus retention (30d).",
+      "description": "*arr stack activity and library state from exportarr. Activity is limited to Prometheus retention (30d); see *arr History for the long-term view.",
       "editable": true,
       "graphTooltip": 1,
       "id": null,
-      "links": [],
+      "links": [
+        {
+          "title": "*arr History (long-term, Infinity)",
+          "type": "link",
+          "url": "/d/arr-history",
+          "icon": "dashboard"
+        }
+      ],
       "refresh": "5m",
       "schemaVersion": 38,
       "tags": [

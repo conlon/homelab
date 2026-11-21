@@ -42,6 +42,89 @@ spec:
     alertmanager:
       alertmanagerSpec:
         configSecret: alertmanager-discord
+    grafana:
+      # Infinity queries the Sonarr/Radarr history APIs directly for the
+      # "*arr History" dashboard (their own DBs keep years of events, unlike
+      # Prometheus' 30d). 2.12.2 is the newest release supporting Grafana 10.3 —
+      # 3.x+ needs >=10.4.8; bump alongside the kube-prometheus-stack upgrade.
+      # Installed by URL: grafana-cli resolves "<id> <version>" against grafana.com's
+      # versions list, which only returns the newest 24 releases, so 2.12.2 is
+      # "not found". The direct download is the all-arch package (incl. arm64).
+      plugins:
+        - https://grafana.com/api/plugins/yesoreyeram-infinity-datasource/versions/2.12.2/download;yesoreyeram-infinity-datasource
+      # API keys for the datasources below, referenced as $VAR in provisioning.
+      envFromSecret: grafana-arr-api-keys
+      additionalDataSources:
+        - name: Sonarr history
+          uid: infinity-sonarr
+          type: yesoreyeram-infinity-datasource
+          access: proxy
+          editable: false
+          jsonData:
+            auth_method: apiKey
+            apiKeyKey: X-Api-Key
+            apiKeyType: header
+            allowedHosts:
+              - http://sonarr.home.svc.cluster.local
+            timeoutInSeconds: 120
+          secureJsonData:
+            apiKeyValue: $SONARR_API_KEY
+        - name: Sonarr 4K history
+          uid: infinity-sonarr-4k
+          type: yesoreyeram-infinity-datasource
+          access: proxy
+          editable: false
+          jsonData:
+            auth_method: apiKey
+            apiKeyKey: X-Api-Key
+            apiKeyType: header
+            allowedHosts:
+              - http://sonarr-4k.home.svc.cluster.local
+            timeoutInSeconds: 120
+          secureJsonData:
+            apiKeyValue: $SONARR_4K_API_KEY
+        - name: Radarr history
+          uid: infinity-radarr
+          type: yesoreyeram-infinity-datasource
+          access: proxy
+          editable: false
+          jsonData:
+            auth_method: apiKey
+            apiKeyKey: X-Api-Key
+            apiKeyType: header
+            allowedHosts:
+              - http://radarr.home.svc.cluster.local
+            timeoutInSeconds: 120
+          secureJsonData:
+            apiKeyValue: $RADARR_API_KEY
+        - name: Radarr 4K history
+          uid: infinity-radarr-4k
+          type: yesoreyeram-infinity-datasource
+          access: proxy
+          editable: false
+          jsonData:
+            auth_method: apiKey
+            apiKeyKey: X-Api-Key
+            apiKeyType: header
+            allowedHosts:
+              - http://radarr-4k.home.svc.cluster.local
+            timeoutInSeconds: 120
+          secureJsonData:
+            apiKeyValue: $RADARR_4K_API_KEY
+        - name: Radarr LE history
+          uid: infinity-radarr-le
+          type: yesoreyeram-infinity-datasource
+          access: proxy
+          editable: false
+          jsonData:
+            auth_method: apiKey
+            apiKeyKey: X-Api-Key
+            apiKeyType: header
+            allowedHosts:
+              - http://radarr-le.home.svc.cluster.local
+            timeoutInSeconds: 120
+          secureJsonData:
+            apiKeyValue: $RADARR_LE_API_KEY
     # The node-exporter DaemonSet runs on every k3s node. Mount the host textfile
     # collector dir so the Pi disk-temp-exporter metrics (hdd_temperature_celsius,
     # written by ansible — USB-SAT SSD temps aren't visible via hwmon) are picked

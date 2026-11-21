@@ -10,7 +10,9 @@ resources:
   - grafana-dashboard-prox0.yaml
   - grafana-dashboard-k3s-hosts.yaml
   - grafana-dashboard-arr.yaml
+  - grafana-dashboard-arr-history.yaml
   - prometheusrule-host-temps.yaml
   - prometheusrule-k3s-overrides.yaml
   - ingress-alertmanager.yaml
   - alertmanager-discord-secret.sops.yaml
+  - grafana-arr-api-keys-secret.sops.yaml
