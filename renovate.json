@@ -17,6 +17,10 @@
   "kubernetes": {
     "fileMatch": ["\\.yaml$"]
   },
+  "flux": {
+    "description": "Default flux fileMatch only covers gotk-components.yaml, so HelmRelease chart versions were never tracked",
+    "fileMatch": ["^fluxcd/.+\\.ya?ml$"]
+  },
   "dependencyDashboard": true,
   "vulnerabilityAlerts": {
     "enabled": true,
@@ -47,6 +51,12 @@
       "description": "Docker/container image updates auto-create PRs",
       "matchManagers": ["dockerfile", "docker-compose", "kubernetes"],
       "labels": ["docker"]
+    },
+    {
+      "description": "Radarr exporters are pinned to exportarr v2.2.0: v2.3.0 calls /api/v3/wanted/cutoff, which Radarr 4.x lacks. Remove once Radarr is on v5+",
+      "matchPackageNames": ["ghcr.io/onedr0p/exportarr"],
+      "matchCurrentValue": "v2.2.0",
+      "enabled": false
     },
     {
       "matchPackageNames": ["louislam/uptime-kuma"],
