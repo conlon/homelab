@@ -525,6 +525,13 @@ data:
               }
             },
             {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "^(.*) [A-Z]$",
+                "renamePattern": "$1"
+              }
+            },
+            {
               "id": "calculateField",
               "options": {
                 "mode": "binary",
@@ -609,6 +616,9 @@ data:
             "defaults": {
               "unit": "short",
               "min": 0,
+              "color": {
+                "mode": "palette-classic-by-name"
+              },
               "custom": {
                 "drawStyle": "bars",
                 "fillOpacity": 85,
@@ -672,6 +682,13 @@ data:
               }
             },
             {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "^(.*) [A-Z]$",
+                "renamePattern": "$1"
+              }
+            },
+            {
               "id": "filterFieldsByName",
               "options": {
                 "include": {
@@ -691,6 +708,9 @@ data:
             "defaults": {
               "unit": "short",
               "min": 0,
+              "color": {
+                "mode": "palette-classic-by-name"
+              },
               "custom": {
                 "drawStyle": "bars",
                 "fillOpacity": 85,
@@ -753,6 +773,13 @@ data:
               }
             },
             {
+              "id": "renameByRegex",
+              "options": {
+                "regex": "^(.*) [A-Z]$",
+                "renamePattern": "$1"
+              }
+            },
+            {
               "id": "reduce",
               "options": {
                 "reducers": [
@@ -774,6 +801,12 @@ data:
             "overrides": []
           },
           "options": {
+            "text": {
+              "titleSize": 13,
+              "valueSize": 16
+            },
+            "minVizHeight": 16,
+            "maxVizHeight": 28,
             "orientation": "horizontal",
             "displayMode": "basic",
             "showUnfilled": true,
@@ -865,6 +898,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -958,6 +994,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -1055,6 +1094,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -1138,6 +1183,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -1231,6 +1282,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -1324,6 +1378,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -1421,6 +1478,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -1504,6 +1567,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -1597,6 +1666,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -1690,6 +1762,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -1787,6 +1862,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -1870,6 +1951,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -1963,6 +2050,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -2056,6 +2146,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -2153,6 +2246,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -2236,6 +2335,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -2329,6 +2434,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -2422,6 +2530,9 @@ data:
                 "defaults": {
                   "unit": "short",
                   "min": 0,
+                  "color": {
+                    "mode": "palette-classic-by-name"
+                  },
                   "custom": {
                     "drawStyle": "bars",
                     "fillOpacity": 85,
@@ -2519,6 +2630,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
@@ -2602,6 +2719,12 @@ data:
                 "overrides": []
               },
               "options": {
+                "text": {
+                  "titleSize": 13,
+                  "valueSize": 16
+                },
+                "minVizHeight": 16,
+                "maxVizHeight": 28,
                 "orientation": "horizontal",
                 "displayMode": "basic",
                 "showUnfilled": true,
