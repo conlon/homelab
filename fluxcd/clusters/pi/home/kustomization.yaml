@@ -20,6 +20,7 @@ resources:
   - prowlarr
   - flaresolverr
   - bazarr
+  - profilarr
   # xarr metrics (exportarr -> prometheus)
   - exportarr
   # le stack
