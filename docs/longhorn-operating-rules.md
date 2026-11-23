@@ -202,6 +202,67 @@ hoping one works.
 > k1 and k2 hung both USB bridges, dropped both nodes off the bus, and cascaded into six
 > damaged filesystems. The drives were never faulty — a power cycle restored both.
 
+## Rule 11 — A degraded volume with no rebuild running is probably deadlocked. Look before re-placing.
+
+`concurrentReplicaRebuildPerNodeLimit: 1` (Rule 1a) protects the Pis, but it allows a
+**cross-volume deadlock**. Two volumes each get a replacement copy on the same two nodes.
+Each node's single rebuild slot is held by the *other* volume's copy, which never
+finishes. Nothing errors and nothing retries, and the volumes stay `degraded` indefinitely.
+
+**Signature (all read-only to check):**
+
+- Volume `degraded`, engine `status.rebuildStatus` is `{}`: no rebuild is running.
+- The engine's `replicaModeMap` still lists a replica in `ERR` whose Replica CR **no
+  longer exists** (a stale address from a node that restarted).
+- The replacement replicas are `running` or `stopped`, with no `healthyAt`, no `failedAt`
+  and `rebuildRetryCount: 5`. A `running` one has an **empty** data directory on disk.
+- On the *replica* nodes' `longhorn-manager` (not the volume owner, which logs nothing):
+  `Replica rebuildings for map[<other volume's replica>] are in progress on this node,
+  which reaches or exceeds the concurrent limit value 1`. A `stopped` replica's
+  `Start` event repeats every ~30s (15,451 times in 5 days here).
+- Side effect: the stale `ERR` entry makes snapshot deletion fail. `snapshot-controller`
+  attachment tickets pile up on the volume (so stopping the workload will **not** detach
+  it), and snapshots accumulate past the recurring job's `retain`.
+
+**It is not a host or disk fault.** Check kernel I/O errors and load on the target nodes
+(Rule 9) before blaming them. Constraining placement (Rule 2) does not fix it.
+
+**Fix (each step needs approval, Rule 7; confirm two `RW` copies first, Rule 3):**
+
+1. Save the engine (`kubectl get engines.longhorn.io <vol>-e-0 -o yaml`), then remove
+   the stale entry with a guarded JSON patch:
+   ```sh
+   kubectl -n longhorn-system patch engines.longhorn.io <vol>-e-0 --type=json -p \
+     '[{"op":"test","path":"/spec/replicaAddressMap/<dead-replica>","value":"<ip:port>"},
+       {"op":"remove","path":"/spec/replicaAddressMap/<dead-replica>"}]'
+   ```
+   Longhorn then logs `Removed unknown replica ... in mode ERR`, and the snapshot
+   tickets drain within minutes. On its own this does **not** start a rebuild.
+2. Delete the stuck `rebuildRetryCount: 5` replicas of **one** volume (they are not
+   `RW`; see Rule 6). That frees their slots. Longhorn creates a fresh replica, and the
+   other volume, now able to use the freed slot, drops its own stale entry and rebuilds
+   by itself.
+3. Watch target-node load during the rebuilds that follow (Rule 1a). The first rebuild
+   after a long deadlock can be large, because of the accumulated snapshots.
+
+> **2026-11-15 → 11-20:** k2 restarted, and immich-dark-valkey and n8n both lost their
+> k2 copy. Their replacements on k4/k5 deadlocked each other for 5 days. n8n's 580MB of
+> data grew to 8GB of snapshots in that time. Fixed with steps 1–2 above; n8n's catch-up
+> rebuild then drove k5 to load 8 with ~50% iowait.
+
+**Re-evaluate on every Longhorn upgrade.** This was observed on **v1.6.4**. When upgrading,
+check the release notes for fixes to stale engine replica entries, rebuild slot
+accounting and replicas stuck at the max retry count, and for config that would avoid
+it. For example:
+
+- Does a newer version time out or fail a replica that never starts rebuilding?
+- Can the rebuild limit be scoped so a never-started replica doesn't hold a slot?
+- Would `offline-replica-rebuilding`, or a later rebuild/scheduling feature, change this?
+- Would `replica-auto-balance: least-effort` (the documented recommendation; this cluster
+  runs `best-effort`) reduce the churn that sets it up?
+
+If a version fixes it, record that here and retire this rule.
+
 ---
 
 ## Pre-flight checklist
@@ -219,7 +280,8 @@ Before any Longhorn operation, answer all of these in writing:
 
 ## Post-flight verification
 
-- [ ] All volumes `robustness: healthy` at desired replica count
+- [ ] All volumes `robustness: healthy` at desired replica count. Any volume still
+      `degraded` with an empty `rebuildStatus` → check for the Rule 11 deadlock
 - [ ] `sum(longhorn_fs_errors) == 0` and `sum(longhorn_stale_mount) == 0`
 - [ ] No node above its core count in load average
 - [ ] Applications can actually write (test, don't assume)
