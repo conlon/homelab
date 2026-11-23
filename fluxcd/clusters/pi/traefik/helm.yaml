@@ -21,11 +21,13 @@ spec:
   install:
     remediation:
       retries: 3
+  # Rollback (default strategy) runs between retries and, since retries > 0,
+  # remediateLastFailure defaults to true: after the final failure Flux rolls back to
+  # the last good revision instead of leaving a failed release in place. To inspect a
+  # failed upgrade in place (e.g. CON-27), suspend the HelmRelease during the upgrade.
   upgrade:
     remediation:
       retries: 3
-      # Never auto-rollback/uninstall Traefik: every ingress goes through it.
-      remediateLastFailure: false
   chart:
     spec:
       chart: traefik
