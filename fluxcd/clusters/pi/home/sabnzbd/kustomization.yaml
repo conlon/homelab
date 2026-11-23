@@ -9,6 +9,15 @@ resources:
 components:
   - ../0-components/health-checks
 
+# SABnzbd post-processing scripts, mounted at /scripts. SAB must be pointed at
+# them in sabnzbd.ini (config PVC, not in git) -- see the docstring in
+# scripts/validate_video.py for the exact settings.
+configMapGenerator:
+  - name: sabnzbd-scripts
+    namespace: home
+    files:
+      - scripts/validate_video.py
+
 patches:
   - patch: |-
       - op: replace

@@ -55,7 +55,14 @@ spec:
               mountPath: /config
             - name: media-root
               mountPath: /media
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
       volumes:
+        - name: scripts
+          configMap:
+            name: sabnzbd-scripts
+            defaultMode: 0755
         - name: media-root
           nfs:
             server: 192.168.86.11
