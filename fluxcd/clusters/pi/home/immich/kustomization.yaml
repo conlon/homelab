@@ -5,6 +5,8 @@ metadata:
   name: immich
 resources:
   - pvc.yaml
+  - object-store-secret.sops.yaml
+  - object-store.yaml
   - postgres.yaml
   - helm.yaml
   - ingress.yaml

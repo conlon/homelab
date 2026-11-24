@@ -1,0 +1,33 @@
+---
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: immich-database
+  namespace: home
+  annotations:
+    # Keeps Flux from deleting this if it leaves the repo; remove before a deliberate delete.
+    kustomize.toolkit.fluxcd.io/prune: disabled
+spec:
+  retentionPolicy: 14d
+  configuration:
+    destinationPath: s3://cnpg/home/immich-database
+    endpointURL: http://garage.backups.svc
+    s3Credentials:
+      accessKeyId:
+        name: immich-database-backup-s3
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: immich-database-backup-s3
+        key: ACCESS_SECRET_KEY
+      region:
+        name: immich-database-backup-s3
+        key: REGION
+    wal:
+      compression: gzip
+    data:
+      compression: gzip
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi

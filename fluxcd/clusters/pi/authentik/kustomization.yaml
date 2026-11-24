@@ -6,6 +6,8 @@ metadata:
 resources:
   - namespace.yaml
   - secret.sops.yaml
+  - object-store-secret.sops.yaml
+  - object-store.yaml
   - postgres.yaml
   - helm.yaml
   - ingress.yaml
