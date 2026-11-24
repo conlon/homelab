@@ -13,6 +13,14 @@ spec:
   # switchover if the primary is on a Pi). See project_thermal_outage.
   affinity:
     nodeAffinity:
+      # k1/k2 kubelets lack the SidecarContainers feature gate, which the backup plugin's
+      # sidecar needs on k8s 1.28. Drop this once every node has it (or on 1.29+).
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values: ["k1", "k2"]
       preferredDuringSchedulingIgnoredDuringExecution:
         - weight: 100
           preference:
@@ -30,6 +38,12 @@ spec:
   storage:
     size: 5Gi
     storageClass: longhorn
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: authentik-database
+
   bootstrap:
     initdb:
       database: authentik
