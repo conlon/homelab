@@ -59,6 +59,11 @@
       "enabled": false
     },
     {
+      "description": "plugin-barman-cloud charts >=0.6.0 require k8s >=1.29. Remove once the cluster is on 1.29+",
+      "matchPackageNames": ["plugin-barman-cloud"],
+      "allowedVersions": "<0.6.0"
+    },
+    {
       "matchPackageNames": ["louislam/uptime-kuma"],
       "sourceUrl": "https://github.com/louislam/uptime-kuma"
     },

@@ -6,3 +6,4 @@ metadata:
 resources:
   - namespace.yaml
   - helm.yaml
+  - plugin-barman-cloud.yaml
