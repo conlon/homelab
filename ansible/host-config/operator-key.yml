@@ -49,15 +49,22 @@
         src: /etc/ssh/ssh_host_ed25519_key.pub
       register: operator_hostkey
 
+    - name: Key material of this host (the second field of the .pub line)
+      ansible.builtin.set_fact:
+        operator_hostkey_blob: "{{ (operator_hostkey.content | b64decode).split()[1] }}"
+
+    # The lists are built in a template, not in the assert conditional: newer
+    # ansible-core evaluates the same expression differently inside `that`.
     - name: Host keys must be unique, so a cloned host can't vouch for another
       ansible.builtin.assert:
         that:
-          - >-
-            (ansible_play_hosts_all
-              | map('extract', hostvars, ['operator_hostkey', 'content'])
-              | map('b64decode') | map('regex_replace', '^\S+\s+(\S+).*$', '\1')
-              | unique | list | length) == (ansible_play_hosts_all | length)
-        fail_msg: Two or more hosts share an SSH host key. Fix that before pinning.
+          - all_blobs | length == all_blobs | unique | length
+        fail_msg: >-
+          Two or more hosts share an SSH host key. Fix that before pinning.
+          Compare fingerprints with: ansible pi:proxmox:vm -m command
+          -a 'ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub'
+      vars:
+        all_blobs: "{{ ansible_play_hosts_all | map('extract', hostvars, 'operator_hostkey_blob') | list }}"
       run_once: true
 
     - name: Pin the host key (by IP and by name) in the operator's known_hosts
