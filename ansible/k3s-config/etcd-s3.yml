@@ -1,0 +1,128 @@
+---
+# CON-75: upload k3s etcd snapshots to Garage (S3).
+#
+# Deliberately NOT part of site.yml, which also rewrites the kube-vip and
+# MetalLB manifests and can restart every server at once.
+#
+# - S3 keys go in a root-only environment file loaded by systemd.
+# - Every other setting goes in a k3s config drop-in (world-readable, because
+#   `k3s kubectl` reads config.yaml.d as the calling user).
+# - k3s.service and the existing config.yaml are left untouched.
+# - Values come from inventory/k8s/group_vars/master.sops.yml.
+#
+# Run one server at a time, after taking a local snapshot:
+#   ansible-playbook etcd-s3.yml --check --diff --limit k0
+#   ansible-playbook etcd-s3.yml --limit k0
+
+- name: Configure k3s etcd snapshots to S3
+  hosts: master
+  serial: 1
+  any_errors_fatal: true
+  become: true
+  vars:
+    etcd_s3_env_file: /etc/rancher/k3s/etcd-s3.env
+    etcd_s3_unit_dropin_dir: /etc/systemd/system/k3s.service.d
+    etcd_s3_config_dir: /etc/rancher/k3s/config.yaml.d
+  tasks:
+    - name: Environment file with S3 keys (root only)
+      ansible.builtin.copy:
+        dest: "{{ etcd_s3_env_file }}"
+        owner: root
+        group: root
+        mode: "0600"
+        content: |
+          AWS_ACCESS_KEY_ID={{ etcd_s3_access_key }}
+          AWS_SECRET_ACCESS_KEY={{ etcd_s3_secret_key }}
+      no_log: true
+      diff: false
+      register: etcd_s3_env
+
+    - name: systemd drop-in directory
+      ansible.builtin.file:
+        path: "{{ etcd_s3_unit_dropin_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: systemd drop-in that loads the environment file
+      ansible.builtin.copy:
+        dest: "{{ etcd_s3_unit_dropin_dir }}/etcd-s3.conf"
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Service]
+          EnvironmentFile={{ etcd_s3_env_file }}
+      register: etcd_s3_unit
+
+    - name: k3s config drop-in directory
+      ansible.builtin.file:
+        path: "{{ etcd_s3_config_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    # The endpoint, bucket and region are encrypted in the public inventory,
+    # so keep them out of task output and diffs too.
+    - name: k3s config drop-in with the non-secret S3 settings
+      ansible.builtin.copy:
+        dest: "{{ etcd_s3_config_dir }}/etcd-s3.yaml"
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          etcd-s3: true
+          etcd-s3-endpoint: "{{ etcd_s3_endpoint }}"
+          etcd-s3-bucket: "{{ etcd_s3_bucket }}"
+          etcd-s3-region: "{{ etcd_s3_region }}"
+          etcd-s3-insecure: true
+          etcd-s3-folder: "{{ inventory_hostname }}"
+      no_log: true
+      diff: false
+      register: etcd_s3_config
+
+    - name: Reload systemd and restart k3s (only if something changed)
+      when: etcd_s3_env.changed or etcd_s3_unit.changed or etcd_s3_config.changed
+      block:
+        - name: Reload systemd
+          ansible.builtin.systemd:
+            daemon_reload: true
+
+        - name: Restart k3s
+          ansible.builtin.systemd:
+            name: k3s
+            state: restarted
+
+    - name: Wait for the API server to be ready
+      ansible.builtin.command: k3s kubectl get --raw /readyz
+      register: etcd_s3_readyz
+      until: etcd_s3_readyz.rc == 0 and etcd_s3_readyz.stdout == 'ok'
+      retries: 30
+      delay: 10
+      changed_when: false
+      check_mode: false
+
+    - name: Wait for etcd to report healthy
+      ansible.builtin.command: k3s kubectl get --raw /livez/etcd
+      register: etcd_s3_livez
+      until: etcd_s3_livez.rc == 0 and etcd_s3_livez.stdout == 'ok'
+      retries: 30
+      delay: 10
+      changed_when: false
+      check_mode: false
+
+    - name: Wait for this node and all control-plane nodes to be Ready
+      ansible.builtin.shell: |
+        set -o pipefail
+        k3s kubectl get nodes -l node-role.kubernetes.io/control-plane --no-headers \
+          | awk '$2 != "Ready" {bad++} END {print NR, bad+0}'
+      args:
+        executable: /bin/bash
+      register: etcd_s3_nodes
+      until: etcd_s3_nodes.rc == 0 and etcd_s3_nodes.stdout == (groups['master'] | length ~ ' 0')
+      retries: 30
+      delay: 10
+      changed_when: false
+      check_mode: false
