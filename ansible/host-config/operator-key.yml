@@ -1,0 +1,74 @@
+---
+# CON-208: give the operator host (ava for now, later jade) a scoped SSH key.
+#
+# 1. Installs the operator's public key in authorized_keys on every managed
+#    host, for the user Ansible connects as. The entry is limited to the
+#    operator's address and has all forwarding turned off.
+# 2. Pins every host's SSH host key in the operator's ~/.ssh/known_hosts. Keys
+#    are read from the hosts over this (already trusted) connection, never
+#    from a blind ssh-keyscan.
+#
+# Run it once from a machine that can already log in to every host (the
+# laptop). Nothing here needs sudo.
+#
+#   cd ansible/host-config
+#   ansible-playbook operator-key.yml --check --diff
+#   ansible-playbook operator-key.yml
+#
+# Add -e operator_known_hosts_user=<user> if the operator is not ava/michael.
+#
+# To revoke: remove the line whose comment is "ava-operator (CON-208)" from
+# authorized_keys on each host (or run this playbook with
+# -e operator_key_state=absent).
+
+- name: Install the operator key
+  hosts: pi:proxmox:vm
+  gather_facts: true
+  vars:
+    operator_key_state: present
+    operator_key_file: "{{ playbook_dir }}/files/ava-operator.pub"
+    operator_key_from: "192.168.86.7"
+  tasks:
+    - name: Operator public key in authorized_keys (existing keys are kept)
+      ansible.posix.authorized_key:
+        user: "{{ ansible_facts['user_id'] }}"
+        key: "{{ lookup('ansible.builtin.file', operator_key_file) }}"
+        key_options: 'from="{{ operator_key_from }}",no-agent-forwarding,no-port-forwarding,no-X11-forwarding'
+        exclusive: false
+        state: "{{ operator_key_state }}"
+
+- name: Pin host keys on the operator
+  hosts: pi:proxmox:vm
+  gather_facts: false
+  vars:
+    operator_host: ava
+    operator_known_hosts_user: michael
+  tasks:
+    - name: Read the ed25519 host key
+      ansible.builtin.slurp:
+        src: /etc/ssh/ssh_host_ed25519_key.pub
+      register: operator_hostkey
+
+    - name: Host keys must be unique, so a cloned host can't vouch for another
+      ansible.builtin.assert:
+        that:
+          - >-
+            (ansible_play_hosts_all
+              | map('extract', hostvars, ['operator_hostkey', 'content'])
+              | map('b64decode') | map('regex_replace', '^\S+\s+(\S+).*$', '\1')
+              | unique | list | length) == (ansible_play_hosts_all | length)
+        fail_msg: Two or more hosts share an SSH host key. Fix that before pinning.
+      run_once: true
+
+    - name: Pin the host key (by IP and by name) in the operator's known_hosts
+      ansible.builtin.known_hosts:
+        path: "~{{ operator_known_hosts_user }}/.ssh/known_hosts"
+        name: "{{ item }}"
+        key: "{{ item }} {{ (operator_hostkey.content | b64decode).split(' ')[0] }} {{ (operator_hostkey.content | b64decode).split(' ')[1] }}"
+        state: present
+      loop:
+        - "{{ ansible_host }}"
+        - "{{ inventory_hostname }}"
+      delegate_to: "{{ operator_host }}"
+      vars:
+        ansible_user: "{{ operator_known_hosts_user }}"
