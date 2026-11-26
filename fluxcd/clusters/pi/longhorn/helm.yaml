@@ -26,8 +26,8 @@ spec:
       interval: 24h
   values:
     defaultSettings:
-      backupTarget: s3://longhorn-recovery@us-east-1/
-      backupTargetCredentialSecret: minio-secret
+      backupTarget: s3://longhorn@garage/
+      backupTargetCredentialSecret: garage-longhorn
       storageReservedPercentageForDefaultDisk: 10
       defaultDataLocality: best-effort
       # NOTE: this only governs volumes NOT created through the `longhorn`
